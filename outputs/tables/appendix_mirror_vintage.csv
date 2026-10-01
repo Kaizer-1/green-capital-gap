@@ -1,0 +1,15 @@
+metric,value
+relational max funded_at,2013-12-12
+flat max last_funding_at,2015-01-01
+flat-only companies,18593
+flat-only absent from objects.csv,14511
+flat-only in objects.csv but no deal rows,4082
+"of those, last funded before snapshot close",2186
+claimed funding of that gap (USD bn),14.31
+matched companies,30845
+matched: flat reports more rounds,6881
+matched: equal round counts,23620
+matched: flat reports fewer,344
+surplus rounds claimed by flat,9765
+surplus explained by post-snapshot activity,6353
+surplus NOT explained by timing,3412

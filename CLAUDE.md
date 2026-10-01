@@ -137,7 +137,13 @@ green-capital-gap/
 Full detail in `docs/DATA_SOURCES.md` (you write that file). Summary of what to fetch:
 
 ### Primary — Crunchbase 2013 Snapshot (CC BY 4.0)
-Two Kaggle mirrors of the same underlying snapshot. **Use both and join them.**
+Two Kaggle datasets. **Use both and join them.**
+
+**Corrected at build step 2:** these are NOT mirrors of the same snapshot. The relational
+dump ends at `funded_at` 2013-12-12; the flat file extends to `last_funding_at` 2015-01-01
+and is an early-2015 export. `funding_rounds.csv` holds 52,928 rounds (41,455 in the
+2000-2012 window), not ~90,000. The flat file is used for its taxonomy only, never as a
+funding source. See `outputs/tables/appendix_mirror_vintage.csv`.
 
 | Handle | What it gives you |
 |---|---|
@@ -379,8 +385,8 @@ chart that failed.
 - **Spearman rank correlation** for H5 — relationships here are monotone, not linear.
 - **Benjamini–Hochberg** correction across the full family of tests. Report both raw and
   adjusted p-values in the appendix table.
-- Report **effect sizes alongside p-values**, always. With ~90k deals almost everything
-  is "significant"; the question is whether it matters.
+- Report **effect sizes alongside p-values**, always. With ~41k in-window deals almost
+  everything is "significant"; the question is whether it matters.
 - Any cell with n < 30 gets suppressed or explicitly flagged on the figure.
 
 ---

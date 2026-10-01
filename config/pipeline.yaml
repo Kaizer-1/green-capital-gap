@@ -75,12 +75,17 @@ thresholds:
   alpha: 0.05
   fdr_method: fdr_bh        # Benjamini-Hochberg across the full test family
   # H4: a founding cohort needs this many years of observable window before the
-  # 2012 truncation to be usable for graduation analysis.
+  # truncation to be usable for graduation analysis.
   min_cohort_followup_years: 3
-  # Expected join rate between the relational and flat Crunchbase mirrors.
-  # Below the floor, the build fails loudly rather than proceeding on a bad join.
-  join_rate_floor: 0.70
-  join_rate_expected: 0.85
+  # Permalink join rate between the relational and flat Crunchbase datasets.
+  # Measured at 0.973 at step 2, against the correct denominator (companies with
+  # at least one deal row, NOT all 196,553 companies in objects.csv). The floor
+  # is set to catch a regression in permalink normalisation, which drops the rate
+  # by tens of points rather than by fractions, while leaving headroom for normal
+  # variation. The first run of this check fired at 0.178 on a wrong denominator;
+  # the denominator reasoning is recorded in the _join_diagnostic docstring.
+  join_rate_floor: 0.90
+  join_rate_expected: 0.97
 
 # --------------------------------------------------------------------------
 # Deduplication key (CLAUDE.md §7, row-level)
@@ -186,6 +191,34 @@ round_types:
   seed_entry_types_angel_inclusive:
     - seed
     - angel
+
+# --------------------------------------------------------------------------
+# H4 observation window carve-out.
+#
+# H4 conditions on sample ENTRY (a company that raised seed) and asks whether it
+# graduated. Because both numerator and denominator are drawn from the same
+# cohort, coverage growth over the period partly differences out, which the
+# level-based hypotheses (H1, H2) cannot claim. That asymmetry is what justifies
+# permitting H4 a longer observation window than the headline, and it is stated
+# in the methodology BEFORE any H4 result is reported.
+#
+# The gain is an extra year of follow-up, which admits one further founding
+# cohort. It is NOT about the extra raw deal count.
+#
+# Permitted because the step-2 censoring checks cleared both tests:
+#   (i)  seasonality: December is 7.0-8.0% of deals in 2011-2012 but 3.8% in
+#        2013, so the December 2013 dip is the snapshot cut, not a seasonal one.
+#   (ii) disclosure backfill: the disclosed-amount rate is 88.99 / 88.61 / 88.44
+#        for 2011 / 2012 / 2013, and Nov-Dec 2013 are among the highest monthly
+#        rates in the series. Dollars are not differentially censored in 2013.
+# --------------------------------------------------------------------------
+h4:
+  # Headline specification: identical to the project window.
+  observation_window_end: "2012-12-31"
+  # Reported secondary specification. Stops at 2013-11-30, excluding the
+  # partial December the snapshot cut off.
+  observation_window_end_secondary: "2013-11-30"
+  secondary_spec_label: "extended observation window to 2013-11-30"
 
 # --------------------------------------------------------------------------
 # Amount null encoding (established empirically at build step 2).

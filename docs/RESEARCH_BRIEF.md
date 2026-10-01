@@ -24,10 +24,13 @@ startup funding in emerging markets.** Everything current is proprietary:
 | Crunchbase (live) | API paywalled | deal-level, global |
 
 What *is* open: the **Crunchbase 2013 Snapshot**, released under CC BY 4.0 and mirrored
-on Kaggle. It is genuine, deal-level, global, and it covers ~90,000 funding rounds with
-dates, amounts, round types and country codes.
+on Kaggle. It is genuine, deal-level, global, and it covers **52,928 funding rounds** with
+dates, amounts, round types and country codes, of which **41,455 fall in the 2000-2012
+analysis window**. (Corrected at build step 2; an earlier draft of this brief said
+~90,000, which was wrong.)
 
-Its weakness is obvious: it stops in 2013.
+Its weakness is obvious: it stops in 2013. Measured precisely, the deal-level relational
+dump ends at 2013-12-12.
 
 **Turn that into the design.** The 2005–2012 window is not a stale window. It is the
 window of **Cleantech 1.0** — the first global green venture boom and its collapse. It is
