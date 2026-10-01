@@ -199,7 +199,12 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
         focused["p_value"] < cfg.threshold("alpha")
         and ae_g["non_dilutive_pct"] > ae_n["non_dilutive_pct"]
     )
-    verdict = "Supported" if supported else "Not supported"
+    # The claim that was tested is the advanced-economy benchmark one. The
+    # emerging-market claim was not supported and is not what the verdict covers,
+    # so the qualification belongs in the verdict itself.
+    verdict = (
+        "Supported for the advanced-economy benchmark case" if supported else "Not supported"
+    )
 
     em_arm = {
         "testable": bool(em_g["deals"] >= min_n and em_g["non_dilutive"] >= min_n),
@@ -230,6 +235,14 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
         "benchmark_bloc": "AE",
         "chi2_ae": test_ae,
         "focused_non_dilutive_test_ae": focused,
+        "cramers_v_note": (
+            "Cramer's V is reported alongside the risk ratio in the appendix but is not "
+            "quoted in the text. On a contingency table with heavily unbalanced marginals "
+            "\u2014 here 94.6% of deals sit in one instrument family and 5.4% of companies "
+            "are green \u2014 V is bounded well below 1 by the marginals themselves, so it "
+            "understates association strength by construction. The risk ratio on the "
+            "quantity the hypothesis is about is the interpretable effect size."
+        ),
         "effect_size_warning": (
             f"Cramer's V on the full instrument mix is {test_ae['cramers_v']}, below the "
             "conventional 0.1 threshold for a small effect. With n = "

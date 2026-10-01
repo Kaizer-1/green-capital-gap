@@ -245,27 +245,59 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
 
     seed_a = headline["logit_seed_to_a"]
     a_b = headline["logit_a_to_b"]
-    testable = [m for m in (seed_a, a_b) if m.get("testable")]
-    if not testable:
-        verdict = "Not supported"
-        note = "Neither transition is testable at the configured minimum cell size."
+
+    # H4 is decided on POWER first. An odds ratio of 1.30 with an interval
+    # spanning 0.65 to 2.60 does not identify a direction, so reading one off
+    # the point estimate would be reading noise. The same applies to the spread
+    # across specifications: at these cell sizes 1.30, 1.66 and 1.00 are not
+    # three findings, they are one interval sampled three ways.
+    min_n = int(cfg.threshold("min_cell_n"))
+    green_entrants = next(
+        (
+            r["entrants"]
+            for r in headline["rates"]
+            if r["green"] and r["transition"] == "seed -> A"
+        ),
+        0,
+    )
+    ab_green = next(
+        (
+            r["entrants"]
+            for r in headline["rates"]
+            if r["green"] and r["transition"] == "A -> B"
+        ),
+        0,
+    )
+    seed_a_uninformative = bool(
+        seed_a.get("testable") and seed_a["odds_ratio_ci"][0] < 1 < seed_a["odds_ratio_ci"][1]
+    )
+
+    if not a_b.get("testable") or seed_a_uninformative:
+        verdict = "Underpowered \u2014 cannot determine"
+        note = (
+            f"The advanced-economy green seed cohort holds {green_entrants} companies and "
+            f"the A-to-B pool holds {ab_green}, against a minimum cell size of {min_n}. "
+            "The seed-to-A odds ratio is "
+            f"{seed_a.get('odds_ratio')} {seed_a.get('odds_ratio_ci')}, an interval that "
+            "spans 1 and identifies no direction. A-to-B, the specific missing-middle "
+            "transition, is not testable at all. H4 is therefore recorded as "
+            "undetermined rather than as supported or refuted: the data cannot answer it."
+        )
     else:
         sig_neg = [
             m
-            for m in testable
-            if m["p_value"] < cfg.threshold("alpha") and m["odds_ratio"] < 1
+            for m in (seed_a, a_b)
+            if m.get("testable")
+            and m["p_value"] < cfg.threshold("alpha")
+            and m["odds_ratio"] < 1
         ]
         if not sig_neg:
             verdict = "Not supported"
             note = (
-                "Green ventures are not significantly less likely to graduate than "
-                "non-green ones at either transition under the headline specification."
+                "Both transitions are adequately powered and neither shows green ventures "
+                "graduating less often than non-green ones."
             )
-        elif (
-            a_b.get("testable")
-            and a_b in sig_neg
-            and (not seed_a.get("testable") or a_b["odds_ratio"] < seed_a["odds_ratio"])
-        ):
+        elif a_b in sig_neg and a_b["odds_ratio"] < seed_a["odds_ratio"]:
             verdict = "Supported"
             note = "Green graduation is lower, and the gap is larger at A to B as predicted."
         else:
@@ -282,11 +314,39 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
         "alternative_seed_definition": alt_seed,
         "secondary_window": alt_window,
         "em_arm": em_arm(deals, cfg),
+        "power": {
+            "ae_green_seed_entrants": green_entrants,
+            "ae_green_a_to_b_pool": ab_green,
+            "min_cell_n": min_n,
+            "seed_to_a_ci_spans_one": seed_a_uninformative,
+            "a_to_b_testable": bool(a_b.get("testable")),
+        },
+        "specification_spread_note": (
+            "The headline, angel-inclusive and extended-window specifications give odds "
+            "ratios of roughly 1.30, 1.66 and 1.00. At these cell sizes that spread is "
+            "sampling noise within one wide interval, not three substantive results, and "
+            "it is NOT reported as a divergence finding."
+        ),
+        "pre_commitment_status": (
+            "The §1.3 pre-commitment chose strict seed as the specification that would "
+            "not flatter the hypothesis, reasoning about the DIRECTION of an expected "
+            "negative effect. That reasoning is void here, because the binding failure is "
+            "POWER, not direction: no specification identifies a direction at all. The "
+            "pre-commitment is recorded as void on its power assumption rather than "
+            "quietly satisfied or quietly dropped."
+        ),
+        "what_this_shows": (
+            "The scale-up step that the missing-middle literature points to is "
+            "unobservable in the open record. There are ZERO emerging-market green seed "
+            f"entrants across thirteen years, and even in advanced economies the A-to-B "
+            f"pool is {ab_green} companies. The hypothesis is not refuted; it cannot be "
+            "put to this data."
+        ),
         "verdict": verdict,
         "verdict_note": note,
         "falsification_condition": (
             "Falsified if the green coefficient is null, or if the gap is no larger at "
-            "A to B than at seed to A."
+            "A to B than at seed to A. Neither can be assessed: the test is underpowered."
         ),
     }
     LOG.info("H4 verdict: %s — %s", verdict, note)

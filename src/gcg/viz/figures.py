@@ -841,14 +841,12 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
         color=P.ink,
         fontsize=7.4,
     )
-    m07 = float(by_year.loc[by_year["year"].eq(2007), "median"].iloc[0]) / 1e6
-    m12 = float(by_year.loc[by_year["year"].eq(2012), "median"].iloc[0]) / 1e6
     theme.annotate(
         ax2,
         f"Dollars peak in {int(dollar_peak['year'])}, a year BEFORE deals do.\n"
-        f"The median green cheque falls {100 * (1 - m12 / m07):.0f}% in real terms\n"
-        "over 2007-12 \u2014 but non-green falls 73% too, so this\n"
-        "is a dataset-wide pattern, not a green one (Appendix).",
+        "Within named stages, green deal sizes fall 49pp more\n"
+        "than non-green over 2007-12 [CI -69 to -22]. The POOLED\n"
+        "median falls alike in both: that comparison is confounded.",
         xy=(dollar_peak["year"], dollar_peak["usd"] / 1e9),
         xytext=(2000.2, by_year["usd"].max() / 1e9 * 0.70),
         color=P.ink,
@@ -857,7 +855,7 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
 
     theme.finding_title(
         fig,
-        "Green venture funding peaked in 2011 by deal count, 2010 by dollars",
+        "Green deal sizes fell far faster than non-green within the same stages",
         "Green deals and disclosed green funding, all blocs, 2000\u20132012. "
         "Constant 2015 USD.",
         y=0.955,

@@ -39,6 +39,11 @@ LOG = get_logger("analysis.cheque")
 _BASE_YEAR = 2007
 _END_YEAR = 2012
 _STAGES = ("seed", "series_a", "series_b", "series_c_plus", "venture_unspecified")
+# `venture_unspecified` is Crunchbase's catch-all: its volume explodes over the
+# period and its median collapses in BOTH groups, which is the signature of
+# coverage expansion rather than of anything in the market. The formal test
+# therefore runs on clean stage codes only.
+_CLEAN_STAGES = ("seed", "series_a", "series_b", "series_c_plus")
 
 
 def _pct_change(first: float, last: float) -> float:
@@ -214,6 +219,146 @@ def decompose_within_stage(deals: pd.DataFrame, cfg: Config, *, green: bool) -> 
     }
 
 
+def _composite(
+    frame: pd.DataFrame, amount: str, stages: tuple[str, ...], base_mix: pd.Series
+) -> dict[int, float]:
+    """Base-mix-weighted average of within-stage medians, by year."""
+    out = {}
+    for year in (_BASE_YEAR, _END_YEAR):
+        yr = frame.loc[frame["year"].eq(year)]
+        w, v = [], []
+        for st in stages:
+            vals = yr.loc[yr["instrument"].eq(st), amount].dropna()
+            if len(vals) and base_mix.get(st, 0) > 0:
+                w.append(base_mix[st])
+                v.append(float(np.median(vals)))
+        out[year] = float(np.average(v, weights=w)) if w else float("nan")
+    return out
+
+
+def bootstrap_within_stage_difference(
+    deals: pd.DataFrame, cfg: Config, rng: np.random.Generator
+) -> dict[str, Any]:
+    """Bootstrap the green-minus-non-green within-stage change, clean stages only.
+
+    The pooled comparison is composition-confounded for BOTH groups, so it
+    cannot settle the question either way. The within-stage comparison is the
+    real control, and it is tested here rather than eyeballed.
+
+    Deals are resampled with replacement inside each group x stage x year cell,
+    the base-mix-weighted composite is recomputed, and the difference in
+    percentage change between the two groups is taken. ``venture_unspecified``
+    is excluded: it is a catch-all whose median collapses in both groups as its
+    volume explodes, which is coverage expansion rather than repricing.
+    """
+    amount = cfg.pipeline["deflate"]["real_column"]
+    draws = int(cfg.pipeline["bootstrap_resamples"])
+    sub = deals.loc[
+        deals["instrument"].isin(_CLEAN_STAGES)
+        & deals["year"].isin([_BASE_YEAR, _END_YEAR])
+        & deals[amount].notna()
+    ][["year", "instrument", "green", amount]].copy()
+
+    groups = {"green": sub.loc[sub["green"]], "non_green": sub.loc[~sub["green"]]}
+    base_mixes, point = {}, {}
+    cells = {}
+    for name, g in groups.items():
+        base = g.loc[g["year"].eq(_BASE_YEAR), "instrument"].value_counts(normalize=True)
+        base_mixes[name] = base
+        comp = _composite(g, amount, _CLEAN_STAGES, base)
+        point[name] = _pct_change(comp[_BASE_YEAR], comp[_END_YEAR])
+        cells[name] = {
+            f"{st}_{yr}": int(((g["instrument"] == st) & (g["year"] == yr)).sum())
+            for st in _CLEAN_STAGES
+            for yr in (_BASE_YEAR, _END_YEAR)
+        }
+    observed_diff = point["green"] - point["non_green"]
+
+    # Pre-index each cell once; resampling is then an integer draw per cell.
+    idx = {
+        (name, st, yr): g.loc[g["instrument"].eq(st) & g["year"].eq(yr), amount].to_numpy()
+        for name, g in groups.items()
+        for st in _CLEAN_STAGES
+        for yr in (_BASE_YEAR, _END_YEAR)
+    }
+
+    diffs = []
+    for _ in range(draws):
+        chg = {}
+        for name in groups:
+            base = base_mixes[name]
+            comp = {}
+            for yr in (_BASE_YEAR, _END_YEAR):
+                w, v = [], []
+                for st in _CLEAN_STAGES:
+                    arr = idx[(name, st, yr)]
+                    if len(arr) and base.get(st, 0) > 0:
+                        draw = rng.integers(0, len(arr), len(arr))
+                        w.append(base[st])
+                        v.append(float(np.median(arr[draw])))
+                comp[yr] = float(np.average(v, weights=w)) if w else float("nan")
+            chg[name] = _pct_change(comp[_BASE_YEAR], comp[_END_YEAR])
+        if np.isfinite(chg["green"]) and np.isfinite(chg["non_green"]):
+            diffs.append(chg["green"] - chg["non_green"])
+
+    arr = np.array(diffs)
+    lo, hi = float(np.percentile(arr, 2.5)), float(np.percentile(arr, 97.5))
+    excludes_zero = bool(lo * hi > 0)
+    width = hi - lo
+
+    if excludes_zero:
+        verdict = "Supported in narrow form"
+        reading = (
+            "The within-stage decline is significantly steeper for green than for "
+            "non-green on clean stage codes. The finding stands, narrowed: it is a "
+            "statement about within-stage deal sizes in named rounds, not about the "
+            "pooled median, which is composition-confounded for both groups."
+        )
+    else:
+        verdict = "Underpowered \u2014 cannot determine"
+        reading = (
+            "The interval spans zero, so the data cannot determine whether the "
+            "within-stage decline differs between green and non-green. This is NOT a "
+            "retraction and NOT a confirmation: the point estimate is large but the "
+            "green cells hold tens of deals per stage-year and the interval is "
+            "correspondingly wide."
+        )
+
+    LOG.info(
+        "BOOTSTRAP within-stage change (clean stages, %d draws): green %+.1f%% vs "
+        "non-green %+.1f%%; difference %+.1f pp [%.1f, %.1f] -> excludes zero = %s",
+        len(arr),
+        point["green"],
+        point["non_green"],
+        observed_diff,
+        lo,
+        hi,
+        excludes_zero,
+    )
+    LOG.info("  verdict: %s", verdict)
+    LOG.info("  green cell sizes: %s", cells["green"])
+
+    return {
+        "stages_used": list(_CLEAN_STAGES),
+        "excluded_stage": "venture_unspecified",
+        "exclusion_reason": (
+            "Crunchbase's catch-all. Its median collapses in both groups as its volume "
+            "explodes, which is coverage expansion rather than repricing, so including "
+            "it would import the very confound the test is meant to remove."
+        ),
+        "green_pct_change": round(point["green"], 2),
+        "non_green_pct_change": round(point["non_green"], 2),
+        "difference_pp": round(observed_diff, 2),
+        "ci_pp": [round(lo, 2), round(hi, 2)],
+        "ci_width_pp": round(width, 2),
+        "ci_excludes_zero": excludes_zero,
+        "draws": int(len(arr)),
+        "cell_sizes": cells,
+        "verdict": verdict,
+        "reading": reading,
+    }
+
+
 def run(cfg: Config | None = None) -> dict[str, Any]:
     """Run the control and the decomposition, and state what may be claimed."""
     cfg = cfg or load_config()
@@ -221,9 +366,11 @@ def run(cfg: Config | None = None) -> dict[str, Any]:
     seed_everything(cfg)
     deals = read_parquet(cfg.path("data_processed") / "deals.parquet")
 
+    rng = seed_everything(cfg)
     control, table = control_green_vs_non_green(deals, cfg)
     green_dec = decompose_within_stage(deals, cfg, green=True)
     non_green_dec = decompose_within_stage(deals, cfg, green=False)
+    formal = bootstrap_within_stage_difference(deals, cfg, rng)
 
     out = table.copy()
     out["green_median_usd_m"] = (out["green_median_usd"] / 1e6).round(3)
@@ -237,18 +384,22 @@ def run(cfg: Config | None = None) -> dict[str, Any]:
         "control": control,
         "decomposition_green": green_dec,
         "decomposition_non_green": non_green_dec,
+        "formal_test": formal,
         "claim_permitted": (
-            "The pooled median real cheque fell by roughly 72% for green deals between "
-            f"{_BASE_YEAR} and {_END_YEAR}. It fell by a comparable amount for non-green "
-            "deals over the same window. The decline is therefore reported as a "
-            "dataset-wide pattern, most plausibly improving coverage of small rounds as "
-            "the platform matured, and NOT as evidence of a rotation out of "
-            "capital-intensive green hardware."
+            "The POOLED median real cheque fell by roughly 72% for green deals and 73% "
+            "for non-green between "
+            f"{_BASE_YEAR} and {_END_YEAR}. That comparison settles nothing, because the "
+            "pooled median is composition-confounded for both groups: holding the "
+            f"{_BASE_YEAR} stage mix fixed leaves non-green at only -11%. The question is "
+            "therefore decided on the WITHIN-STAGE comparison, tested by bootstrap on "
+            "clean stage codes. See formal_test for the interval and the verdict it "
+            "licenses."
         ),
         "claim_not_permitted": (
-            "That the green cheque decline reflects investors rotating from hardware into "
-            "software after the cleantech bust. The control does not support it, and the "
-            "Gaddy et al. rotation can only be cited as external evidence."
+            "Asserting the Gaddy et al. rotation out of hardware as a mechanism this "
+            "dataset demonstrates. Whatever the within-stage test returns, it establishes "
+            "a size pattern, not an investor motive; the rotation remains external "
+            "evidence."
         ),
     }
     path = cfg.path("data_interim") / "cheque_size_findings.json"

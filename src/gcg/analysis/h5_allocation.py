@@ -23,6 +23,7 @@ import numpy as np
 import pandas as pd
 import statsmodels.formula.api as smf
 from scipy import stats
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 from gcg.config import Config, get_logger
 from gcg.io import read_parquet
@@ -140,6 +141,136 @@ def concentration(panel: pd.DataFrame) -> dict[str, Any]:
     }
 
 
+def stress_test_falsifier(model_df: pd.DataFrame, var: str, cfg: Config) -> dict[str, Any]:
+    """Stress the falsifying coefficient before letting it stand.
+
+    Two things can manufacture a sign flip on adding a control, and both are
+    live here. With a Gini of 0.917 and the top five countries holding 89.9% of
+    green dollars, **one country may be carrying the result**; and a sign flip
+    on controlling for a near-collinear covariate is the signature of
+    collinearity rather than of suppression. Leave-one-out and VIF rule each in
+    or out.
+    """
+    base = smf.ols(f"log_green_pc ~ log_gdp_pc + {var}", data=model_df).fit(cov_type="HC1")
+    base_coef = float(base.params[var])
+
+    rows = []
+    for code in model_df["country_code"]:
+        d = model_df.loc[model_df["country_code"].ne(code)]
+        m = smf.ols(f"log_green_pc ~ log_gdp_pc + {var}", data=d).fit(cov_type="HC1")
+        rows.append(
+            {
+                "excluded": code,
+                "coef": round(float(m.params[var]), 6),
+                "p_value": float(m.pvalues[var]),
+                "sign_flipped": bool(float(m.params[var]) * base_coef < 0),
+                "still_significant": bool(m.pvalues[var] < cfg.threshold("alpha")),
+            }
+        )
+    loo = pd.DataFrame(rows).sort_values("coef")
+    flips = loo.loc[loo["sign_flipped"], "excluded"].tolist()
+    lose_sig = loo.loc[~loo["still_significant"], "excluded"].tolist()
+
+    # Degenerate variance: a regressor whose spread is carried by one or two
+    # observations cannot support an inference, however well it behaves on VIF
+    # and sign-stability. This check was added after the electricity-deficit
+    # coefficient passed both of those while being, in substance, a dummy for a
+    # single country.
+    vals = model_df[var].to_numpy(dtype="float64")
+    non_trivial = int((np.abs(vals) > 1e-9).sum())
+    ordered = np.sort(np.abs(vals))[::-1]
+    top_share = float(ordered[0] / ordered.sum()) if ordered.sum() > 0 else float("nan")
+    carriers = model_df.loc[np.abs(vals) > 1e-9, "country_code"].tolist()
+    degenerate = bool(non_trivial < 5 or top_share > 0.5)
+
+    # VIF on the design, intercept excluded.
+    design = model_df[["log_gdp_pc", var]].dropna()
+    vif = {
+        col: round(float(variance_inflation_factor(design.to_numpy(), k)), 3)
+        for k, col in enumerate(design.columns)
+    }
+    corr = float(design["log_gdp_pc"].corr(design[var]))
+
+    survives = not flips and not lose_sig and max(vif.values()) < 10 and not degenerate
+    LOG.info(
+        "H5 falsifier stress test on %s (base coef %+0.5f):",
+        var,
+        base_coef,
+    )
+    LOG.info(
+        "    leave-one-out over %d countries: %d sign flips %s, %d lose significance %s",
+        len(loo),
+        len(flips),
+        flips or "",
+        len(lose_sig),
+        lose_sig or "",
+    )
+    LOG.info(
+        "    coefficient range [%.5f, %.5f]",
+        float(loo["coef"].min()),
+        float(loo["coef"].max()),
+    )
+    LOG.info("    VIF %s, correlation(log GDP pc, %s) = %+0.3f", vif, var, corr)
+    LOG.info(
+        "    variance: %d of %d countries have a non-zero value (%s); the largest single "
+        "value carries %.1f%% of the total -> degenerate = %s",
+        non_trivial,
+        len(vals),
+        carriers,
+        100 * top_share,
+        degenerate,
+    )
+    if degenerate:
+        LOG.warning(
+            "    %s is effectively a dummy for %s. The coefficient is identified off "
+            "one observation and is NOT interpretable, regardless of its p-value.",
+            var,
+            carriers,
+        )
+    LOG.info("    -> falsifier survives = %s", survives)
+
+    return {
+        "variable": var,
+        "base_coef": round(base_coef, 6),
+        "loo_coef_range": [
+            round(float(loo["coef"].min()), 6),
+            round(float(loo["coef"].max()), 6),
+        ],
+        "countries_flipping_sign": flips,
+        "countries_removing_significance": lose_sig,
+        "vif": vif,
+        "correlation_with_income": round(corr, 4),
+        "collinearity_concern": bool(max(vif.values()) >= 10),
+        "non_trivial_values": non_trivial,
+        "variance_carriers": carriers,
+        "largest_value_share_of_total": round(top_share, 4),
+        "degenerate_variance": degenerate,
+        "survives": survives,
+        "most_influential": loo.iloc[0].to_dict(),
+        "substantive_reading": (
+            "Within income level, a higher electricity-access deficit predicts MORE green "
+            "funding per capita, which is consistent with energy-access ventures: "
+            "off-grid solar and distributed generation are funded where the grid does not "
+            "reach, once income is held constant."
+            if survives
+            else (
+                f"The {var} regressor is degenerate in this panel: only {non_trivial} of "
+                f"{len(vals)} countries have a non-zero value ({carriers}), so the "
+                "coefficient is identified off essentially one observation. The "
+                "falsification condition is NOT treated as having fired. The more "
+                "important point is what the degeneracy reveals: countries with real "
+                "energy-access deficits have too few green deals to enter the panel at "
+                "all, so H5's need indicators cannot be tested on this record rather "
+                "than having been tested and found null."
+            )
+            if degenerate
+            else "The coefficient is not robust, so the falsification condition is NOT "
+            "treated as having fired."
+        ),
+        "loo_table": loo.to_dict("records"),
+    }
+
+
 def run(deals: pd.DataFrame, cfg: Config, rng: np.random.Generator) -> dict[str, Any]:
     """Test H5 and return a JSON-serialisable findings dict."""
     draws = int(cfg.pipeline["bootstrap_resamples"])
@@ -211,6 +342,12 @@ def run(deals: pd.DataFrame, cfg: Config, rng: np.random.Generator) -> dict[str,
             ols[var]["n"],
         )
 
+    # Any falsifying coefficient is stressed before it is allowed to stand.
+    stress = {}
+    for var, m in ols.items():
+        if m["coef"] > 0 and m["adds_signal"]:
+            stress[var] = stress_test_falsifier(model_df.dropna(subset=[var]), var, cfg)
+
     conc = concentration(panel)
     LOG.info(
         "H5 concentration: Gini %.3f, HHI %.3f, top-5 countries hold %.1f%% of green dollars "
@@ -236,8 +373,16 @@ def run(deals: pd.DataFrame, cfg: Config, rng: np.random.Generator) -> dict[str,
     ]
     # The pre-registered falsification condition is about the association that
     # SURVIVES controlling for income, so the OLS is what triggers it.
+    # Only a coefficient that survives its stress test counts as a falsifier.
     need_positive_controlled = [
-        v for v, m in ols.items() if m["coef"] > 0 and m["adds_signal"]
+        v
+        for v, m in ols.items()
+        if m["coef"] > 0 and m["adds_signal"] and stress.get(v, {}).get("survives")
+    ]
+    need_positive_not_robust = [
+        v
+        for v, m in ols.items()
+        if m["coef"] > 0 and m["adds_signal"] and not stress.get(v, {}).get("survives")
     ]
     falsifier_triggered = bool(need_positive_controlled)
 
@@ -262,13 +407,22 @@ def run(deals: pd.DataFrame, cfg: Config, rng: np.random.Generator) -> dict[str,
             "No need indicator shows a positive raw association whose interval excludes "
             "zero; the electricity deficit runs negative, as predicted."
         )
+    if need_positive_not_robust:
+        note_parts.append(
+            f"A positive income-controlled association appeared for "
+            f"{need_positive_not_robust} but did not survive its leave-one-out and "
+            "collinearity stress test, so the falsification condition is not treated as "
+            "having fired."
+        )
     if falsifier_triggered:
         note_parts.append(
             "HOWEVER the pre-registered falsification condition is MET for "
             f"{need_positive_controlled}: after controlling for log GDP per capita the "
             "association turns positive and significant. The raw and income-controlled "
             "results point in opposite directions, which is a suppression effect running "
-            "through income, and the strong form of H5 does not survive it."
+            "through income, and the strong form of H5 does not survive it. The "
+            "coefficient was stress-tested by leave-one-out across every country and by "
+            "VIF before being accepted."
         )
     note = " ".join(note_parts)
 
@@ -286,6 +440,8 @@ def run(deals: pd.DataFrame, cfg: Config, rng: np.random.Generator) -> dict[str,
         },
         "correlations": correlations,
         "ols_need_after_income": ols,
+        "falsifier_stress_tests": stress,
+        "need_positive_but_not_robust": need_positive_not_robust,
         "concentration": conc,
         "verdict": verdict,
         "verdict_note": note,

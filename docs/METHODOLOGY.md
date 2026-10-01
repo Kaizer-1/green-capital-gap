@@ -580,3 +580,81 @@ rather than as a result.
 
 Under bias correction the risk ratio is below 1 in **20,000 of 20,000 draws**. The gap
 itself is not in question under any specification. Only its magnitude is.
+
+---
+
+## 14. Three corrections made after the first pass
+
+Recorded because each reverses something this document previously asserted.
+
+### 14.1 The cheque-size finding was retracted too early
+
+§5 of the figure set first reported that the median green cheque fell 72% in real terms
+over 2007–2012, and read it as the Gaddy et al. rotation out of hardware. A control
+against non-green deals showed a 73% fall over the same window, and the finding was
+retracted.
+
+**That retraction was wrong, and on the same grounds the original claim was wrong.** The
+pooled median is composition-confounded for *both* groups: holding the 2007 stage mix
+fixed leaves non-green at −11%. A pooled comparison cannot settle the question in either
+direction. The real control is the within-stage comparison, and it was available all
+along.
+
+Tested properly — bootstrap over 10,000 draws, resampling within each group × stage ×
+year cell, on clean stage codes only:
+
+| | within-stage change, 2007→2012 |
+|---|---:|
+| Green | −50.4% |
+| Non-green | −1.1% |
+| **Difference** | **−49.3pp [−69.3, −22.4]** |
+
+The interval excludes zero, so the finding **stands in narrowed form**: within named
+funding stages, green deal sizes fell substantially faster than non-green. The
+`venture_unspecified` catch-all is excluded, because its median collapses in both groups
+as its volume explodes, which is coverage expansion rather than repricing.
+
+What still cannot be claimed is the *mechanism*. A size pattern is not an investor motive;
+the rotation out of hardware remains external evidence.
+
+### 14.2 H4 is undetermined, not refuted
+
+An earlier draft recorded H4 as "Not supported" and noted that the signal ran opposite to
+the hypothesis. Both were wrong.
+
+The seed-to-A odds ratio is 1.30 with an interval of [0.65, 2.60]. That interval spans 1
+and identifies no direction, so reading one off the point estimate reads noise. The A→B
+transition — the specific missing-middle prediction — is not testable at all: the
+advanced-economy green pool is 13 companies. The spread across specifications (1.30, 1.66,
+1.00) is one wide interval sampled three ways, not three results.
+
+**H4 is recorded as "Underpowered — cannot determine."** The §1.3 pre-commitment, which
+chose strict seed as the specification that would not flatter the hypothesis, reasoned
+about the *direction* of an expected negative effect. It is void here because the binding
+failure is power, not direction. That is recorded rather than quietly satisfied.
+
+What the exercise does establish is sharper than a verdict: there are **zero**
+emerging-market green seed entrants across thirteen years, and even in the best-covered
+bloc the A→B pool is 13 companies. The scale-up step is unobservable in the open record.
+
+### 14.3 The H5 falsifier did not fire
+
+The income-controlled coefficient on the electricity-access deficit was positive and
+significant (+0.223, p = 0.010), which met the pre-registered falsification condition, and
+it survived both a leave-one-out check (no sign flips, no loss of significance) and a
+collinearity check (VIF 2.79).
+
+Both checks missed the actual problem. **Twenty of the 22 panel countries have an
+electricity deficit of exactly 0.0%**; China is 0.1% and India is 20.1%. The regressor is
+in substance a dummy for one country, the largest single value carries 99.5% of the total,
+and dropping India sends the coefficient to 32.8 because no variance remains. A
+coefficient identified off one observation is not interpretable however well it behaves on
+VIF and sign stability.
+
+A degenerate-variance check is now part of the stress test, and the falsification condition
+is recorded as **not having fired**. H5 stands as Supported.
+
+The degeneracy is itself the more important result, and it belongs in the text rather than
+the appendix: **countries with real energy-access deficits have too few green deals to
+enter the panel at all.** H5's need indicators were not tested and found null. They could
+not be tested. That is the sixth independent route to the measurement thesis.

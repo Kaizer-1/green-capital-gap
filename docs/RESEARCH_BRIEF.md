@@ -377,16 +377,49 @@ data only. Cleantech's residual is +1.92× [0.75×, 4.91×], so a green-specific
 ruled out while outperformance is not confirmed. State what this licenses and what it
 does not: the gap is real, and it is a capital-intensity gap that green sits inside.
 
-**6. The advanced-economy benchmark** (~1,100 words, Figures 5–10, Tables 2–4)
+**6. The advanced-economy benchmark, and what each null says about the record**
+(~1,200 words, Figures 5–10, Tables 2–4)
+
 H2, H3 and H4 on green against non-green within advanced economies, as the benchmark case
 for the Gaddy et al. capital-model mismatch. Finding first, then evidence, then the
-verdict line and the falsification condition. Each subsection closes with its bounded
-emerging-market arm, cell sizes printed, no test below n = 30.
+verdict line and the falsification condition.
+
+**Structural requirement: every subsection closes with one line tying its emerging-market
+arm back to the measurement thesis.** The nulls are not separate disappointments; they are
+the same finding arriving six times, and the section is written so a reader cannot miss
+that. The six routes:
+
+1. **H2** — the emerging-market arm does not exist. Six year-cells of 1–12 green deals;
+   no difference-in-differences is possible.
+2. **H3** — the emerging-market arm is null *by construction*, with the bias direction
+   stated before the numbers: equity-coded project finance understates non-dilutive share
+   on both sides and more so for emerging markets.
+3. **H4** — **zero** emerging-market green seed entrants across thirteen years, and the
+   advanced-economy A→B pool is 13 companies. The scale-up step the missing-middle
+   literature points to is unobservable in the open record.
+4. **H5** — the country panel runs on 22 countries, 20 of which have an electricity
+   deficit of exactly zero. The need indicators cannot be tested because need-afflicted
+   countries have too few green deals to enter the panel.
+5. **The taxonomy** — 88.2% of emerging-market green deals carry no sub-domain more
+   specific than "Clean Technology". The record cannot say what *kind* of green.
+6. **The instrument coding** — a pre-declared venture-stage criterion fails because
+   Crunchbase codes infrastructure project equity as ordinary venture rounds. The record
+   cannot say what *kind* of capital.
+
+Close the section by stating that these are six independent routes to one conclusion.
 
 **7. Where the capital goes** (~450 words, Figure 11, Table 5)
 H5 at country level, with the power situation stated up front and CIs on every ρ.
 
-**8. Does the pattern persist?** (~400 words, Figure 12)
+**8. What the open record cannot answer** (~450 words, Figure 12)
+
+Open with the claim the paper is actually entitled to make: **the capital-regime question
+is not answerable from open data, and that is the finding.** Not "more data would help" —
+the specific, demonstrated statement that the five structural questions this project set
+out to ask each fail for a different, independently verifiable reason, and that the
+failure is a property of the data infrastructure rather than of the analysis.
+
+Then the continuity probe.
 The continuity probe. Indian startup funding 2015–2020, caveated as non-comparable in
 taxonomy, and itself yielding only 54 green deals — which is a continuation of the
 measurement finding, not an escape from it. Then triangulation against current secondary
