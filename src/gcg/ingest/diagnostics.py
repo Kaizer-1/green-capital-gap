@@ -54,7 +54,9 @@ def censoring_seasonality(cfg: Config, rounds: pd.DataFrame) -> dict[str, Any]:
     # Each month as a share of its own year, so levels do not swamp shape.
     shares = counts.div(counts.sum(axis=0), axis=1) * 100
 
-    dec_share = {int(y): float(shares.loc[12, y]) for y in counts.columns if 12 in shares.index}
+    dec_share = {
+        int(y): float(shares.loc[12, y]) for y in counts.columns if 12 in shares.index
+    }
     baseline = np.mean([v for y, v in dec_share.items() if y != 2013])
     dec_2013 = dec_share.get(2013, float("nan"))
 
@@ -98,7 +100,9 @@ def censoring_disclosure_backfill(cfg: Config, rounds: pd.DataFrame) -> dict[str
     sub = df.loc[df["year"].between(2011, 2013)]
 
     by_month = (
-        sub.groupby(["year", "month"])["disclosed"].agg(deals="size", disclosed="sum").reset_index()
+        sub.groupby(["year", "month"])["disclosed"]
+        .agg(deals="size", disclosed="sum")
+        .reset_index()
     )
     by_month["disclosed_pct"] = (100 * by_month["disclosed"] / by_month["deals"]).round(2)
     wide = by_month.pivot(index="month", columns="year", values="disclosed_pct")
@@ -166,7 +170,9 @@ def amount_sentinel_sweep(cfg: Config, rounds_raw: pd.DataFrame) -> dict[str, An
 
     big = rounds_raw.loc[amt.gt(_IMPLAUSIBLE_ROUND_USD)]
     if len(big):
-        cols = [c for c in ("object_id", "funded_at", "funding_round_code") if c in big.columns]
+        cols = [
+            c for c in ("object_id", "funded_at", "funding_round_code") if c in big.columns
+        ]
         exhibit = big[cols].assign(raised_amount_usd=amt.loc[big.index])
         _save(cfg, exhibit, "diag_implausible_round_amounts", index=False)
         findings["implausible_examples"] = exhibit.head(10).to_dict("records")
@@ -236,7 +242,9 @@ def fx_failure_profile(
             "all_deals_pct": (100 * allc.reindex(by_country.index) / allc.sum()).round(2),
         }
     )
-    comparison["skew_ratio"] = (comparison["fx_fail_pct"] / comparison["all_deals_pct"]).round(2)
+    comparison["skew_ratio"] = (comparison["fx_fail_pct"] / comparison["all_deals_pct"]).round(
+        2
+    )
     _save(cfg, comparison, "diag_fx_failures_by_country")
     _save(cfg, by_ccy.to_frame("deals"), "diag_fx_failures_by_currency")
 
@@ -303,7 +311,8 @@ def instrument_contingency(cfg: Config, rounds_raw: pd.DataFrame) -> dict[str, A
         "code_values": int(rounds_raw["funding_round_code"].nunique()),
     }
     LOG.info(
-        "instrument contingency: %d type values x %d code values, %d conflicting rows (%.1f%%)",
+        "instrument contingency: %d type values x %d code values, "
+        "%d conflicting rows (%.1f%%)",
         findings["type_values"],
         findings["code_values"],
         findings["conflict_rows"],
@@ -329,7 +338,9 @@ def mirror_vintage(
 
     funded_ids = set(rounds["object_id"].dropna())
     funded = companies.loc[companies["id"].isin(funded_ids)]
-    matched_slugs = set(funded["permalink_norm"].dropna()) & set(flat["permalink_norm"].dropna())
+    matched_slugs = set(funded["permalink_norm"].dropna()) & set(
+        flat["permalink_norm"].dropna()
+    )
     all_slugs = set(companies["permalink_norm"].dropna())
 
     flat_only = flat.loc[

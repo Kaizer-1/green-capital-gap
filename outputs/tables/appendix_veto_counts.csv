@@ -1,0 +1,8 @@
+veto_pattern,companies,funded_companies,reason
+\bcleaner(?:s)?\b,127,3,"Cleaning products or staff, not clean technology."
+\bgreeting(?:s)?\b,65,15,Greeting cards. Substring collision with 'green'.
+\b(?:dry[-\s]?clean\w*|clean\w*\s*service(?:s)?|house\s*clean\w*|office\s*clean\w*|janitorial|laundry)\b,48,5,"Cleaning and laundry services. 'clean' in a services sense, not an energy sense."
+\b(?:oil\s*(?:and|&)?\s*gas|petroleum|petrochemical\w*|upstream\s*oil|oilfield|drilling|fracking|hydraulic\s*fracturing|shale\s*(?:oil|gas)|coal\s*(?:mining|fired|power)|tar\s*sands|oil\s*sands|natural\s*gas\s*(?:production|exploration)|refiner(?:y|ies)\s*services|lng\s*terminal)\b,44,12,"Fossil-fuel extraction, refining and coal power. Necessary because the general tier admits a standalone 'Energy' taxonomy token and Crunchbase's 'Energy' bucket mixes renewables with oil, gas and coal. Without this veto an upstream petroleum company classifies as green. Note the deliberate asymmetry: 'biorefinery' and 'hydrogen' remain green, 'refinery services' and 'natural gas production' do not."
+\bgreenhouse\b(?!\s*gas),18,5,Greenhouse Software (recruiting ATS) and ordinary horticulture. Only 'greenhouse gas' is a green signal.
+\b(?:solaris|solarium|solariums)\b,8,1,Solaris (operating system) and tanning salons. Word boundaries already prevent the match; logged for completeness.
+\b(?:conference(?:s)?|trade\s*show|media\s*compan\w*|magazine|publisher|publishing|news\s*(?:site|portal|outlet))\b.*\b(?:cleantech|greentech|renewable)\b,2,0,Sector media and events businesses. Their capital is not green-venture capital.

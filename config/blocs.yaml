@@ -125,9 +125,27 @@ code_overrides:
   YUG: {to: SRB, reason: "ISO-3166-3 Yugoslavia. Mapped to Serbia as the successor with the continuing World Bank series. An approximation; flagged in the methodology."}
   SCG: {to: SRB, reason: "ISO-3166-3 Serbia and Montenegro. Mapped to Serbia; same approximation as YUG."}
 
+  # Overseas departments and territories that Crunchbase lists as if they were
+  # sovereign states. Each is mapped to the metropolitan state whose World Bank
+  # series governs it. Found empirically in the step-4 unmapped log; 11 deals in
+  # total, so the choice is immaterial to any result, but a silent drop is not
+  # acceptable.
+  GLP: {to: FRA, reason: "Guadeloupe is a French overseas department with no separate World Bank series."}
+  REU: {to: FRA, reason: "Reunion is a French overseas department with no separate World Bank series."}
+  UMI: {to: USA, reason: "United States Minor Outlying Islands; no separate World Bank series."}
+
 # World Bank API and OWID series use a few non-ISO codes of their own.
 world_bank_code_aliases:
   XKX: {to: XKX, reason: "World Bank code for Kosovo. No ISO-3166-1 alpha-3 exists; retained as-is."}
+
+# Codes that are World Bank REGIONAL AGGREGATES, not countries. Their presence
+# in a company's country_code field is an upstream data error. They are counted
+# and excluded from country-level panels rather than mapped to a bloc, because
+# mapping an aggregate to a bloc would double-count. Found in the step-4 log.
+aggregate_codes_in_source:
+  CSS: {reason: "World Bank aggregate: Caribbean small states. Not a country."}
+  PST: {reason: "World Bank aggregate: Pacific island small states. Not a country."}
+  FST: {reason: "Non-standard code with no ISO-3166 or World Bank match. Treated as unknown."}
 
 # --------------------------------------------------------------------------
 # Economies with no World Bank income classification, or with one the historical

@@ -55,8 +55,8 @@ subdomains:
   solar:
     label: "Solar"
     patterns:
-      - '\bsolar\s*(power|energy|panel|panels|pv|thermal|cell|cells|farm|module|modules|water\s*heat\w*)?\b'
-      - '\bphotovoltaic(s)?\b'
+      - '\bsolar\s*(?:power|energy|panel|panels|pv|thermal|cell|cells|farm|module|modules|water\s*heat\w*)?\b'
+      - '\bphotovoltaic(?:s)?\b'
       - '\bsolar\s*pv\b'
       - '\bconcentrated\s*solar\b'
       - '\bcsp\b'
@@ -68,15 +68,15 @@ subdomains:
   wind_hydro_geo:
     label: "Wind, hydro and geothermal"
     patterns:
-      - '\bwind\s*(power|energy|turbine|turbines|farm|farms|generation)\b'
+      - '\bwind\s*(?:power|energy|turbine|turbines|farm|farms|generation)\b'
       - '\bwind\b(?=\s*(?:\||,|$))'
       - '\boffshore\s*wind\b'
       - '\bhydro\b'
-      - '\bhydro[-\s]?(power|electric|electricity|kinetic)\b'
+      - '\bhydro[-\s]?(?:power|electric|electricity|kinetic)\b'
       - '\bmicro[-\s]?hydro\b'
       - '\bgeothermal\b'
-      - '\btidal\s*(power|energy)?\b'
-      - '\bwave\s*(power|energy)\b'
+      - '\btidal\s*(?:power|energy)?\b'
+      - '\bwave\s*(?:power|energy)\b'
       - '\bmarine\s*energy\b'
     # \bwind\b cannot match "window" or "windows". The lookahead variant admits
     # a bare "Wind" only when it stands alone as a taxonomy token.
@@ -84,16 +84,16 @@ subdomains:
   biofuels_biomass:
     label: "Biofuels and biomass"
     patterns:
-      - '\bbio[-\s]?fuel(s)?\b'
+      - '\bbio[-\s]?fuel(?:s)?\b'
       - '\bbio[-\s]?diesel\b'
       - '\bbio[-\s]?ethanol\b'
       - '\bethanol\b'
       - '\bbio[-\s]?mass\b'
       - '\bbio[-\s]?gas\b'
       - '\bbio[-\s]?energy\b'
-      - '\bbio[-\s]?refiner(y|ies)\b'
+      - '\bbio[-\s]?refiner(?:y|ies)\b'
       - '\balgae\b'
-      - '\balgal\s*(fuel|biofuel)\b'
+      - '\balgal\s*(?:fuel|biofuel)\b'
       - '\bbiochar\b'
       - '\banaerobic\s*digest\w*\b'
       - '\bwaste[-\s]?to[-\s]?energy\b'
@@ -103,15 +103,15 @@ subdomains:
   energy_storage_battery:
     label: "Energy storage and batteries"
     patterns:
-      - '\bbatter(y|ies)\b'
+      - '\bbatter(?:y|ies)\b'
       - '\benergy\s*storage\b'
       - '\bgrid\s*storage\b'
-      - '\bfuel\s*cell(s)?\b'
+      - '\bfuel\s*cell(?:s)?\b'
       - '\blithium[-\s]?ion\b'
       - '\bli[-\s]?ion\b'
-      - '\bflow\s*batter(y|ies)\b'
-      - '\b(super|ultra)[-\s]?capacitor(s)?\b'
-      - '\bhydrogen\s*(fuel|storage|energy|production)?\b'
+      - '\bflow\s*batter(?:y|ies)\b'
+      - '\b(?:super|ultra)[-\s]?capacitor(?:s)?\b'
+      - '\bhydrogen\s*(?:fuel|storage|energy|production)?\b'
       - '\bthermal\s*storage\b'
 
   energy_efficiency_smart_grid:
@@ -124,8 +124,8 @@ subdomains:
       - '\bsmart\s*meter\w*\b'
       - '\bdemand\s*response\b'
       - '\bdemand[-\s]?side\s*management\b'
-      - '\bmicro[-\s]?grid(s)?\b'
-      - '\bbuilding\s*(energy\s*)?(automation|management)\b'
+      - '\bmicro[-\s]?grid(?:s)?\b'
+      - '\bbuilding\s*(?:energy\s*)?(?:automation|management)\b'
       - '\bled\s*lighting\b'
       - '\bsolid[-\s]?state\s*lighting\b'
       - '\bpower\s*management\b'
@@ -136,12 +136,12 @@ subdomains:
   electric_mobility:
     label: "Electric mobility"
     patterns:
-      - '\belectric\s*(vehicle(s)?|car(s)?|bus(es)?|truck(s)?|scooter(s)?|motorcycle(s)?|bike(s)?|bicycle(s)?|drivetrain|powertrain|mobility)\b'
+      - '\belectric\s*(?:vehicle(?:s)?|car(?:s)?|bus(?:es)?|truck(?:s)?|scooter(?:s)?|motorcycle(?:s)?|bike(?:s)?|bicycle(?:s)?|drivetrain|powertrain|mobility)\b'
       - '\be[-\s]?mobility\b'
       - '\bev\s*charg\w*\b'
-      - '\bcharging\s*(station|stations|infrastructure|network)\b'
+      - '\bcharging\s*(?:station|stations|infrastructure|network)\b'
       - '\bplug[-\s]?in\s*hybrid\b'
-      - '\bhybrid\s*(vehicle|car|drivetrain|powertrain)s?\b'
+      - '\bhybrid\s*(?:vehicle|car|drivetrain|powertrain)s?\b'
       - '\bbike[-\s]?shar\w*\b'
       - '\bcar[-\s]?shar\w*\b'
     # Bare "EV" is deliberately excluded as a trigger: two letters, far too
@@ -150,7 +150,7 @@ subdomains:
   water_sanitation:
     label: "Water and sanitation"
     patterns:
-      - '\bwater\s*(treatment|purification|filtration|quality|conservation|management|recycling|reuse|technolog\w*|infrastructure)\b'
+      - '\bwater\s*(?:treatment|purification|filtration|quality|conservation|management|recycling|reuse|technolog\w*|infrastructure)\b'
       - '\bwaste[-\s]?water\b'
       - '\bdesalinat\w*\b'
       - '\bsanitation\b'
@@ -164,8 +164,8 @@ subdomains:
     label: "Waste, recycling and circular economy"
     patterns:
       - '\brecycl\w*\b'
-      - '\bwaste\s*(management|reduction|collection|disposal|treatment|diversion|sorting)\b'
-      - '\b(solid|organic|industrial|municipal|hazardous)\s*waste\b'
+      - '\bwaste\s*(?:management|reduction|collection|disposal|treatment|diversion|sorting)\b'
+      - '\b(?:solid|organic|industrial|municipal|hazardous)\s*waste\b'
       - '\be[-\s]?waste\b'
       - '\blandfill\b'
       - '\bcompost\w*\b'
@@ -179,49 +179,49 @@ subdomains:
   sustainable_agriculture:
     label: "Sustainable agriculture"
     patterns:
-      - '\bsustainable\s*(agriculture|farming|food|fisher\w*|aquaculture)\b'
+      - '\bsustainable\s*(?:agriculture|farming|food|fisher\w*|aquaculture)\b'
       - '\bag[-\s]?tech\b'
       - '\bagri[-\s]?tech\b'
-      - '\bprecision\s*(agriculture|farming)\b'
+      - '\bprecision\s*(?:agriculture|farming)\b'
       - '\bagroforestry\b'
       - '\bpermaculture\b'
-      - '\borganic\s*(farm\w*|agriculture|food|produce)\b'
+      - '\borganic\s*(?:farm\w*|agriculture|food|produce)\b'
       - '\bvertical\s*farm\w*\b'
       - '\bhydroponic\w*\b'
       - '\baquaponic\w*\b'
-      - '\bsoil\s*(health|carbon|quality)\b'
+      - '\bsoil\s*(?:health|carbon|quality)\b'
       - '\bdrip\s*irrigation\b'
       - '\bmicro[-\s]?irrigation\b'
-      - '\bcrop\s*(yield|monitoring)\b'
+      - '\bcrop\s*(?:yield|monitoring)\b'
     # "organic" alone is not a trigger: "organic search", "organic growth" and
     # "organic traffic" are ubiquitous in startup tag fields.
 
   green_building_materials:
     label: "Green building and materials"
     patterns:
-      - '\bgreen\s*(building|buildings|construction|cement|concrete|roof\w*|infrastructure)\b'
-      - '\bsustainable\s*(building|construction|materials|design|architecture)\b'
-      - '\bleed\s*(certif\w*|rating)\b'
+      - '\bgreen\s*(?:building|buildings|construction|cement|concrete|roof\w*|infrastructure)\b'
+      - '\bsustainable\s*(?:building|construction|materials|design|architecture)\b'
+      - '\bleed\s*(?:certif\w*|rating)\b'
       - '\bpassive\s*house\b'
-      - '\bnet[-\s]?zero\s*(building|energy)\b'
-      - '\bbio[-\s]?plastic(s)?\b'
-      - '\bbio[-\s]?material(s)?\b'
+      - '\bnet[-\s]?zero\s*(?:building|energy)\b'
+      - '\bbio[-\s]?plastic(?:s)?\b'
+      - '\bbio[-\s]?material(?:s)?\b'
       - '\bbio[-\s]?degradable\b'
       - '\bcompostable\s*packaging\b'
       - '\bbuilding\s*insulation\b'
-      - '\beco[-\s]?(friendly|material)\w*\b'
+      - '\beco[-\s]?(?:friendly|material)\w*\b'
 
   environmental_monitoring_carbon:
     label: "Environmental monitoring and carbon"
     patterns:
-      - '\bcarbon\s*(credit(s)?|offset(s)?|capture|sequestration|accounting|footprint|trading|market(s)?|neutral\w*|emission(s)?|pricing|tax)\b'
+      - '\bcarbon\s*(?:credit(?:s)?|offset(?:s)?|capture|sequestration|accounting|footprint|trading|market(?:s)?|neutral\w*|emission(?:s)?|pricing|tax)\b'
       - '\bccs\b'
-      - '\bemission(s)?\s*(monitoring|reduction|trading|control)\b'
+      - '\bemission(?:s)?\s*(?:monitoring|reduction|trading|control)\b'
       - '\bcap\s*and\s*trade\b'
-      - '\bair\s*(quality|pollution|monitoring)\b'
-      - '\benvironmental\s*(monitoring|sensor\w*|data|compliance|remediation|services|technolog\w*)\b'
-      - '\bpollution\s*(control|monitoring|reduction)\b'
-      - '\bclimate\s*(tech\w*|change|adaptation|resilience|risk)\b'
+      - '\bair\s*(?:quality|pollution|monitoring)\b'
+      - '\benvironmental\s*(?:monitoring|sensor\w*|data|compliance|remediation|services|technolog\w*)\b'
+      - '\bpollution\s*(?:control|monitoring|reduction)\b'
+      - '\bclimate\s*(?:tech\w*|change|adaptation|resilience|risk)\b'
       - '\bgreenhouse\s*gas\w*\b'
       - '\bghg\b'
       - '\blife[-\s]?cycle\s*assessment\b'
@@ -238,11 +238,11 @@ general_unspecified:
   patterns:
     - '\bclean\s*tech\w*\b'
     - '\bcleantech\b'
-    - '\bclean\s*(energy|power|technolog\w*)\b'
+    - '\bclean\s*(?:energy|power|technolog\w*)\b'
     - '\bgreen\s*tech\w*\b'
     - '\bgreentech\b'
-    - '\bgreen\s*(energy|power|economy)\b'
-    - '\brenewable(s)?\b'
+    - '\bgreen\s*(?:energy|power|economy)\b'
+    - '\brenewable(?:s)?\b'
     - '\brenewable\s*energy\b'
     - '\balternative\s*energy\b'
     - '\bsustainab\w*\b'
@@ -260,11 +260,11 @@ general_unspecified:
 # --------------------------------------------------------------------------
 exclusions:
 
-  - pattern: '\b(dry[-\s]?clean\w*|clean\w*\s*service(s)?|house\s*clean\w*|office\s*clean\w*|janitorial|laundry)\b'
+  - pattern: '\b(?:dry[-\s]?clean\w*|clean\w*\s*service(?:s)?|house\s*clean\w*|office\s*clean\w*|janitorial|laundry)\b'
     scope: veto_all
     reason: "Cleaning and laundry services. 'clean' in a services sense, not an energy sense."
 
-  - pattern: '\bcleaner(s)?\b'
+  - pattern: '\bcleaner(?:s)?\b'
     scope: veto_all
     reason: "Cleaning products or staff, not clean technology."
 
@@ -272,15 +272,15 @@ exclusions:
     scope: veto_all
     reason: "Greenhouse Software (recruiting ATS) and ordinary horticulture. Only 'greenhouse gas' is a green signal."
 
-  - pattern: '\bgreeting(s)?\b'
+  - pattern: '\bgreeting(?:s)?\b'
     scope: veto_all
     reason: "Greeting cards. Substring collision with 'green'."
 
-  - pattern: '\b(solaris|solarium|solariums)\b'
+  - pattern: '\b(?:solaris|solarium|solariums)\b'
     scope: veto_all
     reason: "Solaris (operating system) and tanning salons. Word boundaries already prevent the match; logged for completeness."
 
-  - pattern: '\bwindow(s|ing)?\b'
+  - pattern: '\bwindow(?:s|ing)?\b'
     scope: veto_subdomain
     subdomain: wind_hydro_geo
     reason: "'Windows' / 'window' is not wind power. Boundaries prevent it; retained as an explicit guard."
@@ -290,29 +290,29 @@ exclusions:
     subdomain: waste_recycling_circular
     reason: "Figurative use, not waste management."
 
-  - pattern: '\borganic\s*(search|traffic|growth|reach|install\w*)\b'
+  - pattern: '\borganic\s*(?:search|traffic|growth|reach|install\w*)\b'
     scope: veto_subdomain
     subdomain: sustainable_agriculture
     reason: "Marketing jargon, not organic agriculture."
 
-  - pattern: '\b(carbon\s*copy|carbonite|carbon\s*fiber|carbon\s*fibre)\b'
+  - pattern: '\b(?:carbon\s*copy|carbonite|carbon\s*fiber|carbon\s*fibre)\b'
     scope: veto_subdomain
     subdomain: environmental_monitoring_carbon
     reason: "Carbon Copy (software), Carbonite (backup), carbon fibre (materials, not emissions)."
 
-  - pattern: '\b(greentech\s*media|cleantech\s*group|cleantech\s*open|cleantechnica|renewable\s*energy\s*world|environmental\s*leader)\b'
+  - pattern: '\b(?:greentech\s*media|cleantech\s*group|cleantech\s*open|cleantechnica|renewable\s*energy\s*world|environmental\s*leader)\b'
     scope: veto_all
     reason: "Trade media, conference organisers and analyst firms. They report on the sector; they are not in it."
 
-  - pattern: '\b(conference(s)?|trade\s*show|media\s*compan\w*|magazine|publisher|publishing|news\s*(site|portal|outlet))\b.*\b(cleantech|greentech|renewable)\b'
+  - pattern: '\b(?:conference(?:s)?|trade\s*show|media\s*compan\w*|magazine|publisher|publishing|news\s*(?:site|portal|outlet))\b.*\b(?:cleantech|greentech|renewable)\b'
     scope: veto_all
     reason: "Sector media and events businesses. Their capital is not green-venture capital."
 
-  - pattern: '\b(carbon\s*black)\b'
+  - pattern: '\b(?:carbon\s*black)\b'
     scope: veto_all
     reason: "Carbon Black, the endpoint-security company."
 
-  - pattern: '\b(oil\s*(and|&)?\s*gas|petroleum|petrochemical\w*|upstream\s*oil|oilfield|drilling|fracking|hydraulic\s*fracturing|shale\s*(oil|gas)|coal\s*(mining|fired|power)|tar\s*sands|oil\s*sands|natural\s*gas\s*(production|exploration)|refiner(y|ies)\s*services|lng\s*terminal)\b'
+  - pattern: '\b(?:oil\s*(?:and|&)?\s*gas|petroleum|petrochemical\w*|upstream\s*oil|oilfield|drilling|fracking|hydraulic\s*fracturing|shale\s*(?:oil|gas)|coal\s*(?:mining|fired|power)|tar\s*sands|oil\s*sands|natural\s*gas\s*(?:production|exploration)|refiner(?:y|ies)\s*services|lng\s*terminal)\b'
     scope: veto_all
     reason: >
       Fossil-fuel extraction, refining and coal power. Necessary because the
@@ -322,7 +322,7 @@ exclusions:
       asymmetry: 'biorefinery' and 'hydrogen' remain green, 'refinery services'
       and 'natural gas production' do not.
 
-  - pattern: '\b(nuclear\s*(power|energy|reactor|fission)|uranium)\b'
+  - pattern: '\b(?:nuclear\s*(?:power|energy|reactor|fission)|uranium)\b'
     scope: veto_subdomain
     subdomain: general_unspecified
     reason: >
