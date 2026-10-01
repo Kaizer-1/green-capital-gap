@@ -22,6 +22,7 @@ _CONFIG_FILES = {
     "pipeline": "config/pipeline.yaml",
     "lexicon": "config/green_lexicon.yaml",
     "blocs": "config/blocs.yaml",
+    "audit_calls": "config/audit_calls.yaml",
 }
 
 
@@ -66,6 +67,7 @@ class Config:
     pipeline: dict[str, Any] = field(repr=False)
     lexicon: dict[str, Any] = field(repr=False)
     blocs: dict[str, Any] = field(repr=False)
+    audit_calls: dict[str, Any] = field(repr=False)
 
     # -- paths -------------------------------------------------------------
     def path(self, key: str) -> Path:

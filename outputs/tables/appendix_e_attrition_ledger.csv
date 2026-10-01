@@ -1,0 +1,8 @@
+step,stage,action,reason,rows_in,rows_out,rows_dropped,pct_of_step_input,pct_of_original
+1,ingest,funding_rounds.csv as ingested,starting population,52928,52928,0,0.0,0.0
+2,dates,drop unparseable funded_at,"no usable deal date, so the row cannot be placed in the window or deflated",52928,52680,248,0.469,0.469
+3,dates,drop implausible funded_at,"date outside 1990-2014, impossible for a 2013 snapshot",52680,52661,19,0.036,0.036
+4,linkage,drop orphan object_id,"no matching company in objects.csv, so no country, date of founding or green label",52661,52363,298,0.566,0.563
+5,dedupe,drop duplicates on object_id+funded_at+instrument+raised_amount_usd,"identical company, date, instrument and amount",52363,52259,104,0.199,0.196
+6,join,attach company attributes,"left join, must not change row count",52259,52259,0,0.0,0.0
+7,window,truncate to 2000-2012,"coverage growth contaminates the final year, and the snapshot cut censors December 2013",52259,41105,11154,21.344,21.074

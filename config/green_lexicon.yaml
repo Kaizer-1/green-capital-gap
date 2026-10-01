@@ -348,11 +348,56 @@ exclusions:
 # Each entry needs a one-line reason. Defensible hand-curation; the audit
 # trail is the point. EMPTY UNTIL THE AUDIT HAS ACTUALLY BEEN RUN.
 # --------------------------------------------------------------------------
-manual_exclusions: []
+# Ratified by the supervisor at build step 5. The HEADLINE results do NOT apply
+# these: the classifier is symmetric by construction and manual curation is not,
+# so curation is reported as a robustness run alongside the raw headline (see
+# docs/METHODOLOGY.md 6). Both appear in the text; raw leads.
+#
+# The fossil rule applied below is stated once, explicitly: a company is excluded
+# as fossil when its PRIMARY GENERATION ASSET MIX WAS PREDOMINANTLY FOSSIL IN THE
+# OBSERVATION WINDOW. This is applied on external knowledge of the companies, not
+# on tag patterns, and the same scrutiny is applied to advanced-economy IPPs.
+# "Mixed fuel" fails the rule and the company is kept.
+manual_exclusions:
+  # --- emerging-market green companies (reviewed individually) ---
+  - permalink: quippo-infrastructure
+    reason: "Telecom tower infrastructure. Matched on a bare 'Clean Technology' tag with 'mobile' its only other token."
+  - permalink: sedemac-mechatronics
+    reason: "Engine control units for small internal-combustion engines and gensets. The product burns fuel."
+  - permalink: wifinity-technology
+    reason: "'Intelligent enterprise management' software. Bare 'Clean Technology' tag with no green product in the record."
+  - permalink: gate-technology
+    reason: "Diversified electronics firm; 'Clean Energy' is one of nine unrelated tags including Telecommunications, Medical and Automotive."
+  - permalink: aventones
+    reason: "Carpooling marketplace matched only on a generic 'Sustainability' token. No energy or emissions technology."
+  - permalink: ksk-power-venture
+    reason: "Fossil rule: primary generation asset mix predominantly coal-fired thermal in the observation window, with only minor hydro."
+  # --- advanced-economy companies ---
+  - permalink: agendia
+    reason: "Molecular cancer diagnostics. Matched on generic 'sustainab'/'environmental' tokens with no green product."
+  - permalink: growlife
+    reason: "Cannabis cultivation equipment retailer matched on 'hydroponic'. Energy-intensive indoor growing, not sustainable agriculture."
+  - permalink: gainspan
+    reason: "Low-power Wi-Fi chipsets. Matched on 'battery', which appears as battery LIFE in the product description."
+  - permalink: virident-systems
+    reason: "Flash memory and server storage. Generic cleantech token with no green product in the record."
+  - permalink: luca-technologies
+    reason: "Fossil rule: the product is biogenic coalbed methane. Marketed as clean energy; it is a fossil fuel."
 
-# Companies the audit confirms as genuinely green despite looking marginal.
-# Recorded so the decision is visible, not just the rejections.
-manual_inclusions: []
+# Companies the audit confirms as green despite looking marginal. Recorded so the
+# decision is visible, not just the rejections.
+manual_inclusions:
+  - permalink: akenerji-elektrik-uretim
+    reason: "Mixed-fuel Turkish generator: hydro and wind alongside natural gas. FAILS the 'predominantly fossil' rule, so the rule is followed rather than the thesis, and it is kept."
+  - permalink: villgro-innovation-marketing
+    reason: "Kept but UNVERIFIED. Excluding on unverifiability would preferentially delete emerging-market rows, which is the exact bias this project measures."
+  - permalink: scion-global
+    reason: "Kept but UNVERIFIED. Same reasoning as villgro-innovation-marketing."
+  - permalink: farmhopping
+    reason: "Organic-food and farmers-market marketplace. Sustainable agriculture is one of the eleven sub-domains, so in scope."
+  - permalink: playground-energy
+    reason: "Playground equipment harvesting energy from movement to generate electricity. Marginal in scale, genuine in kind."
+
 
 # --------------------------------------------------------------------------
 # Flag-gated patterns. Admitted only when the named flag in

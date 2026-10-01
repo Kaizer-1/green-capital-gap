@@ -1,0 +1,5 @@
+green_spec,sample,em_deals,em_green,em_rate_pct,ae_deals,ae_green,ae_rate_pct,risk_ratio,rr_lo,rr_hi,p,fisher_p
+raw,all deals,1309,34,2.597,37896,2056,5.425,0.4788,0.3427,0.6689,7.54e-06,1.26e-06
+raw,venture-stage only,1272,33,2.594,36604,1983,5.417,0.4789,0.341,0.6724,1.04e-05,1.69e-06
+curated,all deals,1309,28,2.139,37896,2030,5.357,0.3993,0.2761,0.5774,2.86e-07,1.52e-08
+curated,venture-stage only,1272,27,2.123,36604,1957,5.346,0.397,0.2727,0.578,3.91e-07,1.96e-08

@@ -288,15 +288,30 @@ def classify(
     slug = df["permalink_norm"].astype("string").fillna("")
     is_manual_excl = slug.isin(manual_excl).to_numpy()
     is_manual_incl = slug.isin(manual_incl).to_numpy()
+    manual_reason = np.array([""] * len(df), dtype=object)
     for i in np.flatnonzero(is_manual_excl):
-        veto_reason[i] = f"manual audit: {manual_excl[slug.iloc[i]]}"
-        veto_pattern[i] = "<manual_exclusion>"
-    veto_all |= is_manual_excl
+        manual_reason[i] = f"manual exclusion: {manual_excl[slug.iloc[i]]}"
+    for i in np.flatnonzero(is_manual_incl):
+        manual_reason[i] = f"manual inclusion: {manual_incl[slug.iloc[i]]}"
 
     # ---- headline definition -------------------------------------------
+    # `green` is the RAW classifier output: patterns only. Manual audit
+    # decisions are deliberately NOT folded in here, because the classifier is
+    # symmetric by construction (the same lexicon is applied to every company
+    # regardless of bloc) while manual curation is not: the emerging-market
+    # green set was audited exhaustively and advanced-economy companies only at
+    # the top of the funding distribution. Mixing the two would make the
+    # headline depend on an asymmetric process. See docs/METHODOLOGY.md §6.
+    #
     # Tier C vetoes Tier B only. Tier A is the snapshot's own flag and is not
     # overridden by a lexicon exclusion.
-    green = tier_a | (tier_b_surviving & ~veto_all) | is_manual_incl
+    green = tier_a | (tier_b_surviving & ~veto_all)
+
+    # `green_curated` applies the ratified manual decisions as a robustness
+    # specification, reported alongside the raw headline. A manual exclusion
+    # DOES override Tier A here: the point of excluding a coal-predominant IPP
+    # is precisely that the snapshot flagged it as cleantech.
+    green_curated = (green & ~is_manual_excl) | is_manual_incl
 
     tier = np.array(["none"] * len(df), dtype=object)
     tier[tier_b_surviving & ~veto_all] = "B"
@@ -314,6 +329,10 @@ def classify(
             else "",
             "category_code": df[field].to_numpy() if field in df.columns else "",
             "green": green,
+            "green_curated": green_curated,
+            "manual_excluded": is_manual_excl,
+            "manual_included": is_manual_incl,
+            "manual_decision_reason": manual_reason,
             "green_strict_tier_a": tier_a.to_numpy(),
             "green_tier": tier,
             "tier_a": tier_a.to_numpy(),

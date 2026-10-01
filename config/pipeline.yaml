@@ -364,3 +364,65 @@ figures:
   figsize_single: [7.2, 4.4]
   figsize_stacked: [7.2, 8.0]
   source_line: "Source: Crunchbase 2013 Snapshot (CC BY 4.0); author's calculations."
+
+# --------------------------------------------------------------------------
+# Venture-stage classification.
+#
+# THE CRITERION IS STATED HERE BEFORE IT IS APPLIED TO ANY DATA, and it is
+# applied symmetrically to every bloc. Its purpose is to separate venture-stage
+# companies from infrastructure and independent-power-producer project finance,
+# because several of the largest emerging-market "green venture" deals are
+# utility-scale generation assets rather than startups, and the same is true of
+# some advanced-economy rows.
+#
+# The criterion is INSTRUMENT-BASED and uses only fields already in the data.
+# It deliberately does not use deal size, company name or any external knowledge,
+# so it cannot be tuned toward a preferred answer:
+#
+#   venture_stage   -> the company has AT LEAST ONE in-window round whose
+#                      canonical instrument appears in `venture_instruments`
+#   non_venture_only -> every in-window round falls outside that set
+#
+# Deal size is reported as an independent cross-check on whether the criterion
+# separated the two populations, but is NOT part of the definition. If the
+# criterion fails to separate them, that is reported rather than quietly fixed.
+# --------------------------------------------------------------------------
+venture_stage:
+  venture_instruments:
+    - angel
+    - seed
+    - series_a
+    - series_b
+    - series_c_plus
+    - venture_unspecified
+    - convertible_note
+  # Instruments that do not on their own indicate a venture-stage company.
+  non_venture_instruments:
+    - private_equity
+    - debt_financing
+    - post_ipo_equity
+    - post_ipo_debt
+    - grant
+    - secondary_market
+    - crowdfunding
+    - other
+    - unknown
+  # Reported cross-check only, never part of the definition.
+  size_crosscheck_percentiles: [0.25, 0.5, 0.75]
+
+# --------------------------------------------------------------------------
+# Random audit of advanced-economy green companies.
+#
+# The emerging-market green set was audited exhaustively (28 of 28 companies)
+# while advanced-economy green companies were audited only at the top of the
+# funding distribution. That asymmetry biases TOWARD finding a gap, because
+# false positives were removed from one bloc more thoroughly than the other.
+#
+# To measure it, a RANDOM sample of advanced-economy green companies is audited
+# at the same intensity. Random, not funding-ranked, so the estimated
+# false-positive rate is unbiased with respect to deal size.
+# --------------------------------------------------------------------------
+audit:
+  ae_random_sample_size: 60
+  # Drawn with the project seed so the sample is reproducible and fixed.
+  sample_seed_offset: 7

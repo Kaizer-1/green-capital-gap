@@ -324,3 +324,25 @@ country_recovery:
     to: "Tonga's ccTLD, sold as a vanity domain for the English preposition 'to'."
     nr: "Nauru's ccTLD, sold as a vanity domain."
     gl: "Greenland's ccTLD, sold as a vanity domain."
+
+# --------------------------------------------------------------------------
+# Company-level country corrections.
+#
+# Where the snapshot's country_code is demonstrably wrong for a named company,
+# the correction is recorded here with its evidence. These change BLOC
+# assignment, not green labels, and each one is a factual correction rather
+# than a judgement about the company's business.
+#
+# Ratified by the supervisor at build step 5.
+# --------------------------------------------------------------------------
+company_country_corrections:
+  algenol-biofuel:
+    to: USA
+    from: RUS
+    reason: >
+      Algenol Biofuels operated from Fort Myers, Florida. The Russian attribution
+      reflects the nationality of an investor, not the company's domicile. The
+      green label is correct and unchanged; only the bloc assignment moves, which
+      removes $25m from emerging-market green dollars and adds it to advanced
+      economies. The correction runs AGAINST the project's thesis, which is why it
+      is applied rather than left alone.

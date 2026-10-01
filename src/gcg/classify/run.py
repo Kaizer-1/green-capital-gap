@@ -607,6 +607,10 @@ def run(cfg: Config | None = None) -> dict[str, Any]:
     labels["country_code"] = companies["country_code_recovered"].to_numpy()
     labels["country_recovery_route"] = companies["country_recovery_route"].to_numpy()
     labels["has_taxonomy"] = companies["category_list"].notna().to_numpy()
+    # Source attributes H4 needs for founding cohorts, carried on the labels
+    # table so it is the single company-level join target downstream.
+    labels["founded_at"] = pd.to_datetime(companies["founded_at"], errors="coerce").to_numpy()
+    labels["status"] = companies["status"].to_numpy()
     if "taxonomy_tag_count" not in labels.columns:
         labels["taxonomy_tag_count"] = count_taxonomy_tags(
             companies["category_list"]

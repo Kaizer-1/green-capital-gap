@@ -276,3 +276,196 @@ also richer and more complete than a 2013 one would have been, which is why the 
 worth making despite the anachronism.
 
 Table: `outputs/tables/appendix_mirror_vintage.csv`.
+
+---
+
+## 6. The differential-audit asymmetry, and why the headline is raw classifier output
+
+**Named before the results are reported, with its direction stated.**
+
+The 28 emerging-market green companies were audited exhaustively, company by
+company. The 1,114 advanced-economy green companies were audited only at the top of
+the funding distribution. Removing false positives more thoroughly from one bloc than
+from the other biases the double gap, and the direction is knowable in advance: if the
+emerging-market false-positive rate is higher, curation lowers the emerging-market green
+rate further and **widens** the gap.
+
+The headline specification is therefore the **raw classifier output, with no manual
+exclusions applied**. The classifier is symmetric by construction — the same lexicon,
+the same vetoes, the same thresholds, applied to every company regardless of bloc.
+Manual curation is not symmetric, because the attention paid to each bloc was not equal.
+The curated specification is reported alongside as a robustness run, and both appear in
+the text. Raw leads.
+
+### 6.1 Measuring the asymmetry
+
+60 advanced-economy green companies were drawn **at random** — not funding-ranked, so
+the estimate is unbiased with respect to deal size — using the project seed, and audited
+against the same standard as the emerging-market set. Every call is recorded in
+`config/audit_calls.yaml` with a one-line reason.
+
+| | Audited | False positives | Rate | 95% CI |
+|---|---:|---:|---:|---|
+| Emerging markets | 28 (census) | 6 | **21.4%** | 10.2–39.5 |
+| Advanced economies | 60 (random of 1,114) | 9 | **15.0%** | 8.1–26.1 |
+
+Two-proportion test: p = 0.455. Risk ratio 1.43 [0.56, 3.62]. **The two rates are not
+distinguishable at this sample size.** The differential-audit concern is real in
+principle and is not detectably biasing the result.
+
+The point estimate nonetheless runs in the predicted direction, and the specification
+grid confirms the consequence: the risk ratio moves from 0.479 raw to 0.399 curated, so
+**curation widens the gap and the raw headline is the conservative choice.**
+
+The same standard was applied in both directions. The rule that excluded SEDEMAC
+Mechatronics from the emerging-market set — improving the efficiency of internal
+combustion is not a green product — also excluded Transonic Combustion from the
+advanced-economy sample. The tag-soup rule that excluded GATe Technology also excluded
+IndustryTrader.com. Five advanced-economy companies were kept as **unverified**, exactly
+as Villgro Innovation Marketing and Scion Global were kept, because excluding on
+unverifiability preferentially deletes thinly-documented rows, which is the bias this
+project is measuring.
+
+---
+
+## 7. The fossil rule
+
+Stated once, applied symmetrically:
+
+> A company is excluded as fossil when its **primary generation asset mix, or its primary
+> product, was predominantly fossil in the observation window.**
+
+Two properties of this rule need stating plainly.
+
+First, it is applied on **external knowledge of the named companies, not on tag
+patterns.** The Tier-C fossil regex in `config/green_lexicon.yaml` catches companies that
+describe themselves in fossil terms; it cannot catch a coal-fired independent power
+producer that Crunchbase tagged only "Clean Technology". That gap is why a manual rule
+exists, and because the rule rests on outside knowledge it belongs in the curated
+specification rather than the headline.
+
+Second, **"mixed fuel" fails the rule and the company is kept.** Akenerji Elektrik Uretim
+operates hydro and wind alongside substantial natural-gas capacity. It is not
+predominantly fossil, so it stays, even though excluding it would have strengthened the
+reported gap. The rule is followed rather than the thesis.
+
+The same scrutiny was applied to advanced-economy independent power producers and fuel
+businesses: it removed Luca Technologies (biogenic coalbed methane) and Prometheus Energy
+(liquefied natural gas) from the advanced-economy sample, and KSK Power Venture
+(predominantly coal-fired thermal) from the emerging-market set.
+
+---
+
+## 8. The ccTLD near-miss
+
+Country codes were missing for 1,650 in-window companies — a bucket larger than the
+entire emerging-market bloc. `city`, `state_code` and `region` are blank for every one of
+them (`region` is the literal string `"unknown"`), so recovery had to come from the flat
+mirror's own `country_code` (207 companies) and from domain top-level domains (101).
+
+The domain route required an explicit allow-list, and this is worth recording by name
+because the alternative was a fabricated result.
+
+Several country-code top-level domains belong to emerging or least-developed countries
+and are sold worldwide as vanity domains. Had they been mapped naively to their nominal
+country, the following attributions would have entered the sample:
+
+| TLD | Nominal country | Companies | Status |
+|---|---|---:|---|
+| `.me` | Montenegro | 315 | vanity, refused |
+| `.tv` | **Tuvalu — an LDC** | 127 | vanity, refused |
+| `.ly` | Libya | 65 | vanity, refused |
+| `.fm` | Micronesia | 39 | vanity, refused |
+| `.cc` | Cocos (Keeling) Islands | 34 | vanity, refused |
+| `.st` | **Sao Tome and Principe — an LDC** | 18 | vanity, refused |
+| `.to` | Tonga | 12 | vanity, refused |
+| `.ws` | Samoa | 10 | vanity, refused |
+| `.nr` | Nauru | 7 | vanity, refused |
+
+A naive mapping would have **fabricated 127 Tuvaluan and 18 São Toméan ventures out of
+domain-name marketing, in a project whose finding is that LDC green ventures are absent
+from the record.** The LDC bloc contains 13 deals and zero green deals; `.tv` alone would
+have multiplied it tenfold with companies that have no connection to Tuvalu.
+
+All 23 refusals are enumerated with reasons in `config/blocs.yaml`, and the 29 accepted
+ccTLDs are listed there too. Every recovered row carries the route that recovered it, so
+any result can be re-run without the inferred ones.
+
+---
+
+## 9. The venture-stage criterion, declared in advance, did not work
+
+Several of the largest emerging-market green deals are utility-scale generation assets
+rather than startups. To separate them from venture-stage companies, an instrument-based
+criterion was declared in `config/pipeline.yaml` **before being applied to any data**,
+using only fields already present, and deliberately ignoring deal size, company name,
+country and green status so that it could not be tuned toward a preferred answer:
+
+> A company is venture-stage if at least one of its in-window rounds carries a venture
+> instrument (angel, seed, Series A/B/C+, unspecified venture, convertible note).
+
+**It did not separate the populations.** 96–98% of deals are venture-stage in every bloc,
+and emerging-market green deals are 97.1% venture-stage against 96.5% for
+advanced-economy green. The double gap is unchanged: the risk ratio is 0.479 under both
+the full sample and the venture-stage-only sample.
+
+The reason is visible in the data and is itself informative. Crunchbase codes
+infrastructure project equity as ordinary venture rounds: Greenko Group and Akenerji as
+`venture_unspecified`, KSK Power Venture as `series_a`, Auro Mira Energy as `series_b`,
+Azure Power as `series_a` then `series_b`. Only Isagen appears as `debt_financing`. The
+instrument field does not distinguish a Series B into a solar independent power producer
+from a Series B into a software company.
+
+The criterion is reported as declared, with its failure stated, rather than replaced by
+one tuned until it produced a separation. Isolating infrastructure finance would require
+company-by-company external knowledge, which would reintroduce precisely the audit
+asymmetry that §6 exists to avoid.
+
+The size cross-check does show the criterion picked up *something*: non-venture deals
+have a higher mean ($22.3m against $9.1m) but a lower median ($1.0m against $2.9m), which
+is the signature of a bimodal group mixing small grants with large infrastructure rounds.
+It is not a clean venture/infrastructure split.
+
+---
+
+## 10. Sector composition: the green deficit is not green-specific
+
+Reported because the alternative is to let the double gap imply something it does not.
+
+Emerging-market venture capital in this snapshot is not simply a smaller version of
+advanced-economy venture capital. Its sector composition is different, and the difference
+explains a large part of the green deficit. Representation ratio is the emerging-market
+share of a sector divided by the advanced-economy share, so 1.0 means proportionate:
+
+| Sector | EM share | AE share | Ratio |
+|---|---:|---:|---:|
+| Biotech | 1.49% | 13.70% | **0.11** |
+| Hardware | 1.24% | 3.97% | 0.31 |
+| Enterprise | 2.57% | 7.59% | 0.34 |
+| **Cleantech** | **2.41%** | **4.77%** | **0.51** |
+| Software | 12.95% | 17.46% | 0.74 |
+| Mobile | 9.88% | 7.89% | 1.25 |
+| Web | 12.53% | 9.61% | 1.30 |
+| Social | 5.06% | 1.93% | 2.62 |
+| E-commerce | 15.44% | 4.50% | **3.43** |
+| Travel | 2.66% | 0.74% | 3.60 |
+
+The pattern is capital intensity, not greenness. Emerging-market venture capital in
+2000–2012 concentrated in capital-light consumer internet — e-commerce at 3.4× its
+advanced-economy weight, travel at 3.6×, social at 2.6× — and avoided capital-intensive,
+long-horizon, R&D-heavy sectors. **Biotech is 4.6 times more under-represented than
+cleantech.** Three sectors are more under-represented in emerging markets than cleantech
+is: biotech, hardware and enterprise.
+
+This is a substantive explanation rather than a confound to be purged. It says the
+emerging-market green deficit is one instance of a general preference for capital-light
+bets in thin markets, and it extends Gaddy et al. directly: if the venture model was
+already mismatched to capital-intensive energy innovation in deep, liquid US capital
+markets, the mismatch is worse where capital pools are thinner and exits are harder — and
+what the data shows is emerging-market venture avoiding the whole class of
+capital-intensive sectors, with cleantech among them rather than singled out.
+
+It does **not** dissolve the double gap. Cleantech is still under-represented at 0.51, and
+the conditional green rate gap is significant under every specification. The claim the
+sector composition licenses is narrower and more defensible: the gap is a capital-intensity
+gap that green entrepreneurship sits inside, not evidence of something specific to green.

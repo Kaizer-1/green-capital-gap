@@ -1,0 +1,3 @@
+bloc,audited,false_positives,fp_rate_pct,ci_lo_pct,ci_hi_pct,coverage
+EM,28,6,21.43,10.21,39.54,census (all 28 companies)
+AE,60,9,15.0,8.1,26.11,"random sample of 60, seed 20251008, not funding-ranked"

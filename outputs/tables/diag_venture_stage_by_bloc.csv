@@ -1,0 +1,10 @@
+bloc,green,deals,venture_stage_deals,non_venture_deals,venture_stage_pct
+AE,False,35840,34621,1219,96.6
+CHINA,False,341,335,6,98.24
+EM,False,1275,1239,36,97.18
+LDC,False,13,12,1,92.31
+UNASSIGNED,False,1462,1407,55,96.24
+AE,True,2056,1983,73,96.45
+CHINA,True,20,19,1,95.0
+EM,True,34,33,1,97.06
+UNASSIGNED,True,64,64,0,100.0
