@@ -1,0 +1,4 @@
+spec,em_rate_pct,ae_rate_pct,risk_ratio,rr_ci
+raw (headline),2.597,5.425,0.4788,"[0.3427, 0.6689]"
+bias-corrected,2.0162,4.5792,0.4373,"[0.2605, 0.6518]"
+partially curated,2.139,5.357,0.3993,"[0.2761, 0.5774]"

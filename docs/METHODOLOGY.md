@@ -469,3 +469,114 @@ It does **not** dissolve the double gap. Cleantech is still under-represented at
 the conditional green rate gap is significant under every specification. The claim the
 sector composition licenses is narrower and more defensible: the gap is a capital-intensity
 gap that green entrepreneurship sits inside, not evidence of something specific to green.
+
+---
+
+## 11. H3 is caveated before its numbers, not after
+
+**Stated here before any H3 result is computed.**
+
+§9 established that the record cannot distinguish infrastructure project equity from
+venture rounds: KSK Power Venture's coal-and-hydro project financing is coded `series_a`,
+Greenko Group's and Akenerji's as `venture_unspecified`, Azure Power's as `series_a` then
+`series_b`. Only Isagen appears as `debt_financing`.
+
+This has a direct and knowable consequence for H3, which measures the share of funding
+arriving through non-dilutive instruments. **Project finance that is genuinely debt or
+concessional in nature, but coded as an equity round, understates the non-dilutive share
+on both sides of the comparison.**
+
+The bias is very unlikely to be symmetric. Infrastructure-scale independent power
+producers are a far larger fraction of the emerging-market green set — on inspection,
+seven of the 28 emerging-market green companies are IPPs or utility-scale generation
+developers — than of the advanced-economy green set, where venture-stage hardware and
+software firms dominate. So the understatement of non-dilutive share should be **larger
+for emerging markets than for advanced economies.**
+
+The direction matters because H3's emerging-market arm asks whether emerging-market green
+capital is *more* non-dilutive than advanced-economy green capital. If the measured
+answer is "no difference" or "less non-dilutive", that result is **biased toward the
+answer it gives**, and cannot be read as evidence against the underlying hypothesis. It
+can only be read as: the open record does not show the difference, and the record's own
+instrument coding is a reason it would not show it even if the difference were real.
+
+H3's emerging-market arm is reported with this caveat attached, in the text, before the
+numbers.
+
+---
+
+## 12. Two measurement findings about the record itself
+
+These are findings, not caveats, and they belong in the results. They are two faces of one
+claim: **the open venture record lacks the resolution to study emerging-market green
+entrepreneurship, in both the sector dimension and the instrument dimension.**
+
+### 12.1 The taxonomy cannot resolve green sub-domains in emerging markets
+
+91.2% of emerging-market green deals carry no green sub-domain more specific than
+"general". The mechanism is direct: **26 of the 28 emerging-market green companies carry
+no taxonomy tag more specific than "Clean Technology"**, with match text reading
+`|Clean Technology| | cleantech | | | Clean Technology` and nothing else. Only four carry
+specific evidence — Vital Renewable Energy (sugarcane ethanol), farmhopping, Keclon and
+Stima Systems.
+
+The advanced-economy rate is 67.5%, itself high, so this is a general weakness of the
+taxonomy that becomes disabling in emerging markets. The consequence is that the planned
+sub-domain mix comparison (originally Figure 5) is dead in every form, including
+conditional on having a specific sub-domain, and it was cut.
+
+### 12.2 The record cannot distinguish project finance from venture finance
+
+A pre-declared, instrument-based, symmetrically-applied venture-stage criterion failed to
+separate utility-scale generation assets from venture-stage startups: 96–98% of deals
+classify as venture-stage in every bloc. The worked examples are in §9 — KSK, Greenko,
+Azure, Auro Mira, Akenerji, all coded as ordinary venture rounds.
+
+Taken together: a researcher using this record cannot tell *what kind of green* an
+emerging-market company is, nor *what kind of capital* it raised. Those are the two
+variables an analysis of the emerging-market green capital regime would need most. Their
+absence is why this paper reports a measurement result rather than the regime result it
+set out to produce, and it is a concrete, citable statement about the data infrastructure
+of the field.
+
+---
+
+## 13. The audit comparison is underdetermined, not reassuring
+
+§6 reports emerging-market and advanced-economy false-positive rates of 21.4%
+[10.2–39.5] and 15.0% [8.1–26.1], with p = 0.455.
+
+**That is an absence of power, not a demonstration of equality.** With 28 and 60 companies
+audited, the study cannot detect a 6-percentage-point difference in false-positive rates;
+the two intervals overlap across most of their range and the risk-ratio interval
+[0.56, 3.62] admits anything from the advanced-economy rate being nearly twice the
+emerging-market rate to the reverse being more than threefold. The correct statement is
+that the differential-audit asymmetry **has not been ruled out**, and that the point
+estimate runs in the direction that would make the raw headline conservative.
+
+Because the comparison is underdetermined, a third specification is reported rather than
+resting on either raw or partially-curated numbers alone.
+
+### 13.1 The three specifications
+
+| Specification | EM rate | AE rate | Risk ratio | 95% CI |
+|---|---:|---:|---:|---|
+| **Raw — headline** | 2.597% | 5.425% | **0.479** | 0.343–0.669 |
+| Bias-corrected | 2.016% | 4.579% | 0.437 | 0.261–0.652 |
+| Partially curated | 2.139% | 5.357% | 0.399 | 0.276–0.577 |
+
+The bias-corrected specification applies each bloc's measured false-positive rate to its
+**whole** green population, rather than only to the companies that happened to be audited,
+so both blocs are corrected on the same basis. Audit uncertainty is propagated by drawing
+the false-positive rates from Jeffreys Beta posteriors, with binomial sampling of the green
+counts layered on top, across 20,000 seeded draws.
+
+It **sits between the other two**, which is the confirmation that matters: partial curation
+inflates the gap, because it removes false positives from the bloc that was audited
+exhaustively while leaving them in the bloc that was only sampled. The raw specification
+leads because it is symmetric and conservative; the bias-corrected one is the honest
+midpoint; the partially-curated one is the upper bound on the gap and is reported as such
+rather than as a result.
+
+Under bias correction the risk ratio is below 1 in **20,000 of 20,000 draws**. The gap
+itself is not in question under any specification. Only its magnitude is.

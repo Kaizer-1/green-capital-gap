@@ -426,3 +426,26 @@ audit:
   ae_random_sample_size: 60
   # Drawn with the project seed so the sample is reproducible and fixed.
   sample_seed_offset: 7
+
+# --------------------------------------------------------------------------
+# Capital-intensity regression (H1b).
+#
+# Tests whether the emerging-market green deficit is a green deficit at all, or
+# one instance of a general aversion to capital-intensive sectors in thin
+# markets. The proxy is built from ADVANCED-ECONOMY data only, so it cannot be
+# contaminated by the emerging-market composition it is used to explain.
+#
+# Sector inclusion thresholds are declared here before the regression is run.
+# --------------------------------------------------------------------------
+capital_intensity:
+  min_em_deals: 15
+  min_ae_deals: 30
+  # Proxies, both computed on advanced-economy deals only. The headline uses
+  # median deal size; cumulative funding per company is reported as a check,
+  # because the two capture different things (round size vs total capital
+  # absorbed before the last observed round).
+  primary_proxy: median_deal_usd_real
+  secondary_proxy: median_company_cumulative_usd_real
+  # Monte Carlo draws for the bias-corrected specification, seeded.
+  bias_correction_draws: 20000
+

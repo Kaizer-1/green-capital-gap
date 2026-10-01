@@ -366,6 +366,17 @@ right — the taxonomy cannot resolve green sub-domains in emerging markets, bec
 Then the careful part: what the absence does and does not license, with the instrument
 argument given as external evidence and the competing explanation left open.
 
+**5a. The gap is a capital-intensity gap** (~550 words, Figure 1b, Table 2) — **primary finding**
+Sector composition as a result in its own right, not a control. Emerging-market venture
+capital concentrated in capital-light consumer internet and avoided capital-intensive,
+long-horizon, R&D-heavy sectors as a class. The representation ladder: biotech 0.11,
+hardware 0.31, enterprise 0.34, cleantech 0.51, against e-commerce 3.43 and travel 3.60.
+The regression: log representation ratio on log median advanced-economy deal size,
+elasticity −1.19 [−1.64, −0.75], R² = 0.60, 23 sectors, proxy built from advanced-economy
+data only. Cleantech's residual is +1.92× [0.75×, 4.91×], so a green-specific deficit is
+ruled out while outperformance is not confirmed. State what this licenses and what it
+does not: the gap is real, and it is a capital-intensity gap that green sits inside.
+
 **6. The advanced-economy benchmark** (~1,100 words, Figures 5–10, Tables 2–4)
 H2, H3 and H4 on green against non-green within advanced economies, as the benchmark case
 for the Gaddy et al. capital-model mismatch. Finding first, then evidence, then the

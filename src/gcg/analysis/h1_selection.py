@@ -228,6 +228,95 @@ def leave_one_out(deals: pd.DataFrame, bloc: str = "EM") -> pd.DataFrame:
     return out
 
 
+def bias_corrected_gap(
+    deals: pd.DataFrame, cfg: Config, rng: np.random.Generator
+) -> dict[str, Any]:
+    """Third specification: correct both blocs by their measured false-positive rates.
+
+    Raw applies no curation. Partial curation applies the manual exclusions,
+    which were produced by an asymmetric audit (a census of 28 emerging-market
+    companies against a sample of advanced-economy ones) and therefore removes
+    proportionally more from the bloc that was looked at harder.
+
+    This specification instead applies each bloc's *measured* false-positive
+    rate to its *whole* green population, so both blocs are corrected on the
+    same basis. Uncertainty from the audit is propagated: the false-positive
+    rates are drawn from Jeffreys Beta posteriors reflecting how few companies
+    were actually audited, and binomial sampling of the green counts is layered
+    on top. Both sources of error therefore appear in the interval.
+
+    The expected result is a risk ratio between the raw and partially-curated
+    ones, which would confirm that partial curation inflates the gap.
+    """
+    spec = cfg.audit_calls["ae_random_audit"]
+    census = cfg.audit_calls["em_census"]
+    draws = int(cfg.pipeline["capital_intensity"]["bias_correction_draws"])
+
+    em, ae = deals.loc[deals["bloc"].eq("EM")], deals.loc[deals["bloc"].eq("AE")]
+    em_n, ae_n = len(em), len(ae)
+    em_g, ae_g = int(em["green"].sum()), int(ae["green"].sum())
+
+    # Jeffreys posteriors on the two false-positive rates.
+    em_k, em_audited = int(census["excluded"]), int(census["companies"])
+    ae_k, ae_audited = len(spec["false_positive"]), int(spec["sample_size"])
+    fp_em = rng.beta(em_k + 0.5, em_audited - em_k + 0.5, size=draws)
+    fp_ae = rng.beta(ae_k + 0.5, ae_audited - ae_k + 0.5, size=draws)
+
+    p_em = np.clip(em_g * (1 - fp_em) / em_n, 1e-12, 1)
+    p_ae = np.clip(ae_g * (1 - fp_ae) / ae_n, 1e-12, 1)
+    s_em = rng.binomial(em_n, p_em)
+    s_ae = rng.binomial(ae_n, p_ae)
+
+    rate_em, rate_ae = s_em / em_n, s_ae / ae_n
+    with np.errstate(divide="ignore", invalid="ignore"):
+        rr = np.where(rate_ae > 0, rate_em / rate_ae, np.nan)
+    rr = rr[np.isfinite(rr)]
+
+    out = {
+        "em_green_raw": em_g,
+        "ae_green_raw": ae_g,
+        "fp_rate_em_mean": round(float(fp_em.mean()), 4),
+        "fp_rate_ae_mean": round(float(fp_ae.mean()), 4),
+        "em_green_corrected_expected": round(float((em_g * (1 - fp_em)).mean()), 2),
+        "ae_green_corrected_expected": round(float((ae_g * (1 - fp_ae)).mean()), 2),
+        "em_rate_pct": round(100 * float(rate_em.mean()), 4),
+        "em_rate_ci_pct": [
+            round(100 * float(np.percentile(rate_em, 2.5)), 4),
+            round(100 * float(np.percentile(rate_em, 97.5)), 4),
+        ],
+        "ae_rate_pct": round(100 * float(rate_ae.mean()), 4),
+        "ae_rate_ci_pct": [
+            round(100 * float(np.percentile(rate_ae, 2.5)), 4),
+            round(100 * float(np.percentile(rate_ae, 97.5)), 4),
+        ],
+        "risk_ratio": round(float(np.median(rr)), 4),
+        "risk_ratio_ci": [
+            round(float(np.percentile(rr, 2.5)), 4),
+            round(float(np.percentile(rr, 97.5)), 4),
+        ],
+        "prob_rr_below_1": round(float((rr < 1).mean()), 5),
+        "draws": int(len(rr)),
+        "note": (
+            "Company-level false-positive rates applied to deal counts. This assumes "
+            "false-positive companies carry an average number of deals; in the "
+            "emerging-market census they carried exactly one each, so the assumption "
+            "holds there and is an approximation for advanced economies."
+        ),
+    }
+    LOG.info(
+        "bias-corrected gap: EM %.3f%% [%.3f-%.3f] vs AE %.3f%% [%.3f-%.3f]; "
+        "RR %.4f [%.4f, %.4f]; P(RR<1)=%.4f",
+        out["em_rate_pct"],
+        *out["em_rate_ci_pct"],
+        out["ae_rate_pct"],
+        *out["ae_rate_ci_pct"],
+        out["risk_ratio"],
+        *out["risk_ratio_ci"],
+        out["prob_rr_below_1"],
+    )
+    return out
+
+
 def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
     """Test H1-revised and return a JSON-serialisable findings dict."""
     by_bloc = green_rate_by_bloc(deals, cfg)

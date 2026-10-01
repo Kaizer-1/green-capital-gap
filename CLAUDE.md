@@ -37,20 +37,42 @@ definition to its broadest admissible form does not change that: Tier A strict g
 the headline 34, and Tier B with every veto removed also 34. Country recovery on the
 blank-country bucket added one. The constraint is the record, not the classifier.
 
-Per §15, the thesis therefore serves the data. The revised argument:
+Per §15, the thesis therefore serves the data. The revised argument, reframed again at
+build step 5 once the capital-intensity regression was run:
 
 > Green entrepreneurship in emerging economies is subject to a **double gap** in the open
 > venture record. First, emerging markets are under-represented in the record relative to
 > their economic weight. Second, and separately, **conditional on a company already being
 > in the record, an emerging-market company is markedly less likely to be green than an
-> advanced-economy one** — 2.66% against 5.42%, a risk ratio of 0.49. The second gap is
-> measured entirely within the dataset, so it does not depend on the dataset's coverage.
-> Together they mean the deal-level evidence required to study emerging-market green
-> entrepreneurship does not exist in open data, and that absence is itself the finding.
+> advanced-economy one** — 2.60% against 5.43%, a risk ratio of 0.48 [0.34, 0.67].
+>
+> **But the second gap is not green-specific. It is a capital-intensity gap.** Across 23
+> sectors, a sector's emerging-market representation falls roughly in proportion to its
+> capital intensity: the elasticity of the EM/AE representation ratio with respect to
+> median advanced-economy deal size is **−1.19 [−1.64, −0.75]**, explaining 60% of the
+> cross-sector variance. Biotech sits at 0.11 of proportionate representation, hardware at
+> 0.31, enterprise at 0.34 — all below cleantech's 0.51. Emerging-market venture capital
+> in 2000–2012 avoided capital-intensive, long-horizon, R&D-heavy sectors **as a class**,
+> and concentrated in capital-light consumer internet: e-commerce at 3.4× proportionate,
+> travel at 3.6×.
+>
+> Cleantech's residual from that fit is **positive** — 1.92× its predicted representation
+> [0.75×, 4.91×] — though the interval includes 1. The data therefore cannot separate
+> "green is exactly as under-represented as its capital intensity predicts" from "green is
+> substantially better represented than its capital intensity predicts". What it **does**
+> rule out is a green-specific *deficit*: after controlling for capital intensity there is
+> no evidence that green was penalised beyond its capital needs, and the point estimate
+> runs the other way, consistent with policy and development-finance pull creating demand
+> that pure market logic would not.
+>
+> Together these mean the deal-level evidence required to study emerging-market green
+> entrepreneurship does not exist in open data, and that absence is itself the finding —
+> but the mechanism is the capital intensity of green technology meeting thin capital
+> markets, not a green-specific aversion.
 
-The first gap is the denominator check. **The second gap is the headline**, because it
-cannot be explained away as a coverage artefact: both its numerator and its denominator
-are drawn from companies Crunchbase chose to index.
+The first gap is the denominator check. **The second gap is the headline, and the
+capital-intensity result is its qualifier.** Both belong on page one: putting the gap at
+the front and its qualifier in an appendix is the same error as suppressing the gap.
 
 The structural claims from the original thesis are not abandoned. They are tested where
 the data has power — **green against non-green within advanced economies**, which is the
