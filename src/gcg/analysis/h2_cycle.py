@@ -268,14 +268,22 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
 
     series.to_csv(cfg.path("tables") / "h2_indexed_series.csv", index=False)
 
-    # The verdict is gated on the pre-trend check, not on the p-value alone.
+    # The verdict is gated on the identifying assumption, not on the p-value.
+    # If parallel trends fail, the difference-in-differences never identified
+    # anything, so there is no null to report: the hypothesis was not tested.
+    # That is "cannot determine", by the same rule applied to H4's untestable
+    # transition and H5's degenerate need regressor.
     significant = estimate["p_value"] < cfg.threshold("alpha")
     if not pre["parallel_trends_hold"]:
-        verdict = "Not supported"
+        verdict = "Not testable \u2014 identifying assumption failed"
         status = (
-            "Parallel trends FAIL in the pre-period, so the difference-in-differences "
-            "is downgraded to descriptive and no causal reading is offered, per the "
-            "pre-registered rule in RESEARCH_BRIEF §4."
+            "Parallel trends FAIL in the pre-period: green deal volume was already "
+            f"growing {pre['differential_trend_per_year']:+.3f} log-points per year faster "
+            "than non-green before the event window "
+            f"(p = {pre['p_value']:.4f}). The difference-in-differences therefore never "
+            "identified a causal effect, so there is no null result to report \u2014 the "
+            "hypothesis was not tested. Per the pre-registered rule in RESEARCH_BRIEF §4 "
+            "the comparison is reported as descriptive only."
         )
     elif significant and estimate["interaction_coef"] < 0:
         verdict = "Supported"
@@ -288,7 +296,7 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
         )
     else:
         verdict = "Not supported"
-        status = "The interaction is indistinguishable from zero."
+        status = "Parallel trends hold and the interaction is indistinguishable from zero."
 
     findings = {
         "hypothesis": "H2: the green bust was amplified relative to non-green",
@@ -301,9 +309,15 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
         "verdict": verdict,
         "verdict_note": status,
         "falsification_condition": (
-            "Falsified if the green x post interaction is indistinguishable from zero, "
-            "or if pre-trends diverge, in which case the claim is downgraded to "
-            "descriptive rather than defended."
+            "Falsified if the green x post interaction is indistinguishable from zero. "
+            "Not assessable here: pre-trends diverge, so the design does not identify the "
+            "quantity the condition refers to."
+        ),
+        "descriptive_finding": (
+            "Across the crisis window green and non-green moved in opposite directions: "
+            "advanced-economy green deals contracted 26.5% between 2008 and 2009 while "
+            "non-green GREW 13.5%. That is a description of the series, not a tested "
+            "effect, and it is reported as such."
         ),
     }
     LOG.info("H2 verdict: %s — %s", verdict, status)

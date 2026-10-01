@@ -8,12 +8,15 @@ and 300dpi PNG plus PDF under a deterministic filename.
 
 from __future__ import annotations
 
+import json
+
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 
 from gcg.analysis import h1b_capital_intensity as h1b
+from gcg.analysis import h2_cycle, h3_instrument, h5_allocation
 from gcg.analysis.h1_selection import (
     green_rate_by_bloc,
     green_rate_by_year,
@@ -1197,11 +1200,422 @@ def fig_m1_censoring_artefact(cfg: Config) -> None:
     theme.save(fig, cfg, "fig_m1_censoring_artefact")
 
 
+def fig_07_crisis_contraction(deals: pd.DataFrame, cfg: Config) -> None:
+    """Figure 7: the crisis hit green and spared non-green, descriptively.
+
+    No difference-in-differences coefficient plot accompanies this figure,
+    because the design did not identify one: pre-trends fail. Plotting a
+    coefficient whose identifying assumption failed would present a number the
+    analysis is not entitled to. The indexed series carries the descriptive
+    claim and the annotation states the limit on it.
+    """
+    theme.apply_theme()
+    res = h2_cycle.run(deals, cfg)
+    series = res["_tables"]["h2_indexed_series"]
+    base = int(cfg.window["did_index_base_year"])
+
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    styles = {
+        "AE-green": (P.accent_green, "-", 2.0),
+        "AE-non-green": (P.accent_grey, "-", 1.6),
+        "EM-green": (P.em, (0, (5, 2)), 1.4),
+    }
+    for name, (colour, ls, lw) in styles.items():
+        sub = series.loc[series["series"].eq(name)].sort_values("year")
+        if sub.empty:
+            continue
+        ax.plot(
+            sub["year"], sub["indexed"], color=colour, linestyle=ls, linewidth=lw, zorder=3
+        )
+        last = sub.iloc[-1]
+        ax.text(
+            last["year"] + 0.15,
+            last["indexed"],
+            name.replace("-", " "),
+            va="center",
+            ha="left",
+            fontsize=8,
+            color=colour,
+        )
+
+    ax.axhline(100, color=P.ink_muted, linewidth=0.8, linestyle=(0, (4, 3)), zorder=0)
+    ax.axvline(2008, color=P.rule, linewidth=1.0, zorder=0)
+
+    cd = res["crisis_drawdown"]
+    theme.annotate(
+        ax,
+        f"Across 2008-09 advanced-economy green contracted\n"
+        f"{cd['AE-green']['contraction_pct']:.1f}% while non-green GREW "
+        f"{cd['AE-non-green']['contraction_pct']:+.1f}%.",
+        xy=(
+            2009,
+            float(
+                series.loc[
+                    series["series"].eq("AE-green") & series["year"].eq(2009), "indexed"
+                ].iloc[0]
+            ),
+        ),
+        xytext=(2000.3, 330),
+        color=P.ink,
+        fontsize=7.6,
+    )
+    theme.annotate(
+        ax,
+        "Pre-trends diverge, so no difference-in-differences\n"
+        "estimate is reported. These series are descriptive.",
+        xy=(2004, 120),
+        xytext=(2000.3, 232),
+        color=P.alert,
+        fontsize=7.6,
+    )
+
+    ax.set_xlim(1999.7, 2014.4)
+    ax.set_ylim(0, 420)
+    ax.set_xlabel("Year the deal closed")
+    ax.set_ylabel(f"Deal volume, {base} = 100")
+    theme.style_axes(ax)
+    theme.finding_title(
+        fig,
+        "The crisis hit green venture funding and left non-green growing",
+        f"Deal volume indexed to {base}, by bloc and green status, 2000\u20132012.",
+        y=0.945,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        f"n = {len(deals):,} deals. The emerging-market green series rests on 0\u2013"
+        f"{res['em_arm']['largest_cell']} deals per year and is plotted for shape only. No "
+        "difference-in-differences coefficient is shown: green volume was already growing "
+        f"{res['pre_trend']['differential_trend_per_year']:+.3f} log-points per year faster "
+        f"than non-green before the event window (p = {res['pre_trend']['p_value']:.4f}), so "
+        "parallel trends fail and the design does not identify a causal effect. Raw "
+        "classifier output.",
+        y=0.195,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.105, right=0.845, top=0.84, bottom=0.30)
+    theme.save(fig, cfg, "fig_07_crisis_contraction")
+
+
+def fig_08_instrument_mix(deals: pd.DataFrame, cfg: Config) -> None:
+    """Figure 8: non-dilutive dependence, green against non-green."""
+    theme.apply_theme()
+    res = h3_instrument.run(deals, cfg)
+    shares = res["_tables"]["h3_non_dilutive_by_bloc"]
+    shares = shares.loc[shares["bloc"].isin(["AE", "EM"])]
+
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    labels, values, colours, notes = [], [], [], []
+    for bloc in ("AE", "EM"):
+        for green in (True, False):
+            r = shares.loc[shares["bloc"].eq(bloc) & shares["green"].eq(green)]
+            if r.empty:
+                continue
+            r = r.iloc[0]
+            labels.append(f"{bloc}\n{'green' if green else 'non-green'}")
+            values.append(r["non_dilutive_pct"])
+            colours.append(P.accent_green if green else P.accent_grey)
+            notes.append(f"n = {int(r['deals']):,}")
+
+    y = np.arange(len(labels))[::-1]
+    ax.barh(y, values, color=colours, height=0.56, zorder=3)
+    for yi, v, note in zip(y, values, notes, strict=False):
+        ax.text(
+            v + 0.22,
+            yi,
+            f"{v:.2f}%",
+            va="center",
+            ha="left",
+            fontsize=8.4,
+            color=P.ink,
+            fontweight="bold",
+        )
+        ax.text(v + 2.35, yi, note, va="center", ha="left", fontsize=7.4, color=P.ink_muted)
+
+    foc = res["focused_non_dilutive_test_ae"]
+    theme.annotate(
+        ax,
+        f"Within advanced economies, green is {foc['risk_ratio']:.2f}x\n"
+        f"more likely to use non-dilutive capital "
+        f"{foc['risk_ratio_ci']}",
+        xy=(values[0], y[0]),
+        xytext=(4.0, y[0] - 0.62),
+        color=P.accent_green,
+        fontsize=7.6,
+    )
+    theme.annotate(
+        ax,
+        f"The emerging-market arm rests on {res['em_arm']['em_green_deals']} deals\n"
+        "and is reported as untestable, not as a null",
+        xy=(values[2], y[2]),
+        xytext=(4.0, y[2] - 0.6),
+        color=P.em,
+        fontsize=7.6,
+    )
+
+    ax.set_xlim(0, 15)
+    ax.set_ylim(-0.95, len(labels) - 0.4)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels, fontsize=8.2, linespacing=1.4)
+    ax.tick_params(axis="y", length=0, pad=6)
+    ax.xaxis.set_major_formatter(theme.fmt_pct)
+    ax.set_xlabel("Share of the group's deals using non-dilutive instruments")
+    ax.spines["left"].set_visible(False)
+    theme.style_axes(ax, xgrid=True)
+    ax.grid(axis="y", visible=False)
+    theme.finding_title(
+        fig,
+        "Green ventures lean harder on grants and debt than non-green ones do",
+        "Non-dilutive share of deals by bloc and green status, 2000\u20132012.",
+        y=0.945,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        "Non-dilutive instruments are grants, debt financing and post-IPO debt. "
+        f"Advanced-economy comparison: risk ratio {foc['risk_ratio']:.3f} "
+        f"{foc['risk_ratio_ci']}, p = {foc['p_value']:.2e}. Project finance that is debt or "
+        "concessional in substance but coded as an equity round understates the "
+        "non-dilutive share on both sides, and more so for emerging markets where "
+        "independent power producers are seven of 28 green companies; that bias direction "
+        "was stated before these numbers were computed. Raw classifier output.",
+        y=0.195,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.165, right=0.985, top=0.84, bottom=0.30)
+    theme.save(fig, cfg, "fig_08_instrument_mix")
+
+
+def fig_09_cell_sizes(
+    deals: pd.DataFrame,  # noqa: ARG001 - every figure takes the deal table
+    cfg: Config,
+) -> None:
+    """Figure 9: every emerging-market test cell against the minimum, on one scale.
+
+    This replaces three planned figures that would have rendered results the
+    analysis does not have: a difference-in-differences coefficient plot whose
+    identifying assumption failed, a graduation odds-ratio plot whose interval
+    spans 1 at n = 40, and a need-indicator panel whose regressor is degenerate.
+    Each would have shown a quantity dressed as a finding.
+
+    What is left when those are removed is the argument itself: the cells are
+    too small, everywhere, for the same reason.
+    """
+    theme.apply_theme()
+    min_n = int(cfg.threshold("min_cell_n"))
+    analysis = json.loads(
+        (cfg.path("data_interim") / "analysis_findings.json").read_text(encoding="utf-8")
+    )
+
+    em_green_nd = next(
+        r["non_dilutive"]
+        for r in analysis["h3"]["non_dilutive_by_bloc"]
+        if r["bloc"] == "EM" and r["green"]
+    )
+    # The cell a test depends on is not always the headline count. H3's
+    # emerging-market green sample is 34 deals, which clears the minimum; the
+    # instrument-mix comparison depends on the NON-DILUTIVE cell within it,
+    # which is 3. Plotting 34 here would have put a bar past the threshold line
+    # on a figure whose whole claim is that none of them clear it.
+    rows = [
+        (
+            "H2  largest EM green year-cell",
+            analysis["h2"]["em_arm"]["largest_cell"],
+            "difference-in-differences",
+        ),
+        ("H3  EM green non-dilutive deals", em_green_nd, "instrument-mix test"),
+        (
+            "H4  EM green seed entrants",
+            analysis["h4"]["em_arm"]["cells"]["em_green_entrants"],
+            "graduation model",
+        ),
+        (
+            "H4  AE green Series A to B pool",
+            analysis["h4"]["power"]["ae_green_a_to_b_pool"],
+            "missing-middle transition",
+        ),
+        ("H5  countries with any energy deficit", 2, "need-indicator regression"),
+    ]
+    labels = [r[0] for r in rows]
+    values = [r[1] for r in rows]
+    tests = [r[2] for r in rows]
+
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    y = np.arange(len(rows))[::-1]
+    ax.barh(y, values, color=P.em, height=0.5, zorder=3)
+    ax.axvline(min_n, color=P.alert, linewidth=1.3, zorder=4)
+
+    for yi, v, test in zip(y, values, tests, strict=False):
+        ax.text(
+            v + 0.7,
+            yi,
+            str(v),
+            va="center",
+            ha="left",
+            fontsize=9,
+            color=P.em,
+            fontweight="bold",
+        )
+        ax.text(
+            v + 3.0,
+            yi,
+            f"{test} not reported",
+            va="center",
+            ha="left",
+            fontsize=7.4,
+            color=P.ink_muted,
+            style="italic",
+        )
+
+    ax.text(
+        min_n - 0.6,
+        y[0] + 0.62,
+        f"minimum cell size, n = {min_n}",
+        ha="right",
+        va="bottom",
+        fontsize=7.8,
+        color=P.alert,
+        fontweight="bold",
+    )
+
+    ax.set_xlim(0, 36)
+    ax.set_ylim(-0.75, len(rows) - 0.1)
+    ax.set_yticks(y)
+    ax.set_yticklabels(labels, fontsize=8.2)
+    ax.tick_params(axis="y", length=0, pad=6)
+    for lbl in ax.get_yticklabels():
+        lbl.set_color(P.ink)
+    ax.set_xlabel("Observations available in the cell the test depends on")
+    ax.spines["left"].set_visible(False)
+    theme.style_axes(ax, xgrid=True)
+    ax.grid(axis="y", visible=False)
+    theme.finding_title(
+        fig,
+        "Every emerging-market test fails on the same wall, for different reasons",
+        "Observations available against the pre-registered minimum cell size, "
+        "across H2\u2013H5.",
+        y=0.945,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        f"The minimum cell size of {min_n} was fixed in config before any hypothesis was "
+        "tested, and no bar clears it. These are five distinct failures rather than one "
+        "repeated: a difference-in-differences with no usable time series; an "
+        "instrument-mix comparison resting on 3 non-dilutive deals, drawn from an "
+        "emerging-market green sample of 34 which does itself clear the threshold; a "
+        "graduation model with no entrants at all; a missing-middle transition holding 13 "
+        "companies even in the best-covered bloc; and a need regressor on which 20 of 22 "
+        "countries record exactly zero. Three figures that would have plotted these "
+        "quantities as estimates were cut rather than drawn.",
+        y=0.195,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.305, right=0.985, top=0.84, bottom=0.30)
+    theme.save(fig, cfg, "fig_09_cell_sizes")
+
+
+def fig_11_depth_vs_need(deals: pd.DataFrame, cfg: Config, rng) -> None:
+    """Figure 11: green funding intensity against market depth.
+
+    The planned small-multiple of need indicators is not drawn. Twenty of the
+    22 panel countries record an electricity-access deficit of exactly zero, so
+    a scatter against it would be a column of points on the axis with one
+    outlier, which reads as a relationship and is not one. The degenerate
+    distribution is shown instead, beside the depth relationship that can be
+    measured.
+    """
+    theme.apply_theme()
+    res = h5_allocation.run(deals, cfg, rng)
+    panel = res["_tables"]["h5_country_panel"]
+    depth = res["correlations"]["green_usd_per_capita"]["gdp_per_capita_usd"]
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.2, 4.0), width_ratios=[1.45, 1.0])
+
+    x = panel["gdp_per_capita_usd"] / 1e3
+    yv = panel["green_usd_per_capita"].clip(lower=1e-3)
+    ax1.scatter(x, yv, s=26, color=P.ink, zorder=3, linewidths=0)
+    for code in ("USA", "IND", "CHN", "NOR", "ISR"):
+        row = panel.loc[panel["country_code"].eq(code)]
+        if row.empty:
+            continue
+        ax1.annotate(
+            code,
+            (
+                float(row["gdp_per_capita_usd"].iloc[0]) / 1e3,
+                max(float(row["green_usd_per_capita"].iloc[0]), 1e-3),
+            ),
+            textcoords="offset points",
+            xytext=(6, -2),
+            fontsize=7.2,
+            color=P.ink_muted,
+        )
+    ax1.set_xscale("log")
+    ax1.set_yscale("log")
+    ax1.set_xlabel("GDP per capita, 2012 USD thousands (log)")
+    ax1.set_ylabel("Green funding per capita,\nconstant 2015 USD (log)")
+    ax1.set_title(
+        f"(a)  Depth: rho {depth['rho']:+.3f} {depth['ci']}",
+        fontsize=9.0,
+        fontfamily=theme.title_font(),
+        color=P.ink,
+        loc="left",
+        pad=6,
+    )
+    theme.style_axes(ax1, xgrid=True)
+
+    deficit = panel["electricity_deficit_pct"].fillna(0)
+    ax2.hist(deficit, bins=np.arange(0, 24, 1.5), color=P.accent_grey, zorder=3)
+    ax2.set_xlabel("Electricity access deficit (%)")
+    ax2.set_ylabel("Countries in panel")
+    ax2.set_title(
+        "(b)  Need: no usable variation",
+        fontsize=9.0,
+        fontfamily=theme.title_font(),
+        color=P.ink,
+        loc="left",
+        pad=6,
+    )
+    theme.style_axes(ax2)
+    n_zero = int((deficit < 0.05).sum())
+    theme.annotate(
+        ax2,
+        f"{n_zero} of {len(deficit)} countries\nsit at exactly 0.0%",
+        xy=(0.8, n_zero * 0.75),
+        xytext=(5.5, n_zero * 0.72),
+        color=P.alert,
+        fontsize=7.6,
+    )
+
+    theme.finding_title(
+        fig,
+        "Capital tracks market depth; whether it tracks need cannot be measured here",
+        f"Green funding intensity across {len(panel)} countries with at least three "
+        "green deals, 2000\u20132012.",
+        y=0.935,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        f"Spearman rank correlation with a bootstrap interval over "
+        f"{cfg.pipeline['bootstrap_resamples']:,} draws; n = {depth['n']} countries. The "
+        "planned small-multiple of need indicators is not drawn: panel (b) shows why. A "
+        "scatter against a regressor on which 20 of 22 countries record exactly zero "
+        "would read as a relationship and is not one. Green funding is highly "
+        f"concentrated, with a Gini of {res['concentration']['gini']:.3f} and the top five "
+        f"countries holding {res['concentration']['top5_share_pct']:.1f}% of green dollars.",
+        y=0.175,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.125, right=0.985, top=0.80, bottom=0.275, wspace=0.34)
+    theme.save(fig, cfg, "fig_11_depth_vs_need")
+
+
 def main() -> None:
     """Render every figure."""
     cfg = load_config()
     cfg.ensure_dirs()
-    seed_everything(cfg)
+    rng = seed_everything(cfg)
     deals = read_parquet(cfg.path("data_processed") / "deals.parquet")
     fig_01_double_gap_and_capital_intensity(deals, cfg)
     fig_02_coverage_vs_gdp(deals, cfg)
@@ -1209,6 +1623,10 @@ def main() -> None:
     fig_04_subdomain_resolution(deals, cfg)
     fig_05_cycle(deals, cfg)
     fig_06_green_share_of_all(deals, cfg)
+    fig_07_crisis_contraction(deals, cfg)
+    fig_08_instrument_mix(deals, cfg)
+    fig_09_cell_sizes(deals, cfg)
+    fig_11_depth_vs_need(deals, cfg, rng)
     fig_12_continuity_india(deals, cfg)
     fig_m1_censoring_artefact(cfg)
     fig_m2_capital_intensity_regression(deals, cfg)
