@@ -313,6 +313,26 @@ exclusions:
     scope: veto_all
     reason: "Carbon Black, the endpoint-security company."
 
+  - pattern: '\b(oil\s*(and|&)?\s*gas|petroleum|petrochemical\w*|upstream\s*oil|oilfield|drilling|fracking|hydraulic\s*fracturing|shale\s*(oil|gas)|coal\s*(mining|fired|power)|tar\s*sands|oil\s*sands|natural\s*gas\s*(production|exploration)|refiner(y|ies)\s*services|lng\s*terminal)\b'
+    scope: veto_all
+    reason: >
+      Fossil-fuel extraction, refining and coal power. Necessary because the
+      general tier admits a standalone 'Energy' taxonomy token and Crunchbase's
+      'Energy' bucket mixes renewables with oil, gas and coal. Without this veto
+      an upstream petroleum company classifies as green. Note the deliberate
+      asymmetry: 'biorefinery' and 'hydrogen' remain green, 'refinery services'
+      and 'natural gas production' do not.
+
+  - pattern: '\b(nuclear\s*(power|energy|reactor|fission)|uranium)\b'
+    scope: veto_subdomain
+    subdomain: general_unspecified
+    reason: >
+      Nuclear is contested as 'green' and is outside the Cleantech 1.0 venture
+      taxonomy this report analyses. Vetoed from the generic tier only, so a
+      nuclear firm is not admitted on a bare 'Energy' token, while an explicit
+      renewables or storage hit still counts. Sensitivity of the headline results
+      to this choice is reported in the robustness appendix.
+
   - pattern: '\bbattery\s*park\b'
     scope: veto_subdomain
     subdomain: energy_storage_battery
