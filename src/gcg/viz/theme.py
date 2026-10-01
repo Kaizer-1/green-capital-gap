@@ -41,6 +41,9 @@ class Palette:
     accent_green: str = "#3F7D3F"
     accent_grey: str = "#A8A69E"
     alert: str = "#B03A2E"
+    # Marks the series under discussion. Deliberately outside the bloc colours
+    # so highlighting cleantech cannot be read as a bloc assignment.
+    focus: str = "#5B4B8A"
 
     def bloc(self, name: str) -> str:
         """Colour for a bloc label."""

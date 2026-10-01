@@ -73,6 +73,7 @@ test-classifier:
 # ---------------------------------------------------------------------------
 analysis: $(FINDINGS)
 $(FINDINGS): $(DEALS) $(CONFIGS) $(SRC_ANALYSIS) $(SRC_REPORT)
+	$(PY) -m gcg.analysis.descriptives
 	$(PY) -m gcg.analysis.run
 	$(PY) -m gcg.report.findings
 
