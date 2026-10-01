@@ -1,0 +1,145 @@
+[
+  {
+    "source": "cb_relational",
+    "filename": "funding_rounds.csv",
+    "origin": "Kaggle dataset `justinas/startup-investments` (Crunchbase 2013 Snapshot)",
+    "licence": "CC BY 4.0",
+    "sha256": "f622ea495d1909cfb347635edd4ccee52d91da7936e579380e34b4f95c8f5643",
+    "size_bytes": 13134510,
+    "fetched_at": "2026-10-01 10:16 UTC",
+    "rows": 52928,
+    "note": "Relational Crunchbase 2013 Snapshot. funding_rounds.csv is deal-level (funded_at, raised_amount_usd, funding_round_type, funding_round_code). objects.csv carries permalink, category_code, tag_list, country_code, founded_at, status, short_description.\n"
+  },
+  {
+    "source": "cb_relational",
+    "filename": "objects.csv",
+    "origin": "Kaggle dataset `justinas/startup-investments` (Crunchbase 2013 Snapshot)",
+    "licence": "CC BY 4.0",
+    "sha256": "89d3d024f6b9c3c6b1360cb163f90a842ca298cf9cf9b3efd92b152763e43de7",
+    "size_bytes": 284809039,
+    "fetched_at": "2026-10-01 10:16 UTC",
+    "rows": 462651,
+    "note": "Relational Crunchbase 2013 Snapshot. funding_rounds.csv is deal-level (funded_at, raised_amount_usd, funding_round_type, funding_round_code). objects.csv carries permalink, category_code, tag_list, country_code, founded_at, status, short_description.\n"
+  },
+  {
+    "source": "cb_flat",
+    "filename": "investments_VC.csv",
+    "origin": "Kaggle dataset `arindam235/startup-investments-crunchbase` (Crunchbase 2013 Snapshot, flat mirror)",
+    "licence": "CC BY 4.0",
+    "sha256": "4232d61be9e91e99194cb93b01688448295a0d38ce3f0496756eb70c81b9e9b6",
+    "size_bytes": 12534978,
+    "fetched_at": "2026-10-01 10:16 UTC",
+    "rows": 49438,
+    "note": "Read as latin-1; column names stripped on load. Flat mirror of the same snapshot. Supplies the rich pipe-delimited category_list field that the relational dump's coarse category_code lacks.\n"
+  },
+  {
+    "source": "wb_income_groups",
+    "filename": "world-bank-income-groups.csv",
+    "origin": "https://ourworldindata.org/grapher/world-bank-income-groups.csv?csvType=full",
+    "licence": "CC BY 4.0 (Our World in Data / World Bank)",
+    "sha256": "da5ed832b1af395d79ea6505dd0021149d37bdbb58157119cb00ae72429760f9",
+    "size_bytes": 364941,
+    "fetched_at": "2026-10-01 10:31 UTC",
+    "rows": 8173,
+    "note": "Time-varying income classification. Drives the bloc assignment."
+  },
+  {
+    "source": "wb_country_meta",
+    "filename": "wb_country_meta.json",
+    "origin": "https://api.worldbank.org/v2/country?format=json&per_page=400",
+    "licence": "CC BY 4.0 (World Bank)",
+    "sha256": "d29d57f8adf954c5e2a1520a02fb2c7b45575d8db3bd327a9dff47d66914231c",
+    "size_bytes": 113590,
+    "fetched_at": "2026-10-01 10:31 UTC",
+    "rows": 295,
+    "note": "ISO-3 codes, region, current income level. Used for code validation."
+  },
+  {
+    "source": "wb_indicators",
+    "filename": "wb_indicator_NY.GDP.MKTP.CD.json",
+    "origin": "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.MKTP.CD?format=json&per_page=20000&date=1995:2024",
+    "licence": "CC BY 4.0 (World Bank)",
+    "sha256": "34615b6e0d3692806fde60fc8512db38b4cff8629b3b9ac49ed099943e09c881",
+    "size_bytes": 1681600,
+    "fetched_at": "2026-10-01 10:31 UTC",
+    "rows": 7950,
+    "note": "NY.GDP.MKTP.CD -> gdp_current_usd"
+  },
+  {
+    "source": "wb_indicators",
+    "filename": "wb_indicator_NY.GDP.PCAP.CD.json",
+    "origin": "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.PCAP.CD?format=json&per_page=20000&date=1995:2024",
+    "licence": "CC BY 4.0 (World Bank)",
+    "sha256": "e968c94fbf3462aa4a09c5994bd0bdad86cf69e08820bf2aa28a34d71fa0864f",
+    "size_bytes": 1772491,
+    "fetched_at": "2026-10-01 10:31 UTC",
+    "rows": 7950,
+    "note": "NY.GDP.PCAP.CD -> gdp_per_capita_usd"
+  },
+  {
+    "source": "wb_indicators",
+    "filename": "wb_indicator_SP.POP.TOTL.json",
+    "origin": "https://api.worldbank.org/v2/country/all/indicator/SP.POP.TOTL?format=json&per_page=20000&date=1995:2024",
+    "licence": "CC BY 4.0 (World Bank)",
+    "sha256": "ff925ac195a90e01dbcbbf0ad68c764e4133cbbb5638ad694a4671f7b5916930",
+    "size_bytes": 1597663,
+    "fetched_at": "2026-10-01 10:31 UTC",
+    "rows": 7950,
+    "note": "SP.POP.TOTL -> population"
+  },
+  {
+    "source": "wb_indicators",
+    "filename": "wb_indicator_EG.ELC.ACCS.ZS.json",
+    "origin": "https://api.worldbank.org/v2/country/all/indicator/EG.ELC.ACCS.ZS?format=json&per_page=20000&date=1995:2024",
+    "licence": "CC BY 4.0 (World Bank)",
+    "sha256": "cad8a90c718088e2e6c4f7c918e6040cb343e5f85b851acd9d98b0713aaca1ab",
+    "size_bytes": 1783507,
+    "fetched_at": "2026-10-01 10:31 UTC",
+    "rows": 7950,
+    "note": "EG.ELC.ACCS.ZS -> electricity_access_pct"
+  },
+  {
+    "source": "wb_indicators",
+    "filename": "wb_indicator_EG.FEC.RNEW.ZS.json",
+    "origin": "https://api.worldbank.org/v2/country/all/indicator/EG.FEC.RNEW.ZS?format=json&per_page=20000&date=1995:2024",
+    "licence": "CC BY 4.0 (World Bank)",
+    "sha256": "44003661cfd9aa65ea2bbc608a9f027c3b8d1c85066edfa66b6d2a9aee8c8cbf",
+    "size_bytes": 1994373,
+    "fetched_at": "2026-10-01 10:31 UTC",
+    "rows": 7950,
+    "note": "EG.FEC.RNEW.ZS -> renewable_energy_share_pct"
+  },
+  {
+    "source": "wb_indicators",
+    "filename": "wb_indicator_NY.GDP.DEFL.ZS.json",
+    "origin": "https://api.worldbank.org/v2/country/all/indicator/NY.GDP.DEFL.ZS?format=json&per_page=20000&date=1995:2024",
+    "licence": "CC BY 4.0 (World Bank)",
+    "sha256": "1bf1971bb64e6dbdf825aac31b8795aba3ebcba89857c2f8355c419dafb78f08",
+    "size_bytes": 1864117,
+    "fetched_at": "2026-10-01 10:31 UTC",
+    "rows": 7950,
+    "note": "NY.GDP.DEFL.ZS -> gdp_deflator"
+  },
+  {
+    "source": "owid_co2",
+    "filename": "owid-co2-data.csv",
+    "origin": "https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv",
+    "licence": "CC BY 4.0 (Our World in Data)",
+    "sha256": "7f78e2b218ce4bb8c538bbec04fdc9a7982e8d40bff972e650df603899edd5f6",
+    "size_bytes": 14377942,
+    "fetched_at": "2026-10-01 10:31 UTC",
+    "rows": 42480,
+    "note": "CO2 per capita for the H5 need indicators."
+  },
+  {
+    "source": "india",
+    "filename": "startup_funding.csv",
+    "origin": "Kaggle dataset `sudalairajkumar/indian-startup-funding`",
+    "licence": "CC0 / see Kaggle page",
+    "sha256": "03823824b982e814c10df9ccb8b7d811726b91d5fecf8eb846d4889e5f354890",
+    "size_bytes": 425801,
+    "fetched_at": "2026-10-01 10:33 UTC",
+    "rows": 3044,
+    "note": "Continuity probe only (report \u00a77). Never pooled with Crunchbase. Continuity probe only (report \u00a77). Never pooled with Crunchbase: the taxonomies and amount conventions are not compatible.\n"
+  }
+]

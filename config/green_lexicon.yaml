@@ -251,7 +251,6 @@ general_unspecified:
     - '\bdecarbonis\w*\b'
     - '\bdecarboniz\w*\b'
     - '\bnatural\s*resources\b'
-    - '\benergy\b(?=\s*(?:\||,|$))'
 
 # --------------------------------------------------------------------------
 # Tier C — exclusions. A Tier-B hit matching any `veto_all` pattern is dropped
@@ -354,3 +353,23 @@ manual_exclusions: []
 # Companies the audit confirms as genuinely green despite looking marginal.
 # Recorded so the decision is visible, not just the rejections.
 manual_inclusions: []
+
+# --------------------------------------------------------------------------
+# Flag-gated patterns. Admitted only when the named flag in
+# config/pipeline.yaml `flags` is true, and every headline result is re-run
+# with the flag both ways. The classifier records which companies depend on a
+# gated pattern so the dependence can be quantified rather than asserted.
+# --------------------------------------------------------------------------
+gated_patterns:
+  bare_energy:
+    flag: admit_bare_energy
+    subdomain: general_unspecified
+    never_in_tier_a: true
+    patterns:
+      - '\benergy\b(?=\s*(?:\||,|$))'
+    reason: >
+      Admits a standalone "Energy" taxonomy token. Buys recall: many emerging-market
+      renewables firms in this snapshot carry no tag more specific than "Energy".
+      Costs precision, backstopped by the fossil-fuel veto in Tier C. Never applied
+      under Tier-A-strict. Deals and dollars that depend on this pattern alone are
+      reported by bloc.

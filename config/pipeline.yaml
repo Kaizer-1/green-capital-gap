@@ -92,59 +92,61 @@ dedupe_key:
   - raised_amount_usd
 
 # --------------------------------------------------------------------------
-# Round-type normalisation (CLAUDE.md §7: explicit mapping, never a scattered
-# .str.lower().str.replace() chain). Keys are lowercased/stripped raw values.
+# Instrument normalisation (CLAUDE.md §7: an explicit mapping, never a
+# scattered .str.lower().str.replace() chain).
+#
+# IMPORTANT, established empirically at build step 2: `funding_round_code` is
+# the real instrument field, not `funding_round_type`. The latter is a coarse
+# 9-value rollup that collapses `seed` into `angel`, and buries `grant`,
+# `debt_round`, `convertible` and `secondary_market` inside a single `other`
+# bucket. Normalising from `funding_round_type` would have left H3 (instrument
+# mix) untestable and H4 (seed graduation) unmeasurable.
+#
+# Precedence: `funding_round_code` wins; `funding_round_type` is a fallback for
+# rows where the code is absent. The two disagree for a known minority of rows
+# (type=series-a with code=seed, n=1419; type=angel with code=convertible,
+# n=146). The conflict count is logged and reported in the methodology.
 # --------------------------------------------------------------------------
 round_types:
-  # canonical stage labels used for the H4 graduation ladder
+  primary_field: funding_round_code
+  fallback_field: funding_round_type
+
+  # funding_round_code -> canonical. Keys are lowercased/stripped raw values.
   normalise:
-    angel: angel
     seed: seed
-    "series-a": series_a
-    "series a": series_a
+    angel: angel
     a: series_a
-    "series-b": series_b
-    "series b": series_b
     b: series_b
-    "series-c+": series_c_plus
-    "series-c": series_c_plus
-    "series c": series_c_plus
     c: series_c_plus
-    "series-d": series_c_plus
-    "series d": series_c_plus
     d: series_c_plus
-    "series-e": series_c_plus
-    "series-f": series_c_plus
-    "series-g": series_c_plus
-    "series-h": series_c_plus
     e: series_c_plus
     f: series_c_plus
     g: series_c_plus
-    venture: venture_unspecified
-    "venture-series-unknown": venture_unspecified
+    h: series_c_plus
     unattributed: venture_unspecified
+    partial: venture_unspecified
+    debt_round: debt_financing
     grant: grant
-    "debt-financing": debt_financing
-    "debt financing": debt_financing
-    "convertible-note": convertible_note
-    "convertible note": convertible_note
+    convertible: convertible_note
+    private_equity: private_equity
+    post_ipo_equity: post_ipo_equity
+    post_ipo_debt: post_ipo_debt
+    crowd: crowdfunding
+    crowd_equity: crowdfunding
+    secondary_market: secondary_market
+
+  # funding_round_type -> canonical, used only when the code is absent.
+  normalise_fallback:
+    angel: angel
+    seed: seed
+    "series-a": series_a
+    "series-b": series_b
+    "series-c+": series_c_plus
+    venture: venture_unspecified
     "private-equity": private_equity
-    "private equity": private_equity
-    "post-ipo-equity": post_ipo_equity
-    "post-ipo equity": post_ipo_equity
-    "post-ipo-debt": post_ipo_debt
-    "post-ipo debt": post_ipo_debt
-    "equity-crowdfunding": crowdfunding
-    "product-crowdfunding": crowdfunding
+    "post-ipo": post_ipo_equity
     crowdfunding: crowdfunding
-    "secondary-market": secondary_market
-    "secondary market": secondary_market
-    "non-equity-assistance": non_equity_assistance
-    "non equity assistance": non_equity_assistance
-    "initial-coin-offering": other
     other: other
-    undisclosed: other
-    "": unknown
 
   # Instrument families for H3. Dilutive = sells equity now or on conversion.
   instrument_family:
@@ -161,7 +163,6 @@ round_types:
       - grant
       - debt_financing
       - post_ipo_debt
-      - non_equity_assistance
     quasi_equity:
       - convertible_note
     other:
@@ -176,15 +177,73 @@ round_types:
     - series_a
     - series_b
     - series_c_plus
-  # angel rounds are folded into the seed entry gate for H4; stated in methodology.
-  seed_entry_types:
+
+  # Resolved from flags.fold_angel_into_seed; both specifications are run.
+  # Step 2 established code=seed n=11608 and code=angel n=3239, so the two
+  # specifications are well-powered and genuinely different.
+  seed_entry_types_strict:
+    - seed
+  seed_entry_types_angel_inclusive:
     - seed
     - angel
 
 # --------------------------------------------------------------------------
-# Data sources. Every download is cached to data/raw with a recorded SHA256
-# (CLAUDE.md §4). `auth: kaggle` sources require credentials; the pipeline
-# stops and asks rather than substituting anything.
+# Amount null encoding (established empirically at build step 2).
+# CLAUDE.md §7 warns that raised_amount_usd is "missing for a large minority of
+# rows". In this snapshot that missingness is encoded as a literal 0.0, NOT as
+# NaN: 6,000 of 52,928 deal rows. Treating 0 as a disclosed $0 round would
+# corrupt every median, IQR and dollar total in the report.
+# --------------------------------------------------------------------------
+amounts:
+  zero_means_undisclosed: true
+  # 362 of those 6,000 rows carry a positive local-currency `raised_amount` with
+  # no USD conversion. That is a distinct failure mode from a genuinely
+  # undisclosed deal and gets its own attrition-ledger line. They are NOT
+  # back-converted: doing so would need an unvetted historical FX source.
+  track_fx_conversion_failures: true
+  local_amount_field: raised_amount
+  local_currency_field: raised_currency_code
+
+# --------------------------------------------------------------------------
+# Specification flags. Each is a judgement call that changes a headline number,
+# so each is toggleable and each is run BOTH ways in robustness.py. The value
+# here is the HEADLINE specification.
+# --------------------------------------------------------------------------
+flags:
+  # Admit a standalone "Energy" taxonomy token as a generic green hit.
+  # Never applied under Tier-A-strict. Dependence is quantified, not asserted.
+  admit_bare_energy: true
+
+  # H4 funnel entry gate. Folding angel rounds into "seed" inflates the funnel
+  # denominator and depresses measured graduation rates. That effect is expected
+  # to be larger in EM, where angel-only financing is more common, which biases
+  # H4 TOWARD the thesis. The headline therefore uses strict seed, the
+  # specification that does not flatter the hypothesis. The direction is verified
+  # empirically at step 7; if the data reverses it the headline switches and the
+  # text says so.
+  fold_angel_into_seed: false
+
+# --------------------------------------------------------------------------
+# Tripwires. Diagnostics computed at build step 3 that change what the report is
+# allowed to claim. Each is checked in code and logged; crossing one is a
+# reporting decision, not a silent pass.
+# --------------------------------------------------------------------------
+tripwires:
+  # If green deals depending solely on the bare-energy pattern fall below this
+  # share of EM green deals, the sensitivity gets one line, not a section.
+  bare_energy_em_share_trivial: 0.03
+
+  # If `general_unspecified` exceeds this share of EM green companies, Figure 5
+  # dies as a headline EM-vs-AE sub-domain comparison and is reframed: mix
+  # conditional on having a specific sub-domain, with the unspecified rate
+  # plotted as its own bar alongside.
+  general_unspecified_em_share_max: 0.35
+
+  # Nuclear is expected to be negligible in 2000-2012 venture data. Verified
+  # empirically. At or below this n it gets a footnote and no appendix row, and
+  # no robustness budget is spent on the nuclear veto.
+  nuclear_trivial_n: 30
+
 # --------------------------------------------------------------------------
 sources:
   cb_relational:

@@ -4,8 +4,12 @@
 # re-run with unchanged inputs does no work. `make all` on a warm cache finishes
 # in under three minutes.
 
-PY      := python3
+# Prefer the project venv so the targets work without manual activation.
+VENV    := .venv
+PY      := $(shell [ -x $(VENV)/bin/python ] && echo $(VENV)/bin/python || echo python3)
 PIP     := $(shell command -v uv >/dev/null 2>&1 && echo "uv pip" || echo "$(PY) -m pip")
+# The kaggle CLI lives in the venv; put it on PATH for the ingest stage.
+export PATH := $(CURDIR)/$(VENV)/bin:$(PATH)
 STAMPS  := .stamps
 CONFIGS := config/pipeline.yaml config/green_lexicon.yaml config/blocs.yaml
 
@@ -42,7 +46,8 @@ all: report
 # ---------------------------------------------------------------------------
 install: $(STAMPS)/install
 $(STAMPS)/install: pyproject.toml
-	$(PIP) install -e ".[dev]"
+	@[ -d $(VENV) ] || uv venv --python 3.11 $(VENV)
+	VIRTUAL_ENV=$(CURDIR)/$(VENV) $(PIP) install -e ".[dev,kaggle]"
 	@mkdir -p $(STAMPS) && touch $@
 
 # ---------------------------------------------------------------------------

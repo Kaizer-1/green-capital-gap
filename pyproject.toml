@@ -38,7 +38,6 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "C4", "SIM", "ARG", "PD", "RET", "PTH"]
 ignore = [
-    "PD901",  # `df` is a fine name for a dataframe
     "PD010",  # pivot is sometimes the clearest option
 ]
 
