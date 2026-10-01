@@ -1,0 +1,26 @@
+# Raw and interim data are reproducible from `make data` and are not committed.
+# data/processed/ IS committed when under 50MB (CLAUDE.md §3).
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+
+# Build bookkeeping
+.stamps/*
+!.stamps/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
