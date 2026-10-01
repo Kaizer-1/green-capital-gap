@@ -36,8 +36,14 @@ open data.** That is the paper's finding, not its limitation.
 
 Over 2000–2012 emerging markets held {{measure.em_gdp_share_range}} of world GDP and
 {{measure.em_deal_share_range}} of recorded venture deals, an under-representation of
-{{measure.under_rep_range}} (Figure 2). This is the coverage gap, and it is the reason the
-paper's headline result is measured *within* the dataset rather than against the world.
+{{measure.under_rep_range}} (`#ref(<fig-coverage>)`{=typst}). This is the coverage gap, and it is
+the reason the paper's headline result is measured *within* the dataset rather than
+against the world.
+
+```{=typst}
+#exhibit("fig_02_coverage_vs_gdp", [Emerging-market share of world GDP against its share of recorded venture deals.]) <fig-coverage>
+```
+
 
 ### 5.2 Conditional on being in the record, an emerging-market company is half as likely to be green
 
@@ -45,7 +51,12 @@ paper's headline result is measured *within* the dataset rather than against the
 {{h1.em_ci}}, against {{h1.ae_rate_pct}}% {{h1.ae_ci}} across {{pop.ae_deals}}
 advanced-economy deals. The difference is {{h1.difference_pp}} percentage points
 {{h1.difference_ci}}; the risk ratio is {{h1.rr}} {{h1.rr_ci}}, z-test
-p = {{h1.p}}, Fisher's exact p = {{h1.fisher_p}} (Figure 1a, Table 1).
+p = {{h1.p}}, Fisher's exact p = {{h1.fisher_p}} (panel (a) of `#ref(<fig-double-gap>)`{=typst}).
+
+```{=typst}
+#exhibit("fig_01_double_gap_capital_intensity", [The double gap by bloc, and the sector representation ladder that qualifies it.]) <fig-double-gap>
+```
+
 
 Both numerator and denominator are drawn from companies Crunchbase chose to index, so the
 result does not depend on the coverage gap in §5.1. Counting every deal with no recorded
@@ -53,7 +64,13 @@ country as emerging-market — the most generous possible treatment — gives
 {{h1.ub_em_rate_pct}}% and a risk ratio of {{h1.ub_rr}}, p = {{h1.ub_p}}.
 
 China, reported separately throughout, sits with the advanced economies rather than with
-emerging markets.
+emerging markets. `#ref(<fig-rate-by-year>)`{=typst} shows the two rates by year, with every
+emerging-market cell annotated by its count.
+
+```{=typst}
+#exhibit("fig_03_green_rate_by_year", [Green share of recorded deals by bloc and year, emerging-market counts annotated.]) <fig-rate-by-year>
+```
+
 
 **Verdict: {{h1.verdict}}.** Falsified if the emerging-market green rate were
 indistinguishable from the advanced-economy rate, or if the gap vanished under the upper
@@ -65,8 +82,9 @@ Emerging-market venture capital in this period concentrated in capital-light con
 internet and avoided capital-intensive sectors as a class. Regressing log
 emerging-market representation on log median advanced-economy deal size across
 {{h1b.n_sectors}} sectors gives an elasticity of {{h1b.elasticity}}
-{{h1b.elasticity_ci}}, p = {{h1b.p}}, R² = {{h1b.r2}} (Figure 1b, Figure M2).
-Doubling a sector's capital intensity roughly halves its emerging-market representation.
+{{h1b.elasticity_ci}}, p = {{h1b.p}}, R² = {{h1b.r2}} (panel (b) of
+`#ref(<fig-double-gap>)`{=typst}). Doubling a sector's capital intensity roughly halves
+its emerging-market representation.
 
 Cleantech sits **above** the position that fit predicts, at
 {{h1b.cleantech_residual}} {{h1b.cleantech_residual_ci}} of its predicted
@@ -74,13 +92,27 @@ representation. The interval includes 1, so outperformance is not established; w
 established is that there is no green-specific penalty once capital intensity is
 accounted for. Biotech, by contrast, sits below its own prediction.
 
+Green also took a larger share of venture dollars than of venture deals from 2005 onward
+(`#ref(<fig-dollar-share>)`{=typst}), which is consistent with green being capital-intensive
+without testing the cross-sector elasticity above.
+
+```{=typst}
+#exhibit("fig_06_green_share_of_all", [Green as a share of all recorded deals and of all disclosed dollars.]) <fig-dollar-share>
+```
+
+
 ### 5.4 The taxonomy cannot say what kind of green
 
 {{measure.em_unspecified_pct}}% of emerging-market green deals carry no sub-domain more
 specific than "Clean Technology", against {{measure.ae_unspecified_pct}}% in advanced
-economies (Figure 4). The mechanism is direct: 26 of the 28 emerging-market green
+economies (`#ref(<fig-subdomain>)`{=typst}). The mechanism is direct: 26 of the 28 emerging-market green
 companies carry no other taxonomy tag at all. The planned sub-domain mix comparison was
 cut, because the measurement failure shown here makes it impossible.
+
+```{=typst}
+#exhibit("fig_04_subdomain_resolution", [Share of green deals resolved to a specific sub-domain, by bloc.]) <fig-subdomain>
+```
+
 
 ---
 
@@ -96,22 +128,36 @@ about the record itself.
 Between 2007 and 2012, within named funding stages, green deal sizes fell
 {{cheque.green_pct}}% against {{cheque.nongreen_pct}}% for non-green — a difference of
 {{cheque.difference_pp}} percentage points {{cheque.ci}}, bootstrapped over
-{{repro.bootstrap_draws}} draws (Figure 5).
+{{repro.bootstrap_draws}} draws (`#ref(<fig-cycle>)`{=typst}).
 
 The pooled median falls by about the same amount in both groups and settles nothing: it
 is composition-confounded for each, because the platform recorded far more small rounds
 as it matured. All {{cheque.pairs_to_close}} start-end pairs running to the close of the
-window are negative, spanning {{cheque.range_to_close}} percentage points, so the
-direction is robust to the choice of start year.
+window are negative, spanning {{cheque.range_to_close}} percentage points, and the
+headline figure is their median, so the direction is robust to the choice of start year.
+It is **not** robust to the choice of end year: across all 17 admissible pairs the
+difference is negative in 71%, and every positive pair stops in 2006 or 2009–11, before
+the decline has run its course. The claim the grid supports is a direction that holds to
+the close of the window, with a magnitude that depends on where the comparison starts.
 
 This is a size pattern, not an investor motive. The rotation out of hardware that Gaddy
 et al. document is cited here as external evidence, not as something this dataset shows.
 
+```{=typst}
+#exhibit("fig_05_cycle", [Green deals and disclosed green funding, in counts and constant 2015 USD.]) <fig-cycle>
+```
+
+
 ### 6.2 The crisis hit green and spared non-green, but the test does not identify it
 
 Across 2008–09, advanced-economy green deals contracted
-{{h2.crisis_ae_green_pct}}% while non-green **grew** {{h2.crisis_ae_non_green_pct}}%
-(Figure 7).
+{{h2.crisis_ae_green_pct}}% while non-green **grew**
+{{h2.crisis_ae_non_green_pct}}% (`#ref(<fig-crisis>)`{=typst}).
+
+```{=typst}
+#exhibit("fig_07_crisis_contraction", [Deal volume indexed to 2007, by bloc and green status.]) <fig-crisis>
+```
+
 
 The difference-in-differences designed to test this does not identify it. Green deal
 volume was already growing {{h2.pretrend_coef}} log-points per year faster than non-green
@@ -128,7 +174,12 @@ emerging-market green year-cell holds {{h2.em_largest_cell}} deals.
 Within advanced economies, {{h3.ae_green_nondilutive_pct}}% of green deals use
 non-dilutive instruments — grants, debt, post-IPO debt — against
 {{h3.ae_nongreen_nondilutive_pct}}% of non-green deals. The risk ratio is {{h3.rr}}
-{{h3.rr_ci}}, p = {{h3.p}} (Figure 8, Table 3).
+{{h3.rr_ci}}, p = {{h3.p}} (`#ref(<fig-instrument>)`{=typst}).
+
+```{=typst}
+#exhibit("fig_08_instrument_mix", [Non-dilutive share of deals by bloc and green status.]) <fig-instrument>
+```
+
 
 The χ² on the full instrument mix is also significant, but its Cramér's V of
 {{h3.cramers_v}} falls below the conventional threshold for a small effect: with tens of
@@ -165,7 +216,12 @@ all.
 
 Across {{h5.countries_panel}} countries with enough green activity to measure, green
 funding per capita correlates with GDP per capita at ρ = {{h5.depth_rho}}
-{{h5.depth_ci}} (Figure 11). Green funding is extraordinarily concentrated: a Gini of
+{{h5.depth_ci}} (`#ref(<fig-depth>)`{=typst}).
+
+```{=typst}
+#exhibit("fig_11_depth_vs_need", [Green funding intensity against market depth, beside the need regressor's distribution.]) <fig-depth>
+```
+ Green funding is extraordinarily concentrated: a Gini of
 {{h5.gini}}, with the top five countries holding {{h5.top5_pct}}% of all green dollars
 across {{h5.countries_any}} countries.
 
@@ -191,8 +247,13 @@ emerging-market green deals carry no specific sub-domain; a pre-declared venture
 criterion failed because project finance is coded as venture rounds; and H3's
 emerging-market arm is biased by that same coding in a direction stated in advance.
 
-Figure 9 puts the first four on one scale, against the minimum cell size fixed in config
-before any hypothesis was tested. No cell clears it.
+`#ref(<fig-cells>)`{=typst} puts the first four on one scale, against the minimum cell size fixed
+in config before any hypothesis was tested. No cell clears it.
+
+```{=typst}
+#exhibit("fig_09_cell_sizes", [Observations available in each emerging-market test cell, against the minimum.]) <fig-cells>
+```
+
 
 These are six independent routes to one conclusion. The open venture record cannot
 support the capital-regime analysis the field needs.

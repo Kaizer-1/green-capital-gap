@@ -449,3 +449,15 @@ capital_intensity:
   # Monte Carlo draws for the bias-corrected specification, seeded.
   bias_correction_draws: 20000
 
+
+# --------------------------------------------------------------------------
+# Report front matter. Lives in config so the title page carries no hand-typed
+# values, on the same rule as every statistic in the body.
+# --------------------------------------------------------------------------
+report:
+  title: "The Green Capital Gap"
+  subtitle: "A deal-level analysis of cleantech venture funding in emerging economies, 2000\u20132012"
+  author: "Kaizer Dewaswala"
+  usn: "1RV23IS058"
+  course: "Information Science \u2014 Final Year Chapter Deliverable"
+  date: "October 2026"

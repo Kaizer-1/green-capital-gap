@@ -20,33 +20,26 @@ from datetime import UTC, datetime
 from typing import Any
 
 from gcg.config import Config, get_logger, load_config
+from gcg.rounding import fmt as _r_fmt
+from gcg.rounding import fmt_ci as _r_ci
+from gcg.rounding import fmt_p as _r_p
 
 LOG = get_logger("report.findings")
 
 
 def _fmt(value: float | None, places: int = 2, suffix: str = "") -> str:
-    """Format a number for prose, or an em dash when it is absent."""
-    if value is None or (isinstance(value, float) and value != value):
-        return "—"
-    return f"{value:,.{places}f}{suffix}"
+    """Format a number for prose through the project's single rounding rule."""
+    return _r_fmt(value, places, suffix=suffix)
 
 
 def _ci(pair: list[float] | None, places: int = 2, suffix: str = "") -> str:
-    """Render a confidence interval as prose."""
-    if not pair or any(v is None for v in pair):
-        return "—"
-    return f"[{pair[0]:,.{places}f}{suffix}, {pair[1]:,.{places}f}{suffix}]"
+    """Render a confidence interval through the same rule."""
+    return _r_ci(pair, places, suffix=suffix)
 
 
 def _p(value: float | None) -> str:
-    """Format a p-value the way a reader expects to see it."""
-    if value is None:
-        return "—"
-    if value < 1e-4:
-        return f"{value:.1e}"
-    if value < 0.001:
-        return "< 0.001"
-    return f"{value:.3f}"
+    """Format a p-value."""
+    return _r_p(value)
 
 
 def _git_hash(cfg: Config) -> str:

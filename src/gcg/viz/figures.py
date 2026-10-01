@@ -24,6 +24,7 @@ from gcg.analysis.h1_selection import (
 )
 from gcg.config import Config, get_logger, load_config, seed_everything
 from gcg.io import read_parquet
+from gcg.rounding import fmt as rfmt
 from gcg.viz import theme
 from gcg.viz.theme import PALETTE as P
 
@@ -103,7 +104,7 @@ def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) ->
         ax_a.text(
             r["green_rate_pct"] + 0.18,
             yi + 0.3,
-            f"{r['green_rate_pct']:.2f}%",
+            rfmt(r["green_rate_pct"], 2, suffix="%"),
             va="center",
             ha="left",
             fontsize=8.5,

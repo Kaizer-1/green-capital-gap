@@ -144,9 +144,11 @@ def green_rate_by_bloc(deals: pd.DataFrame, cfg: Config) -> pd.DataFrame:
                 "bloc": bloc,
                 "deals": total,
                 "green_deals": green,
-                "green_rate_pct": round(100 * green / total, 3) if total else 0.0,
-                "ci_lo_pct": round(100 * lo, 3),
-                "ci_hi_pct": round(100 * hi, 3),
+                # Full precision retained: rounding is a display concern and
+                # a value rounded here would be rounded again downstream.
+                "green_rate_pct": 100 * green / total if total else 0.0,
+                "ci_lo_pct": 100 * lo,
+                "ci_hi_pct": 100 * hi,
                 "below_min_cell": bool(green < _MIN_CELL),
             }
         )
@@ -175,9 +177,9 @@ def green_rate_by_year(deals: pd.DataFrame) -> pd.DataFrame:
                 "bloc": bloc,
                 "deals": total,
                 "green_deals": green,
-                "green_rate_pct": round(100 * green / total, 3) if total else 0.0,
-                "ci_lo_pct": round(100 * lo, 3),
-                "ci_hi_pct": round(100 * hi, 3),
+                "green_rate_pct": 100 * green / total if total else 0.0,
+                "ci_lo_pct": 100 * lo,
+                "ci_hi_pct": 100 * hi,
                 "test_permitted": bool(green >= _MIN_CELL),
             }
         )
