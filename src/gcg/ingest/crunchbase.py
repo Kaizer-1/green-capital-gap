@@ -38,6 +38,8 @@ _OBJECT_COLS = [
     "state_code",
     "region",
     "city",
+    "homepage_url",
+    "domain",
     "funding_total_usd",
     "funding_rounds",
     "first_funding_at",

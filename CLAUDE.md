@@ -27,22 +27,59 @@ funding in emerging economies*
 A chart deck is not a finding. This project must produce **a falsifiable argument,
 tested against data, with the tests reported honestly — including the ones that fail.**
 
-The argument:
+### The thesis, revised at build step 3
 
-> Green entrepreneurship in emerging economies operates under a structurally different
-> capital regime than in advanced economies. It is not simply "smaller". It is later,
-> thinner per deal, more dependent on non-dilutive instruments, worse at graduating
-> between stages, and more exposed to global capital cycles it does not generate.
+The original thesis held that emerging-market green entrepreneurship operates under a
+structurally different capital regime — later, thinner per deal, more non-dilutive, worse
+at graduating, more cycle-exposed. **The data cannot carry that claim.** The in-window
+emerging-market green sample is 35 deals across thirteen years, and widening the green
+definition to its broadest admissible form does not change that: Tier A strict gives 29,
+the headline 34, and Tier B with every veto removed also 34. Country recovery on the
+blank-country bucket added one. The constraint is the record, not the classifier.
 
-Five hypotheses operationalise that claim (H1–H5 in `docs/RESEARCH_BRIEF.md`). Every
-figure, table and paragraph must serve one of them, the methodology, or the limitations.
-If something doesn't, delete it. A tight 12-figure report beats a sprawling 30-figure one.
+Per §15, the thesis therefore serves the data. The revised argument:
+
+> Green entrepreneurship in emerging economies is subject to a **double gap** in the open
+> venture record. First, emerging markets are under-represented in the record relative to
+> their economic weight. Second, and separately, **conditional on a company already being
+> in the record, an emerging-market company is markedly less likely to be green than an
+> advanced-economy one** — 2.66% against 5.42%, a risk ratio of 0.49. The second gap is
+> measured entirely within the dataset, so it does not depend on the dataset's coverage.
+> Together they mean the deal-level evidence required to study emerging-market green
+> entrepreneurship does not exist in open data, and that absence is itself the finding.
+
+The first gap is the denominator check. **The second gap is the headline**, because it
+cannot be explained away as a coverage artefact: both its numerator and its denominator
+are drawn from companies Crunchbase chose to index.
+
+The structural claims from the original thesis are not abandoned. They are tested where
+the data has power — **green against non-green within advanced economies**, which is the
+benchmark case for the capital-model mismatch that Gaddy et al. identify. Each then
+carries an emerging-market arm reported as an explicitly bounded, underpowered probe with
+every cell size printed and no significance test below n = 30.
+
+Five hypotheses operationalise the revised claim (H1–H5 in `docs/RESEARCH_BRIEF.md` §4).
+Every figure, table and paragraph must serve one of them, the methodology, or the
+limitations. If something doesn't, delete it. A tight report beats a sprawling one.
 
 **If a hypothesis fails to hold in the data, say so in the report and keep the test in.**
 A null result that is honestly reported scores higher than a laundered one, and the
-examiner will be checking for exactly this.
+examiner will be checking for exactly this. H3's emerging-market arm is expected to come
+back null; it stays in.
 
----
+### The claim the absence does NOT license
+
+A venture database indexes equity rounds. If emerging-market green capital ran
+predominantly through grants, concessional debt and development-finance instruments —
+and CPI puts roughly 29% of flows into its Emerging Markets grouping through concessional
+loans and grants — then those ventures are **structurally unindexable here**, and their
+absence is a property of the instrument, not of the entrepreneurship.
+
+That mechanism is argued from external evidence. **It is not identified by this data and
+must never be presented as though it were.** The competing explanation — that emerging
+market ecosystems in 2000–2012 were genuinely less green — cannot be excluded with this
+dataset. Both readings must appear in the discussion, and neither may be asserted as
+established.
 
 ## 2. Non-negotiables
 

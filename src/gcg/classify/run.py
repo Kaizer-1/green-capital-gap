@@ -19,6 +19,7 @@ from typing import Any
 import pandas as pd
 
 from gcg.classify import blocs as blocs_mod
+from gcg.classify.country_recovery import recover
 from gcg.classify.green import classify, cohens_kappa, count_taxonomy_tags
 from gcg.config import Config, get_logger, load_config, seed_everything
 from gcg.io import read_parquet, write_parquet
@@ -45,6 +46,12 @@ def build_company_table(cfg: Config) -> pd.DataFrame:
     ].drop_duplicates(subset=["permalink_norm"], keep="first")
     joined = companies.merge(taxonomy, on="permalink_norm", how="left")
     assert len(joined) == len(companies), "the taxonomy join must not duplicate companies"
+
+    # Recover blank country codes before any bloc assignment. The blank bucket is
+    # larger than the entire emerging-market bloc, so resolving what can be
+    # resolved comes first (see country_recovery for why ccTLDs are allow-listed).
+    joined, recovery_stats = recover(joined, flat, cfg)
+    joined.attrs["recovery_stats"] = recovery_stats
 
     matched = joined["category_list"].notna().sum()
     LOG.info(
@@ -77,6 +84,7 @@ def attach_deal_level(cfg: Config, labels: pd.DataFrame, panel: pd.DataFrame) ->
     cols = [
         "object_id",
         "country_code",
+        "country_recovery_route",
         "green",
         "green_strict_tier_a",
         "green_tier",
@@ -594,6 +602,10 @@ def run(cfg: Config | None = None) -> dict[str, Any]:
     panel = build_bloc_panel(cfg)
 
     labels = classify(companies, cfg)
+    # classify() reads the ORIGINAL country_code; overwrite with the recovered
+    # one so every downstream bloc assignment uses it, and keep the route.
+    labels["country_code"] = companies["country_code_recovered"].to_numpy()
+    labels["country_recovery_route"] = companies["country_recovery_route"].to_numpy()
     labels["has_taxonomy"] = companies["category_list"].notna().to_numpy()
     if "taxonomy_tag_count" not in labels.columns:
         labels["taxonomy_tag_count"] = count_taxonomy_tags(
@@ -609,6 +621,7 @@ def run(cfg: Config | None = None) -> dict[str, Any]:
     deals = attach_deal_level(cfg, labels, panel)
 
     findings: dict[str, Any] = {
+        "country_recovery": companies.attrs["recovery_stats"],
         "population": {
             "companies": int(len(labels)),
             "funded_companies": int(labels["is_funded"].sum()),

@@ -6,7 +6,7 @@ Every file below was downloaded by the pipeline and is cached in `data/raw/`
 (gitignored). Checksums are recorded in `data/raw/_checksums.json` and verified
 on every re-run; a mismatch fails the build.
 
-Fetched: 2026-10-01 10:33 UTC
+Fetched: 2026-10-01 11:51 UTC
 
 | Source | File | Rows | Size | Licence | SHA256 (first 16) |
 |---|---|---:|---:|---|---|

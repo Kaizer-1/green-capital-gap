@@ -237,3 +237,90 @@ display:
     EM: "Emerging markets (ex-China, ex-LDC)"
     LDC: "Least developed countries"
     UNASSIGNED: "Unassigned"
+
+# --------------------------------------------------------------------------
+# Country recovery for rows with a blank country_code.
+#
+# 2,160 in-window deal rows (1,650 companies) carry no country_code at all —
+# a bucket larger than the entire emerging-market bloc, so leaving it
+# unresolved would mean discarding the single largest block of potentially
+# emerging-market evidence in the dataset.
+#
+# city, state_code and region are ALSO entirely blank for these companies
+# (region is the literal string "unknown"), so geographic recovery from the
+# relational dump is impossible. Two routes remain, applied in this order of
+# authority.
+# --------------------------------------------------------------------------
+country_recovery:
+  # Route 1, authoritative: the flat mirror's own country_code for the same
+  # company. Same underlying database, a later vintage, so a country present
+  # there is a Crunchbase assertion rather than an inference.
+  use_flat_mirror: true
+
+  # Route 2, weak inference: a country-code top-level domain. Accepted ONLY
+  # for the ccTLDs below, which are used geographically rather than as vanity
+  # domains. Every recovery by this route is flagged in the data so results can
+  # be re-run without it.
+  use_cctld: true
+  cctld_to_iso3:
+    ru: RUS
+    uk: GBR
+    de: DEU
+    br: BRA
+    it: ITA
+    us: USA
+    cn: CHN
+    fr: FRA
+    in: IND
+    jp: JPN
+    nl: NLD
+    ca: CAN
+    es: ESP
+    tw: TWN
+    dk: DNK
+    il: ISR
+    ae: ARE
+    mx: MEX
+    ie: IRL
+    ro: ROU
+    za: ZAF
+    nz: NZL
+    ge: GEO
+    pl: POL
+    ar: ARG
+    cl: CHL
+    az: AZE
+    md: MDA
+    li: LIE
+
+  # TLDs explicitly REFUSED as country evidence. This list is the point of the
+  # whole exercise: several of these belong to emerging or least-developed
+  # countries and are sold as vanity domains worldwide. Accepting them would
+  # FABRICATE emerging-market and LDC deals out of domain-name marketing —
+  # inventing 9 Tuvaluan (LDC) ventures from `.tv` alone. A naive TLD recovery
+  # would have manufactured exactly the evidence this project is looking for,
+  # which is the strongest possible reason to enumerate the refusals.
+  cctld_refused:
+    com: "Generic. No geographic content."
+    net: "Generic."
+    org: "Generic."
+    info: "Generic."
+    biz: "Generic."
+    mobi: "Generic."
+    eu: "Supranational, not a country."
+    co: "Colombia's ccTLD, but overwhelmingly used as a generic .com alternative."
+    me: "Montenegro's ccTLD, sold worldwide as a vanity domain."
+    tv: "Tuvalu's ccTLD (an LDC), sold worldwide for television and media sites."
+    ly: "Libya's ccTLD, used for verb-ending vanity domains such as bit.ly."
+    io: "British Indian Ocean Territory, used worldwide by technology companies."
+    am: "Armenia's ccTLD, sold as a vanity domain for radio and media."
+    fm: "Micronesia's ccTLD, sold as a vanity domain for audio and radio."
+    gs: "South Georgia and the South Sandwich Islands; effectively unused geographically."
+    ag: "Antigua and Barbuda's ccTLD, sold as a vanity domain for agencies."
+    is: "Iceland's ccTLD, sold as a vanity domain for the English verb 'is'."
+    cc: "Cocos (Keeling) Islands, sold worldwide as a generic alternative."
+    st: "Sao Tome and Principe's ccTLD (an LDC), sold as a vanity domain."
+    ws: "Samoa's ccTLD, marketed worldwide as standing for 'website'."
+    to: "Tonga's ccTLD, sold as a vanity domain for the English preposition 'to'."
+    nr: "Nauru's ccTLD, sold as a vanity domain."
+    gl: "Greenland's ccTLD, sold as a vanity domain."

@@ -160,97 +160,126 @@ Markets grouping in 2023 moved through concessional loans and grants.
 
 ## 3. Research questions
 
-**RQ1.** How did green venture funding in emerging economies evolve relative to advanced
-economies across the Cleantech 1.0 cycle (2000–2012), in deal counts and in real dollars?
+Revised at build step 3, after the emerging-market green sample was measured at 35 deals.
+The original RQ1/RQ2 presumed a comparable emerging-market series exists. It does not, and
+the revised questions ask what the data can actually answer.
 
-**RQ2.** Does the emerging-market green funding regime differ *structurally* from the
-advanced-economy one — in deal size, instrument mix and stage graduation — rather than
-merely in scale?
+**RQ1.** How visible is green entrepreneurship in emerging economies in the open venture
+record, relative to advanced economies — both in absolute coverage and, conditional on
+dataset membership, in the probability that a recorded company is green?
 
-**RQ3.** Within emerging economies, does green capital allocate toward climate and energy
-*need*, or toward market depth and institutional quality?
+**RQ2.** Within the one bloc where the record is dense enough to test them, do green
+ventures face a structurally different capital regime from non-green ventures — in cycle
+exposure, instrument mix and stage graduation? This is the benchmark case against which
+any future emerging-market evidence can be read.
 
-**RQ4.** Do the structural signatures identified in 2000–2012 persist in contemporary
-evidence on emerging-market green entrepreneurship?
+**RQ3.** Across countries, does green capital allocate toward climate and energy *need*,
+or toward market depth and institutional quality?
+
+**RQ4.** What do the structural signatures identified in 2000–2012 imply for
+contemporary emerging-market green entrepreneurship, and which of them appear in current
+secondary evidence?
 
 ---
 
 ## 4. Hypotheses
 
 Each is falsifiable, each maps to one analysis module, each gets an explicit verdict.
+H1 was replaced at build step 3; H2–H4 were re-specified onto the advanced-economy
+benchmark with a bounded emerging-market arm; H5 is unchanged.
 
-### H1 — Deal share rose; dollar share did not
-*Emerging markets increased their share of global green deal count over 2000–2012 by
-substantially more than their share of global green dollars, implying a persistent and
-possibly widening cheque-size gap.*
+**Standing rule for every emerging-market arm below.** It is reported as an explicitly
+bounded, underpowered probe. Every cell size is printed. **No significance test is run on
+any cell with n < 30.** Nulls are retained. Leave-one-out sensitivity is published for
+every emerging-market headline number, because with 35 deals one curation decision moves
+a figure by up to 20%.
 
-Tests: EM share of green deals and of green real dollars, annually, plotted together.
-Median and IQR deal size by bloc by year, bootstrap CIs. Mann–Whitney U on the
-EM-vs-AE green deal size distribution, pooled and by year.
-Also compute the **undisclosed-amount rate by bloc and year** — if EM deals are
-disproportionately undisclosed, the dollar series is biased and you must say by how much.
+### H1-revised — Selection and visibility: the double gap
+*Emerging markets are under-represented in the venture record relative to their economic
+weight; and, conditional on a company already being in the record, an emerging-market
+company is markedly less likely to be green than an advanced-economy one.*
 
-Falsified if: EM dollar share tracks EM deal share within the bootstrap CI.
+The second clause is the headline. It is immune to the coverage objection because
+numerator and denominator are both drawn from indexed companies.
 
-### H2 — The bust was amplified in emerging markets
-*The post-2008 contraction in green funding was deeper and longer in emerging markets than
-in advanced economies, and deeper than the contraction in non-green funding within
-emerging markets.*
+Tests: green rate by bloc, conditional on dataset membership, with Wilson score intervals.
+Two-proportion z-test plus Fisher's exact as a small-sample check. Effect size as a risk
+ratio with CI, an odds ratio with CI, and Cohen's h. The same by year, with the cell-size
+rule applied — in practice no emerging-market year-cell reaches n = 30, so no per-year
+test is reported and the table says so. An **upper bound** in which every still
+unattributable deal is counted as emerging-market, which is maximally generous to the
+null. The GDP-share comparison is the denominator check establishing that the second gap
+is not the first restated.
 
-Tests: indexed time series (2007 = 100) for four series — EM-green, AE-green, EM-nongreen,
-AE-nongreen. Peak-to-trough drawdown and time-to-recovery for each. Difference-in-differences
-on log deal volume with a `green × EM × post2008` interaction, year fixed effects, robust
-SEs. Plot and formally check pre-trends.
+Falsified if: the emerging-market green rate is indistinguishable from the
+advanced-economy rate, or the gap vanishes under the upper bound.
 
-Falsified if: the triple interaction is indistinguishable from zero, or pre-trends diverge.
-**If pre-trends fail, downgrade to descriptive and say so in the text.**
+### H2 — The green bust was amplified relative to non-green
+*Within advanced economies, the post-2008 contraction in green funding was deeper and
+longer than the contraction in non-green funding.*
 
-### H3 — Emerging-market green capital is less dilutive
-*Green ventures in emerging markets draw a higher share of funding from grants, debt and
-other non-venture instruments than green ventures in advanced economies, and than
-non-green ventures in emerging markets.*
+Tests: indexed series (2007 = 100) for AE-green and AE-non-green, with the emerging-market
+series plotted but not tested. Peak-to-trough drawdown and time-to-recovery. Difference-in
+differences on log deal volume with a `green × post2008` interaction, year fixed effects,
+robust SEs. Plot and formally check pre-trends.
 
-Tests: instrument-mix shares by bloc × green status, by count and by dollars. χ² test of
-independence with Cramér's V for effect size. Stacked-area evolution over time.
-Watch the trap: `grant` and `debt_financing` rows have systematically different disclosure
-rates — report counts and dollars separately.
+Falsified if: the interaction is indistinguishable from zero, or pre-trends diverge.
+**If pre-trends fail, downgrade to descriptive and say so.**
 
-Falsified if: EM green instrument mix is statistically indistinguishable from AE green.
+EM arm: the emerging-market green series runs 2, 12, 4, 4, 7, 6 across 2007–2012.
+Descriptive only. Note in the text that the EM green *rate* tracked the AE rate almost
+exactly in 2008 (10.08% against 10.24%) and then diverged, without claiming a test.
 
-### H4 — The scale-up step is where emerging markets lose
-*Conditional on raising seed capital, green ventures in emerging markets are less likely
-to reach Series A, and markedly less likely to reach Series B, than comparable advanced-
-economy green ventures — with the largest gap at A→B, the "missing middle".*
+### H3 — Green capital is less dilutive than non-green
+*Green ventures draw a higher share of funding from grants, debt and other non-venture
+instruments than non-green ventures do.*
 
-Tests: build company-level funding histories from the deal table. Compute cohort
-graduation rates seed→A and A→B by bloc × green status, by founding cohort, with
-sufficient follow-up time (cohorts must have ≥3 years of observable window before the
-2012 truncation — this materially restricts usable cohorts, say so). Logistic regression
-on graduation with bloc, green, bloc × green, year fixed effects and sub-domain controls;
-report odds ratios with CIs.
+Tests: instrument-mix shares by green status, by count and by dollars. χ² test of
+independence with Cramér's V. Stacked-area evolution over time. Debt carries the
+inferential test; grants are descriptive only where n < 30, a decision recorded in
+`docs/METHODOLOGY.md` §1.1 before the split was computed.
 
-This is the hypothesis most likely to be underpowered. **Check cell sizes first. If n is
-too small, report it as underpowered rather than stretching the definitions.**
+Falsified if: green and non-green instrument mixes are statistically indistinguishable.
 
-Falsified if: the bloc × green interaction is null, or the gap is no larger at A→B than
-at seed→A.
+EM arm, pre-registered expectation: **this arm is expected to return a null.** The
+green/non-green gap looks larger than the EM/AE gap, so the original H3 claim that
+emerging-market green is *more* non-dilutive than advanced-economy green is unlikely to
+survive. It stays in and is reported either way.
+
+### H4 — The scale-up step is where green ventures lose
+*Conditional on raising seed capital, green ventures are less likely to reach Series A,
+and markedly less likely to reach Series B, than comparable non-green ventures — with the
+largest gap at A→B, the "missing middle".*
+
+Tests: company-level funding histories from the deal table. Cohort graduation rates
+seed→A and A→B by green status, by founding cohort, cohorts needing ≥3 years of
+observable window. Logistic regression with green, year fixed effects and sub-domain
+controls; odds ratios with CIs. Headline uses strict seed; the angel-inclusive
+specification is run alongside (`docs/METHODOLOGY.md` §1.3).
+
+H4 is permitted the extended 2013-11-30 observation window as a reported secondary
+specification, justified in `docs/METHODOLOGY.md` §1.2.
+
+Falsified if: the green coefficient is null, or the gap is no larger at A→B than seed→A.
+
+EM arm: not testable. Report the cell sizes and say so.
 
 ### H5 — Capital tracks market depth, not climate need
-*Across emerging economies, country-level green funding intensity correlates with GDP per
-capita and financial-market depth, and shows no positive association with indicators of
-climate or energy need (CO₂ per capita, electricity access deficit, renewable share).*
+*Country-level green funding intensity correlates with GDP per capita and financial-market
+depth, and shows no positive association with indicators of climate or energy need.*
 
-Tests: country-level panel. Green funding per capita and green funding per unit GDP as
-outcomes. Spearman rank correlations against GDP per capita, electricity access,
-renewable share of final energy, CO₂ per capita. Gini coefficient and HHI of green
-funding concentration across EM countries, compared with the same for non-green funding.
-Top-5 country share over time. OLS with log GDP as a control to show whether need
-indicators add anything.
+Tests: country-level panel. Green funding per capita and per unit GDP as outcomes.
+Spearman rank correlations against GDP per capita, electricity access, renewable share of
+final energy, CO₂ per capita — **with bootstrap CIs on ρ, not bare ρ**. Gini and HHI of
+green funding concentration. Top-5 country share over time. OLS with log GDP as a control.
+
+**Power, stated up front:** 42 countries have at least one green deal, 23 have at least
+three, 20 have at least five. The outcome is built on small per-country counts. The
+correlations are reported with CIs and the small-n caveat in the text, not as precise
+estimates.
 
 Falsified if: need indicators show a positive, significant association after controlling
 for income.
-
----
 
 ## 5. Analytical choices that earn marks
 
@@ -294,65 +323,79 @@ Write these on a sticky note:
 ## 7. Report outline
 
 Target 3,500–4,500 words excluding figures, tables, references and appendices.
+Restructured at build step 3 around the double gap.
 
 **Title page** — title, name, USN, course code, date, word count.
 
-**Abstract** (~200 words). Problem, data, method, three headline findings with numbers,
-one-sentence implication.
+**Abstract** (~200 words). The measurement problem, the data, the method, the double gap
+with numbers, the advanced-economy benchmark result, one-sentence implication.
 
 **1. Introduction** (~500 words)
 Green entrepreneurship as the private-sector channel of the climate transition. The
-needs-versus-flows mismatch in emerging economies, with the CPI figures. The research gap:
-most evidence on emerging-market green finance is macro and aggregated; deal-level
-evidence is rare because it is paywalled. State the four RQs. State what the paper
-contributes.
+needs-versus-flows mismatch, with the CPI figures. The research gap: deal-level evidence
+on emerging-market green finance is rare because it is paywalled. State the four RQs.
+State the contribution: not a measurement of the emerging-market green capital regime,
+but a measurement of **why that regime cannot be measured in open data**, plus a
+benchmark case for the capital-model mismatch.
 
 **2. Background and related work** (~600 words)
 Green entrepreneurship in emerging economies, institutional voids, the Porter hypothesis.
 Cleantech 1.0 and the MIT post-mortem. The missing middle and currency risk. Current
 climate finance geography. Close by stating the gap this paper fills.
 
-**3. Data** (~600 words)
-Sources, licences, coverage. Honest statement of why the open-data frontier stops in 2013
-and why that window is the right one to study. The join between the relational and flat
-Crunchbase mirrors. Enrichment layers. Attrition ledger table. Coverage-bias quantification.
+**3. Data** (~650 words)
+Sources, licences, coverage. Why the open-data frontier stops in 2013 and why that window
+is the right one. The join between the relational and flat Crunchbase datasets, **including
+that they are different vintages** and what that bounds. Enrichment layers. Attrition
+ledger. Country recovery and the vanity-TLD refusals. The negative result on taxonomy
+richness: emerging-market companies carry *more* tags, not fewer, so the bias is in which
+companies exist rather than how well they are described.
 
 **4. Methodology** (~700 words)
-Green classifier: three tiers, lexicon, exclusions, κ, sub-domains. Bloc assignment:
-time-varying, China and LDCs separated, robustness alternatives. Deflation. Truncation.
-Statistical approach and the multiple-comparison correction. One paragraph on
-reproducibility.
+Green classifier: three tiers, lexicon, exclusions, κ = 0.85, sub-domains. Bloc
+assignment: time-varying, China and LDCs separated, robustness alternatives. Deflation.
+Truncation, with coverage growth as the primary argument. Statistical approach and the
+multiple-comparison correction. The pre-commitments. One paragraph on reproducibility.
 
-**5. Descriptive landscape** (~500 words, Figures 1–5)
-Global green funding over the cycle. Bloc composition. Sub-domain mix and how it differs
-between EM and AE — expect energy access, agriculture and water to be relatively larger
-in EM, and advanced materials and storage relatively larger in AE. Country ranking within
-EM.
+**5. The double gap** (~700 words, Figures 1–4, Table 1) — **the headline section**
+Gap one: coverage against economic weight, as the denominator check. Gap two: green rate
+conditional on dataset membership, by bloc, with intervals, the upper bound and the
+leave-one-out range. The `general_unspecified` rate as a measurement finding in its own
+right — the taxonomy cannot resolve green sub-domains in emerging markets, because 26 of
+28 emerging-market green companies carry no tag more specific than "Clean Technology".
+Then the careful part: what the absence does and does not license, with the instrument
+argument given as external evidence and the competing explanation left open.
 
-**6. Hypothesis tests** (~1,200 words, Figures 6–11, Tables 1–4)
-One subsection per hypothesis. Finding first, then evidence, then the verdict line and the
-falsification condition. Do not narrate the analysis; report it.
+**6. The advanced-economy benchmark** (~1,100 words, Figures 5–10, Tables 2–4)
+H2, H3 and H4 on green against non-green within advanced economies, as the benchmark case
+for the Gaddy et al. capital-model mismatch. Finding first, then evidence, then the
+verdict line and the falsification condition. Each subsection closes with its bounded
+emerging-market arm, cell sizes printed, no test below n = 30.
 
-**7. Does the pattern persist?** (~400 words, Figure 12)
-The continuity probe. Indian startup funding 2015–2020 as an independent later window,
-clearly caveated as non-comparable in taxonomy. Then triangulation against the current
-secondary evidence in §2.2 above — CPI's 14–17% EMDE share, the falling graduation rates
-Net Zero Insights reports, Tracxn's India trajectory, India's shrinking share of a
-shrinking global pool. State plainly which structural signatures appear to have persisted
-and which have not, and that this section is suggestive, not a test.
+**7. Where the capital goes** (~450 words, Figure 11, Table 5)
+H5 at country level, with the power situation stated up front and CIs on every ρ.
 
-**8. Discussion** (~400 words)
-What follows for policy: where concessional and blended capital would bind if the
-missing-middle result holds. What follows for founders in emerging markets: instrument
-mix, stage planning, the A→B wall. What follows for researchers and for the data
-infrastructure of the field.
+**8. Does the pattern persist?** (~400 words, Figure 12)
+The continuity probe. Indian startup funding 2015–2020, caveated as non-comparable in
+taxonomy, and itself yielding only 54 green deals — which is a continuation of the
+measurement finding, not an escape from it. Then triangulation against current secondary
+evidence: CPI's 14–17% EMDE share, Net Zero Insights on falling graduation rates,
+Tracxn's India trajectory. **Bank the structural-change observation:** non-dilutive
+instruments were 7.1% of in-window deals in 2000–2012, and Net Zero Insights reports
+non-dilutive capital *rising* as equity shrinks in 2025. State plainly which signatures
+appear to have persisted, and that this section is suggestive, not a test.
 
-**9. Limitations and threats to validity** (~350 words)
-Coverage bias first and in full. Selection into Crunchbase. Right-censoring. Undisclosed
-amounts. The 2013 frontier and what it does and does not permit you to claim. No causal
-identification in H5. Underpowered cells in H4 if applicable. Taxonomy sensitivity.
+**9. Discussion** (~400 words)
+What follows for the data infrastructure of the field, first — that is where this paper
+bites. Then policy: where concessional and blended capital would bind. Then founders.
 
-**10. Conclusion** (~200 words)
+**10. Limitations and threats to validity** (~400 words)
+Coverage bias first and in full. The 35-deal emerging-market sample and everything it
+forbids. Selection into Crunchbase. The two-vintage join and the 6.5% under-recording.
+Right-censoring. Undisclosed amounts. Taxonomy anachronism. No causal identification in
+H5. Taxonomy sensitivity.
+
+**11. Conclusion** (~200 words)
 Three findings, one implication, one concrete next step that is actually actionable.
 
 **Reproducibility statement.** Commit hash, Python version, dataset SHA256s, runtime,
@@ -360,34 +403,45 @@ one-line reproduce instruction.
 
 **References.** Numbered, consistent style, every in-text citation resolving.
 
-**Appendix A** — full green lexicon and exclusion list with reasons.
-**Appendix B** — country-to-bloc mapping and overrides.
-**Appendix C** — robustness tables: strict vs broad green, static vs time-varying blocs.
+**Appendix A** — full green lexicon and exclusion list with reasons, plus the ratified
+manual-exclusion decisions.
+**Appendix B** — country-to-bloc mapping, overrides, and the country-recovery rules
+including the refused vanity TLDs.
+**Appendix C** — robustness: strict vs broad green, static vs time-varying blocs,
+bare-energy flag on and off, strict vs angel-inclusive seed.
 **Appendix D** — full test family with raw and BH-adjusted p-values and effect sizes.
 **Appendix E** — attrition ledger.
+**Appendix F** — leave-one-out sensitivity on every emerging-market headline number.
+**Appendix G** — instrument `funding_round_type` × `funding_round_code` contingency table.
+**Appendix H** — mirror vintage comparison.
 
 ---
 
 ## 8. Figure plan
 
-Twelve figures. Each has a job. If a figure has no job, cut it.
+Twelve figures. Each has a job. If a figure has no job, cut it. Revised at build step 3:
+the old Figure 5 (green sub-domain mix, EM vs AE) is **cut** — at 91.2%
+`general_unspecified` on a 35-deal base the comparison is dead in every form, including
+conditional on having a specific sub-domain. The double-gap exhibit replaces it.
 
 | # | Figure | Job |
 |---|---|---|
-| 1 | Global green venture funding, 2000–2012, deals and real dollars on stacked panels, with the 2008 and 2011 events annotated | Establish the cycle |
-| 2 | Green as a share of all venture funding, by bloc, over time | Show green is a cycle within a cycle |
-| 3 | EM share of green deals vs EM share of green dollars (H1) | The headline divergence |
-| 4 | Deal-size distributions by bloc, green vs non-green, log scale, violin or ridgeline (H1) | The cheque-size gap |
-| 5 | Green sub-domain mix, EM vs AE, diverging bar | Different green, not just less green |
-| 6 | Indexed drawdown, four series, 2007 = 100 (H2) | Amplification |
-| 7 | DiD coefficient plot with pre-trend panel (H2) | The formal test |
-| 8 | Instrument mix, stacked area by bloc × green (H3) | Non-dilutive dependence |
-| 9 | Stage graduation funnel, EM vs AE green (H4) | The missing middle |
-| 10 | Graduation odds ratios with CIs (H4) | The formal test |
-| 11 | Green funding intensity vs GDP per capita and vs climate-need indicators, small-multiple scatter with Spearman ρ (H5) | Capital follows markets |
-| 12 | Continuity probe: India 2015–2020 alongside the 2000–2012 EM series, visually separated and labelled as non-comparable | Persistence |
+| 1 | Green rate conditional on dataset membership, by bloc, with Wilson intervals, upper bound overlaid | **The headline.** Gap two |
+| 2 | Bloc share of recorded deals against bloc share of world GDP, by year | Gap one, as the denominator check |
+| 3 | Green rate by bloc and year, cell sizes annotated, EM cells flagged as untestable | Gap two over time, honestly |
+| 4 | `general_unspecified` share by bloc, with the specific sub-domains stacked | The taxonomy cannot resolve EM green |
+| 5 | Global green venture funding 2000–2012, deals and real dollars, 2008 and 2011 annotated | Establish the cycle |
+| 6 | Green as a share of all venture funding over time, AE, with EM plotted untested | Green is a cycle within a cycle |
+| 7 | Indexed drawdown, AE-green vs AE-non-green, 2007 = 100 (H2) | Amplification |
+| 8 | DiD coefficient plot with pre-trend panel (H2) | The formal test |
+| 9 | Instrument mix, stacked area by green status (H3) | Non-dilutive dependence |
+| 10 | Stage graduation funnel and odds ratios with CIs, green vs non-green (H4) | The missing middle |
+| 11 | Green funding intensity vs GDP per capita and vs climate-need indicators, small-multiple scatter with Spearman ρ and CIs (H5) | Capital follows markets |
+| 12 | Continuity probe: India 2015–2020 alongside the 2000–2012 series, visually separated and labelled non-comparable | Persistence |
 
-Plus one small, clearly-labelled censoring artefact figure in the methodology section.
+Plus one small, clearly-labelled censoring-artefact figure in the methodology section:
+monthly deal counts for 2011, 2012 and 2013 overlaid, showing December 2013 at 3.83% of
+its year against a 7.52% baseline.
 
 ---
 
