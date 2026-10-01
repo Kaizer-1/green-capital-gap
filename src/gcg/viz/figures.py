@@ -14,7 +14,11 @@ from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 
 from gcg.analysis import h1b_capital_intensity as h1b
-from gcg.analysis.h1_selection import green_rate_by_bloc, two_proportion_test
+from gcg.analysis.h1_selection import (
+    green_rate_by_bloc,
+    green_rate_by_year,
+    two_proportion_test,
+)
 from gcg.config import Config, get_logger, load_config, seed_everything
 from gcg.io import read_parquet
 from gcg.viz import theme
@@ -482,6 +486,701 @@ def fig_m2_capital_intensity_regression(deals: pd.DataFrame, cfg: Config) -> Non
     theme.save(fig, cfg, "fig_m2_capital_intensity_regression")
 
 
+def fig_02_coverage_vs_gdp(deals: pd.DataFrame, cfg: Config) -> None:
+    """Figure 2: gap one, the denominator check.
+
+    Its only job is to show that the conditional green-rate gap in Figure 1a is
+    not the coverage gap restated. Emerging markets hold a fifth of world GDP
+    and a fiftieth of the venture record; that is a fact about the dataset, and
+    it is why the headline result is measured *within* the dataset instead.
+    """
+    theme.apply_theme()
+    tab = pd.read_csv(cfg.path("tables") / "diag_coverage_bias_by_bloc_year.csv")
+    em = tab.loc[tab["bloc"].eq("EM")].sort_values("year")
+
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    ax.fill_between(
+        em["year"], em["deal_share_pct"], em["gdp_share_pct"], color=P.em, alpha=0.10, zorder=1
+    )
+    ax.plot(em["year"], em["gdp_share_pct"], color=P.ink, linewidth=1.8, zorder=3)
+    ax.plot(em["year"], em["deal_share_pct"], color=P.em, linewidth=1.8, zorder=3)
+
+    last = em.iloc[-1]
+    ax.text(
+        last["year"] + 0.12,
+        last["gdp_share_pct"],
+        "share of\nworld GDP",
+        va="center",
+        ha="left",
+        fontsize=8,
+        color=P.ink,
+        linespacing=1.3,
+    )
+    ax.text(
+        last["year"] + 0.12,
+        last["deal_share_pct"],
+        "share of recorded\nventure deals",
+        va="center",
+        ha="left",
+        fontsize=8,
+        color=P.em,
+        linespacing=1.3,
+    )
+
+    worst = em.loc[em["representation_ratio"].idxmin()]
+    theme.annotate(
+        ax,
+        f"Widest in {int(worst['year'])}: {worst['gdp_share_pct']:.1f}% of world GDP,\n"
+        f"{worst['deal_share_pct']:.1f}% of recorded deals "
+        f"\u2014 {1 / worst['representation_ratio']:.0f}x under-represented",
+        xy=(worst["year"], (worst["gdp_share_pct"] + worst["deal_share_pct"]) / 2),
+        xytext=(2004.6, 13.0),
+        color=P.ink_muted,
+        fontsize=7.6,
+    )
+
+    ax.set_xlim(em["year"].min() - 0.3, em["year"].max() + 2.4)
+    ax.set_ylim(0, 25)
+    ax.yaxis.set_major_formatter(theme.fmt_pct)
+    ax.set_xlabel("Year the deal closed")
+    ax.set_ylabel("Emerging-market share")
+    theme.style_axes(ax)
+    theme.finding_title(
+        fig,
+        "Emerging markets hold a fifth of world GDP and a fiftieth of the venture record",
+        "Emerging-market share of world GDP against its share of recorded venture deals, "
+        "2000\u20132012.",
+        y=0.945,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        f"n = {len(deals):,} deals. GDP shares are computed over the same country set the "
+        "bloc panel covers, so the two series are comparable by construction. This is the "
+        "denominator check for Figure 1: it establishes that the conditional green-rate gap "
+        "is not this coverage gap restated.",
+        y=0.195,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.105, right=0.985, top=0.84, bottom=0.30)
+    theme.save(fig, cfg, "fig_02_coverage_vs_gdp")
+
+
+def fig_03_green_rate_by_year(deals: pd.DataFrame, cfg: Config) -> None:
+    """Figure 3: the gap over time, with every emerging-market cell flagged.
+
+    The substantive point is the 2008 convergence. At the peak of Cleantech 1.0
+    the two rates were within a sixth of a percentage point of each other; the
+    gap opens only after the crash. No emerging-market year-cell reaches the
+    minimum cell size, so nothing here is tested and the figure says so.
+    """
+    theme.apply_theme()
+    by_year = green_rate_by_year(deals)
+    ae = by_year.loc[by_year["bloc"].eq("AE")].sort_values("year")
+    em = by_year.loc[by_year["bloc"].eq("EM")].sort_values("year")
+
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    ax.plot(ae["year"], ae["green_rate_pct"], color=P.ae, linewidth=1.8, zorder=3)
+    ax.plot(
+        em["year"],
+        em["green_rate_pct"],
+        color=P.em,
+        linewidth=1.8,
+        zorder=3,
+        linestyle=(0, (5, 2)),
+    )
+    ax.scatter(em["year"], em["green_rate_pct"], s=18, color=P.em, zorder=4)
+
+    # Only non-zero counts are printed. Seven "0" labels along the axis would be
+    # noise; the footer states that 2000-2006 contain no emerging-market green
+    # deals at all, which is the more useful way to say it.
+    for _, r in em.iterrows():
+        if int(r["green_deals"]) == 0:
+            continue
+        ax.annotate(
+            f"{int(r['green_deals'])}",
+            (r["year"], r["green_rate_pct"]),
+            textcoords="offset points",
+            xytext=(0, -12),
+            ha="center",
+            fontsize=6.8,
+            color=P.em,
+        )
+
+    ax.text(
+        ae["year"].iloc[-1] + 0.12,
+        ae["green_rate_pct"].iloc[-1],
+        "Advanced economies",
+        va="center",
+        ha="left",
+        fontsize=8,
+        color=P.ae,
+    )
+    ax.text(
+        em["year"].iloc[-1] + 0.12,
+        em["green_rate_pct"].iloc[-1],
+        "Emerging markets",
+        va="center",
+        ha="left",
+        fontsize=8,
+        color=P.em,
+    )
+
+    y08_ae = float(ae.loc[ae["year"].eq(2008), "green_rate_pct"].iloc[0])
+    y08_em = float(em.loc[em["year"].eq(2008), "green_rate_pct"].iloc[0])
+    theme.annotate(
+        ax,
+        f"2008: the rates converge\n({y08_em:.2f}% vs {y08_ae:.2f}%).\n"
+        "The gap opens only after the crash.",
+        xy=(2008, (y08_ae + y08_em) / 2),
+        xytext=(2002.4, 8.6),
+        color=P.ink,
+        fontsize=7.6,
+    )
+
+    ax.set_xlim(1999.7, 2014.6)
+    ax.set_ylim(0, 11.5)
+    ax.yaxis.set_major_formatter(theme.fmt_pct)
+    ax.set_xlabel(
+        "Year the deal closed  \u00b7  numbers beside the emerging-market line "
+        "are green deal counts"
+    )
+    ax.set_ylabel("Green share of the\nbloc's recorded deals", labelpad=8)
+    theme.style_axes(ax)
+    theme.finding_title(
+        fig,
+        "The two rates met in 2008, at the peak of Cleantech 1.0, then diverged",
+        "Green share of recorded deals by bloc and year, 2000\u20132012.",
+        y=0.945,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        f"n = {len(deals):,} deals. NO emerging-market year-cell reaches the minimum cell "
+        f"size of {int(cfg.threshold('min_cell_n'))} green deals \u2014 the largest is 12, in "
+        "2008 \u2014 so no per-year test is reported and this figure is descriptive only. "
+        "Counts are printed under each emerging-market point so the reader can see the "
+        "precision available. Raw classifier output.",
+        y=0.205,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.125, right=0.985, top=0.84, bottom=0.31)
+    theme.save(fig, cfg, "fig_03_green_rate_by_year")
+
+
+def fig_04_subdomain_resolution(deals: pd.DataFrame, cfg: Config) -> None:
+    """Figure 4: the taxonomy cannot resolve green sub-domains in emerging markets.
+
+    This replaces the sub-domain mix comparison that was cut. It reports the
+    measurement failure itself, which is a finding: the record cannot say what
+    *kind* of green an emerging-market company is.
+    """
+    theme.apply_theme()
+    green = deals.loc[deals["green"] & deals["green_subdomain"].notna()]
+    tab = pd.crosstab(green["bloc"], green["green_subdomain"])
+    order = [b for b in ("AE", "CHINA", "EM") if b in tab.index]
+    tab = tab.reindex(order)
+    shares = tab.div(tab.sum(axis=1), axis=0) * 100
+
+    unspec = shares.get("general_unspecified", pd.Series(0.0, index=shares.index))
+    specific = 100 - unspec
+
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    y = np.arange(len(order))[::-1]
+    ax.barh(y, unspec, color=P.accent_grey, height=0.44, zorder=3)
+    ax.barh(y, specific, left=unspec, color=P.accent_green, height=0.44, zorder=3)
+
+    # Direct labelling on the first bar, in place of a legend (CLAUDE.md §8).
+    top = y[0]
+    ax.text(
+        unspec.iloc[0] / 2,
+        top + 0.42,
+        'tagged only "Clean Technology"',
+        ha="center",
+        va="bottom",
+        fontsize=7.6,
+        color=P.accent_grey,
+    )
+    ax.text(
+        unspec.iloc[0] + specific.iloc[0] / 2,
+        top + 0.42,
+        "resolved to a\nspecific sub-domain",
+        ha="center",
+        va="bottom",
+        fontsize=7.6,
+        color=P.accent_green,
+        linespacing=1.3,
+    )
+
+    labels = cfg.blocs["display"]["labels"]
+    for yi, bloc in zip(y, order, strict=False):
+        ax.text(
+            unspec[bloc] / 2,
+            yi,
+            f"{unspec[bloc]:.1f}%",
+            va="center",
+            ha="center",
+            fontsize=8.2,
+            color="white",
+            fontweight="bold",
+            zorder=4,
+        )
+        n = int(tab.loc[bloc].sum())
+        ax.text(
+            -1.2,
+            yi,
+            f"{labels.get(bloc, bloc).split(' (')[0]}\n(n = {n:,} green deals)",
+            va="center",
+            ha="right",
+            fontsize=8.2,
+            color=P.ink,
+            linespacing=1.4,
+        )
+
+    theme.annotate(
+        ax,
+        "26 of the 28 emerging-market green companies carry\n"
+        'no tag more specific than "Clean Technology"',
+        xy=(unspec["EM"] * 0.72, y[order.index("EM")]),
+        xytext=(21, y[order.index("EM")] - 0.62),
+        color=P.ink,
+        fontsize=7.6,
+    )
+
+    ax.set_xlim(0, 100)
+    ax.set_ylim(-1.15, len(order) + 0.25)
+    ax.set_yticks([])
+    ax.xaxis.set_major_formatter(theme.fmt_pct)
+    ax.set_xlabel("Share of the bloc's green deals")
+    ax.spines["left"].set_visible(False)
+    theme.style_axes(ax, xgrid=True)
+    ax.grid(axis="y", visible=False)
+    theme.finding_title(
+        fig,
+        "The taxonomy cannot say what kind of green an emerging-market company is",
+        "Share of green deals resolved to a specific sub-domain, by bloc, 2000\u20132012.",
+        y=0.945,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        f"n = {int(green.shape[0]):,} green deals carrying a sub-domain label. The eleven "
+        "specific sub-domains are solar, wind/hydro/geothermal, biofuels, storage, "
+        "efficiency and smart grid, electric mobility, water, waste and circular, "
+        "sustainable agriculture, green building, and environmental monitoring. This "
+        "figure replaces the planned emerging-market sub-domain mix comparison, which the "
+        "measurement failure shown here makes impossible.",
+        y=0.205,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.235, right=0.985, top=0.805, bottom=0.30)
+    theme.save(fig, cfg, "fig_04_subdomain_resolution")
+
+
+def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
+    """Figure 5: the Cleantech 1.0 cycle, in deals and in constant dollars."""
+    theme.apply_theme()
+    amount = cfg.pipeline["deflate"]["real_column"]
+    g = deals.loc[deals["green"]]
+    by_year = (
+        g.groupby("year")
+        .agg(
+            deals=("id", "size"),
+            usd=(amount, lambda s: float(s.sum())),
+            disclosed=(amount, "count"),
+            median=(amount, "median"),
+        )
+        .reset_index()
+    )
+
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=theme.figsize(cfg, "stacked"), sharex=True)
+
+    ax1.bar(by_year["year"], by_year["deals"], color=P.accent_green, width=0.62, zorder=3)
+    ax1.set_ylabel("Green deals")
+    theme.style_axes(ax1)
+    ax1.set_title(
+        "(a)  Deal count",
+        fontsize=9.3,
+        fontfamily=theme.title_font(),
+        color=P.ink,
+        loc="left",
+        pad=6,
+    )
+
+    ax2.bar(by_year["year"], by_year["usd"] / 1e9, color=P.accent_green, width=0.62, zorder=3)
+    ax2.set_ylabel("Green funding\n($bn, constant 2015)")
+    ax2.set_xlabel("Year the deal closed")
+    theme.style_axes(ax2)
+    ax2.set_title(
+        "(b)  Disclosed dollars, constant 2015 USD",
+        fontsize=9.3,
+        fontfamily=theme.title_font(),
+        color=P.ink,
+        loc="left",
+        pad=6,
+    )
+
+    peak = by_year.loc[by_year["deals"].idxmax()]
+    dollar_peak = by_year.loc[by_year["usd"].idxmax()]
+    for ax in (ax1, ax2):
+        # Above the bars, not behind them: at zorder 0 these were hidden.
+        ax.axvline(2008, color=P.ink_muted, linewidth=0.8, alpha=0.30, zorder=5)
+    theme.annotate(
+        ax1,
+        "Global financial crisis",
+        xy=(2008, by_year.loc[by_year["year"].eq(2008), "deals"].iloc[0] * 0.55),
+        xytext=(2002.6, by_year["deals"].max() * 0.80),
+        color=P.ink_muted,
+        fontsize=7.4,
+    )
+    theme.annotate(
+        ax1,
+        f"Deal count peaks at {int(peak['deals'])} in {int(peak['year'])}",
+        xy=(peak["year"], peak["deals"]),
+        xytext=(2002.6, by_year["deals"].max() * 0.97),
+        color=P.ink,
+        fontsize=7.4,
+    )
+    m07 = float(by_year.loc[by_year["year"].eq(2007), "median"].iloc[0]) / 1e6
+    m12 = float(by_year.loc[by_year["year"].eq(2012), "median"].iloc[0]) / 1e6
+    theme.annotate(
+        ax2,
+        f"Dollars peak in {int(dollar_peak['year'])}, a year BEFORE deals do.\n"
+        f"The median green cheque falls from ${m07:.1f}m in 2007\n"
+        f"to ${m12:.1f}m in 2012, a {100 * (1 - m12 / m07):.0f}% real decline:\n"
+        "more deals, each one smaller.",
+        xy=(dollar_peak["year"], dollar_peak["usd"] / 1e9),
+        xytext=(2000.2, by_year["usd"].max() / 1e9 * 0.70),
+        color=P.ink,
+        fontsize=7.4,
+    )
+
+    theme.finding_title(
+        fig,
+        "Green deal count rose to 2011, but each cheque was getting smaller",
+        "Green deals and disclosed green funding, all blocs, 2000\u20132012. "
+        "Constant 2015 USD.",
+        y=0.955,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        f"n = {int(g.shape[0]):,} green deals, of which {int(by_year['disclosed'].sum()):,} "
+        "carry a disclosed amount. Counts and dollars are reported as separate series "
+        "because undisclosed-amount rates differ systematically by instrument and bloc; "
+        "panel (b) covers only the disclosed subsample. Constant 2015 USD via the US GDP "
+        "deflator. Raw classifier output.",
+        y=0.095,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.135, right=0.985, top=0.885, bottom=0.165, hspace=0.22)
+    theme.save(fig, cfg, "fig_05_cycle")
+
+
+def fig_06_green_share_of_all(deals: pd.DataFrame, cfg: Config) -> None:
+    """Figure 6: green's share of deals against its share of dollars.
+
+    An earlier draft of this figure plotted the green rate by bloc and year,
+    which is what Figure 3 already does; it was replaced because a figure with
+    no job of its own should be cut.
+
+    This version asks a question Figure 3 cannot: was a green deal bigger or
+    smaller than an average deal? Green's dollar share running above its count
+    share means green deals were larger, which is the capital-intensity result
+    of Figure 1b showing up directly in the time series rather than through a
+    cross-sector regression.
+    """
+    theme.apply_theme()
+    amount = cfg.pipeline["deflate"]["real_column"]
+    by_year = (
+        deals.groupby("year")
+        .apply(
+            lambda d: pd.Series(
+                {
+                    "count_share": 100 * d["green"].mean(),
+                    "dollar_share": 100
+                    * d.loc[d["green"], amount].sum()
+                    / max(d[amount].sum(), 1e-9),
+                    "deals": len(d),
+                }
+            ),
+            include_groups=False,
+        )
+        .reset_index()
+    )
+
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    ax.fill_between(
+        by_year["year"],
+        by_year["count_share"],
+        by_year["dollar_share"],
+        where=by_year["dollar_share"] >= by_year["count_share"],
+        color=P.accent_green,
+        alpha=0.12,
+        zorder=1,
+    )
+    ax.plot(
+        by_year["year"], by_year["dollar_share"], color=P.accent_green, linewidth=2.0, zorder=3
+    )
+    ax.plot(
+        by_year["year"],
+        by_year["count_share"],
+        color=P.ink,
+        linewidth=1.6,
+        zorder=3,
+        linestyle=(0, (5, 2)),
+    )
+
+    last = by_year.iloc[-1]
+    ax.text(
+        last["year"] + 0.12,
+        last["dollar_share"],
+        "share of green\ndollars",
+        va="center",
+        ha="left",
+        fontsize=8,
+        color=P.accent_green,
+        linespacing=1.3,
+    )
+    ax.text(
+        last["year"] + 0.12,
+        last["count_share"] - 0.4,
+        "share of green\ndeals",
+        va="center",
+        ha="left",
+        fontsize=8,
+        color=P.ink,
+        linespacing=1.3,
+    )
+
+    peak = by_year.loc[by_year["dollar_share"].idxmax()]
+    theme.annotate(
+        ax,
+        "The two series CROSS in 2005. Before then a green\n"
+        "deal was smaller than average; from 2005 on it was\n"
+        "larger, peaking at roughly twice the count share.",
+        xy=(2005, float(by_year.loc[by_year["year"].eq(2005), "dollar_share"].iloc[0])),
+        xytext=(2000.2, 13.2),
+        color=P.ink,
+        fontsize=7.6,
+    )
+    theme.annotate(
+        ax,
+        f"Peak: {peak['dollar_share']:.1f}% of all venture\n"
+        f"dollars in {int(peak['year'])}, against a "
+        f"{float(by_year.loc[by_year['year'].eq(peak['year']), 'count_share'].iloc[0]):.1f}%\n"
+        "share of deals",
+        xy=(peak["year"], peak["dollar_share"]),
+        xytext=(peak["year"] + 0.6, peak["dollar_share"] + 1.9),
+        color=P.accent_green,
+        fontsize=7.6,
+    )
+
+    ax.set_xlim(1999.7, 2014.8)
+    ax.set_ylim(0, 25)
+    ax.yaxis.set_major_formatter(theme.fmt_pct)
+    ax.set_xlabel("Year the deal closed")
+    ax.set_ylabel("Green share of all\nrecorded venture activity")
+    theme.style_axes(ax)
+    theme.finding_title(
+        fig,
+        "From 2005, green took a bigger share of venture dollars than of deals",
+        "Green as a share of all recorded deals and of all disclosed dollars, "
+        "2000\u20132012. Constant 2015 USD.",
+        y=0.945,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        f"n = {len(deals):,} deals, {int(deals['green'].sum()):,} green. The dollar series "
+        "covers the disclosed subsample only, and both series are computed on that same "
+        "subsample's denominator where dollars are concerned, so the comparison is "
+        "internally consistent. A dollar share above the count share means the average "
+        "green cheque exceeded the average cheque overall \u2014 the capital-intensity "
+        "result of Figure 1b, visible directly in the time series. The ordering reverses "
+        "before 2005, when green deals were smaller than average. Raw classifier output.",
+        y=0.195,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.125, right=0.845, top=0.84, bottom=0.30)
+    theme.save(fig, cfg, "fig_06_green_share_of_all")
+
+
+def fig_12_continuity_india(deals: pd.DataFrame, cfg: Config) -> None:
+    """Figure 12: the continuity probe, deliberately kept apart from the main series.
+
+    The two panels never share an axis. Pooling them would be the error the
+    brief warns about most explicitly, and the visual separation is the
+    argument: the later window is a different instrument measuring a different
+    population, and it reproduces the same measurement problem.
+    """
+    theme.apply_theme()
+    india = pd.read_csv(cfg.path("tables") / "fig12_india_continuity.csv")
+    india = india.loc[india["year"].between(2015, 2019)]
+    em = deals.loc[deals["bloc"].eq("EM")]
+    em_year = em.groupby("year")["green"].agg(deals="size", green="sum").reset_index()
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.2, 3.9), width_ratios=[1.25, 1.0])
+
+    ax1.bar(em_year["year"], em_year["green"], color=P.em, width=0.62, zorder=3)
+    ax1.set_title(
+        "Crunchbase, emerging markets\n2000\u20132012",
+        fontsize=8.8,
+        fontfamily=theme.title_font(),
+        color=P.em,
+        loc="left",
+        pad=6,
+    )
+    ax1.set_ylabel("Green deals recorded")
+    ax1.set_ylim(0, 20)
+    theme.style_axes(ax1)
+
+    ax2.bar(india["year"], india["green_deals"], color=P.ldc, width=0.62, zorder=3)
+    ax2.set_title(
+        "Indian funding scrape\n2015\u20132019",
+        fontsize=8.8,
+        fontfamily=theme.title_font(),
+        color=P.ldc,
+        loc="left",
+        pad=6,
+    )
+    ax2.set_ylim(0, 20)
+    theme.style_axes(ax2)
+    ax2.tick_params(labelleft=False)
+
+    for ax in (ax1, ax2):
+        ax.set_xlabel("Year")
+
+    # The divider is positioned from the realised axes geometry. Hard-coding a
+    # figure fraction put it inside the left panel, drawing a red line through
+    # the data.
+    fig.subplots_adjust(left=0.105, right=0.985, top=0.78, bottom=0.33, wspace=0.10)
+    gap = (ax1.get_position().x1 + ax2.get_position().x0) / 2
+    fig.text(
+        gap,
+        0.555,
+        "NOT COMPARABLE",
+        rotation=90,
+        ha="center",
+        va="center",
+        fontsize=7.2,
+        color=P.alert,
+        fontweight="bold",
+    )
+    for y0, y1 in ((0.345, 0.47), (0.645, 0.775)):
+        fig.lines.append(
+            plt.Line2D(
+                [gap, gap], [y0, y1], transform=fig.transFigure, color=P.alert, linewidth=0.9
+            )
+        )
+
+    theme.finding_title(
+        fig,
+        "A later window in one large emerging market reproduces the same scarcity",
+        "Green deals per year. Two different instruments measuring two different "
+        "populations; the panels share no axis.",
+        y=0.93,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        "Left: Crunchbase 2013 Snapshot, emerging markets excluding China and LDCs, "
+        f"{int(em['green'].sum())} green deals. Right: the Indian startup funding scrape, "
+        "3,036 dated deals of which 54 are green under the SAME lexicon, $502m nominal. "
+        "The two are never pooled: taxonomies and amount conventions are not compatible, no "
+        "category_code exists in the Indian data so Tier A cannot fire, and the scrape's "
+        "coverage rules are unknown. 2020 is a partial year and is excluded.",
+        y=0.235,
+        width=108,
+    )
+    theme.save(fig, cfg, "fig_12_continuity_india")
+
+
+def fig_m1_censoring_artefact(cfg: Config) -> None:
+    """Methodology figure: the censoring boundary, established rather than assumed.
+
+    CLAUDE.md asked for the uncensored tail plotted as an artefact. Measuring it
+    turned out to matter: the spec expected 2013 to look like a crash, and it
+    does not. Only December is incomplete, and the seasonal comparison is what
+    establishes that.
+    """
+    theme.apply_theme()
+    tab = pd.read_csv(cfg.path("tables") / "diag_censoring_monthly_counts.csv", index_col=0)
+
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    months = tab.index.to_numpy()
+    styles = {"2011": (P.accent_grey, "-"), "2012": (P.ink_muted, "-"), "2013": (P.alert, "-")}
+    for year, (colour, ls) in styles.items():
+        col = f"share_pct_{year}"
+        if col not in tab.columns:
+            continue
+        ax.plot(
+            months,
+            tab[col],
+            color=colour,
+            linewidth=1.9 if year == "2013" else 1.4,
+            linestyle=ls,
+            zorder=4 if year == "2013" else 3,
+        )
+        ax.text(
+            12.18,
+            tab[col].iloc[-1],
+            year,
+            va="center",
+            ha="left",
+            fontsize=8,
+            color=colour,
+            fontweight="bold" if year == "2013" else "normal",
+        )
+
+    theme.annotate(
+        ax,
+        "December 2013 holds 3.8% of its year\nagainst a 7.5% baseline. The snapshot\n"
+        "was taken mid-December; only this month\nis incomplete, not the year.",
+        xy=(12, tab["share_pct_2013"].iloc[-1]),
+        xytext=(4.6, 4.3),
+        color=P.alert,
+        fontsize=7.6,
+    )
+    theme.annotate(
+        ax,
+        "November 2013 is ABOVE both earlier\nyears, so coverage was not decaying",
+        xy=(11, tab["share_pct_2013"].iloc[-2]),
+        xytext=(5.0, 10.6),
+        color=P.ink_muted,
+        fontsize=7.6,
+    )
+
+    ax.set_xlim(0.6, 13.1)
+    ax.set_ylim(0, 13)
+    ax.set_xticks(range(1, 13))
+    ax.set_xticklabels(["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"])
+    ax.yaxis.set_major_formatter(theme.fmt_pct)
+    ax.set_xlabel("Month the deal closed")
+    ax.set_ylabel("Share of that year's deals")
+    theme.style_axes(ax)
+    theme.finding_title(
+        fig,
+        "Only December 2013 is censored, which is why the window closes at 2012",
+        "Monthly deals as a share of their own year, 2011\u20132013.",
+        y=0.945,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        "Deal counts before the analysis window is applied. Expressing each month as a share "
+        "of its own year removes the level difference between years so the shapes are "
+        "comparable. The disclosed-amount rate is flat across these years (88.99 / 88.61 / "
+        "88.44%), and November and December 2013 are among the highest monthly rates in the "
+        "series, so dollars are not differentially censored either. The window still closes "
+        "at 2012-12-31, on the coverage-growth argument rather than this one.",
+        y=0.22,
+        width=108,
+    )
+    fig.subplots_adjust(left=0.105, right=0.975, top=0.84, bottom=0.325)
+    theme.save(fig, cfg, "fig_m1_censoring_artefact")
+
+
 def main() -> None:
     """Render every figure."""
     cfg = load_config()
@@ -489,6 +1188,13 @@ def main() -> None:
     seed_everything(cfg)
     deals = read_parquet(cfg.path("data_processed") / "deals.parquet")
     fig_01_double_gap_and_capital_intensity(deals, cfg)
+    fig_02_coverage_vs_gdp(deals, cfg)
+    fig_03_green_rate_by_year(deals, cfg)
+    fig_04_subdomain_resolution(deals, cfg)
+    fig_05_cycle(deals, cfg)
+    fig_06_green_share_of_all(deals, cfg)
+    fig_12_continuity_india(deals, cfg)
+    fig_m1_censoring_artefact(cfg)
     fig_m2_capital_intensity_regression(deals, cfg)
 
 
