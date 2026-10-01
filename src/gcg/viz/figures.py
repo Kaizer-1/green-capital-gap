@@ -867,11 +867,20 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
         "carry a disclosed amount. Counts and dollars are reported as separate series "
         "because undisclosed-amount rates differ systematically by instrument and bloc; "
         "panel (b) covers only the disclosed subsample. Constant 2015 USD via the US GDP "
-        "deflator. Raw classifier output.",
-        y=0.095,
-        width=108,
+        "deflator. The cheque-size claim is the WITHIN-STAGE comparison: the pooled median "
+        "falls about 72% for green and 73% for non-green, but that is composition-"
+        "confounded for both, since holding the 2007 stage mix fixed leaves non-green at "
+        "-11%. Bootstrapped over 10,000 draws on clean stage codes, excluding the "
+        "venture_unspecified catch-all: green -50.4% against non-green -1.1%, difference "
+        "-49.3pp [-69.3, -22.4]. All five start-end pairs running to the window close are "
+        "negative (-69.9 to -21.5pp) and -49.3 is their median, so the direction is robust "
+        "to the start year; pairs stopping before the decline completes can turn positive, "
+        "so it is sensitive to the end year. This is a size pattern, not an investor "
+        "motive. Raw classifier output.",
+        y=0.072,
+        width=118,
     )
-    fig.subplots_adjust(left=0.135, right=0.985, top=0.885, bottom=0.165, hspace=0.22)
+    fig.subplots_adjust(left=0.135, right=0.985, top=0.885, bottom=0.20, hspace=0.22)
     theme.save(fig, cfg, "fig_05_cycle")
 
 

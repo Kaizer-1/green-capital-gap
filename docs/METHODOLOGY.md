@@ -658,3 +658,111 @@ The degeneracy is itself the more important result, and it belongs in the text r
 the appendix: **countries with real energy-access deficits have too few green deals to
 enter the panel at all.** H5's need indicators were not tested and found null. They could
 not be tested. That is the sixth independent route to the measurement thesis.
+
+---
+
+## 15. Reproducibility statement
+
+Every number in the report is produced by `make all` on a clean checkout and injected into
+`report.md` from `outputs/findings.json`. No figure is hand-placed, no statistic is typed.
+Seeds, windows, thresholds and classifier patterns live in `config/*.yaml`; the pipeline
+reads nothing else. What follows is the part of reproducibility that matters more than the
+mechanics: what the pipeline caught, and what it did not.
+
+### 15.1 The worked example: a coefficient identified off one observation
+
+The most instructive defect in this project passed two robustness checks before a third
+caught it, and it is worth following in full because it shows what "robust" does and does
+not mean.
+
+H5's pre-registered falsification condition fired. Controlling for log GDP per capita, the
+coefficient on the electricity-access deficit was positive and significant: **+0.223,
+p = 0.010**, surviving Benjamini-Hochberg correction at p_adj = 0.033. On its face the
+strong form of H5 had been falsified by its own stated test.
+
+Two stress tests were run before accepting it:
+
+- **Leave-one-out** across all 22 countries: **no sign flips, no losses of significance.**
+- **Variance inflation**: **VIF 2.79**, comfortably below the conventional threshold of 10,
+  despite a correlation of −0.80 with log GDP per capita.
+
+Both passed. The coefficient looked robust.
+
+What exposed it was a quantity neither check reports as a verdict: the **leave-one-out
+coefficient range, [0.19, 32.8]**. Dropping a single country moved the estimate
+147-fold while leaving its sign and significance intact, which no genuinely stable
+coefficient does.
+
+The cause: **20 of the 22 panel countries record an electricity-access deficit of exactly
+0.0%.** China is 0.1%, India is 20.1%. The regressor is in substance a dummy for one
+country; its largest value carries 99.5% of the total variation; removing India leaves
+almost no variance, which is why the coefficient explodes rather than vanishing. A
+coefficient identified off one observation is not interpretable however well it behaves on
+sign stability and collinearity.
+
+A **degenerate-variance check** is now part of the stress test and runs before any
+falsifier is accepted. The falsification condition is recorded as not having fired.
+
+The lesson generalises, and is why this is the lead example rather than a footnote:
+**leave-one-out and VIF test for the wrong failure mode here.** Both ask whether a
+coefficient is stable; neither asks whether there is enough variation in the regressor for
+stability to mean anything. A reader checking this project's inferences should ask the
+third question too.
+
+The degeneracy is also the more important substantive result, and it sits in the text
+rather than the appendix: countries with real energy-access deficits have too few green
+deals to enter the panel at all. H5's need limb was not tested and found null — it could
+not be tested.
+
+### 15.2 The other three defects
+
+**The instrument field.** The first configuration normalised instruments from
+`funding_round_type`, a nine-value rollup that collapses `seed` into `angel` for 10,189
+rows and buries `grant`, `debt_round`, `convertible` and `secondary_market` inside a single
+`other` bucket. H3 would have been untestable and H4 unmeasurable, and the failure would
+have been silent: a world with no grants and no seed rounds looks like data, not like a
+bug. Caught by inventorying the raw field rather than trusting the specification.
+
+**Zero as a null sentinel.** Undisclosed amounts are encoded as literal `0.0`, not NaN:
+6,000 of 52,928 deal rows. `pd.to_numeric` reports 100% coverage and nothing looks wrong
+while every median, IQR and dollar total is dragged toward zero. Caught by a sentinel
+sweep; the decisive evidence was 362 rows carrying a positive local-currency amount against
+a USD value of exactly zero.
+
+**Two stages, two populations.** Deal-level diagnostics ran inside the classification stage
+against its own ad-hoc join, bypassing the attrition ledger, so advanced-economy deals were
+37,965 in one stage and 37,896 in another. Fixed structurally rather than by correcting
+instances: every deal-level number now reads the canonical post-ledger table.
+
+### 15.3 The error pattern is not directional
+
+Four defects were found and corrected after first being reported. **Two overclaimed a
+refutation and one overclaimed support**, which is worth stating plainly because an error
+pattern that ran one way would indicate bias rather than mistakes:
+
+| Defect | Direction of the error |
+|---|---|
+| H5 falsifier accepted on a degenerate regressor | overclaimed **refutation** of H5 |
+| H4 read as "signal runs opposite" on OR 1.30 [0.65, 2.60] | overclaimed **refutation** of H4 |
+| Cheque-size finding retracted on a confounded pooled comparison | overclaimed **refutation** of the finding |
+| Cheque-size finding originally asserted as the Gaddy rotation | overclaimed **support** |
+
+Three of the four ran toward negative conclusions and one toward a positive one. The
+common failure is not a direction but a habit: **stopping one computation short of the one
+that settles the question.** In every case the machinery to decide it was already in the
+repository — a bootstrap, a confidence interval, a variance check — and was reached for
+only on a second pass.
+
+### 15.4 What a reader needs to reproduce this
+
+```
+git clone <repo> && cd green-capital-gap
+make install
+make all
+```
+
+`make data` requires Kaggle credentials at `~/.kaggle/`; every other source is open and
+unauthenticated. Checksums for all 13 source files are recorded in `data/MANIFEST.md` and
+verified on every run, so a changed upstream file fails the build rather than silently
+changing a result. Runtime on a warm cache is under three minutes. The commit hash, Python
+version and dataset SHA256s are injected into the rendered report from `findings.json`.

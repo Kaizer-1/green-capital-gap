@@ -1,0 +1,5 @@
+specification,em_green,em_rate_pct,ae_green,ae_rate_pct,risk_ratio,rr_lo,rr_hi,p_value
+headline (raw: A or B),34,2.597,2056,5.425,0.4788,0.3427,0.6689,7.541695780988178e-06
+strict (Tier A only),29,2.215,1556,4.106,0.5396,0.3752,0.7758,0.0006394980705417552
+curated (ratified exclusions),28,2.139,2030,5.357,0.3993,0.2761,0.5774,2.8640196214624325e-07
+bare-energy pattern removed,34,2.597,2035,5.37,0.4837,0.3462,0.6758,1.0288030702687578e-05

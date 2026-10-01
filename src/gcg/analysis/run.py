@@ -25,6 +25,7 @@ from gcg.analysis import (
     h3_instrument,
     h4_graduation,
     h5_allocation,
+    robustness,
 )
 from gcg.config import Config, get_logger, load_config, seed_everything
 from gcg.io import read_parquet
@@ -165,6 +166,7 @@ def main() -> int:
         ("h3", lambda: h3_instrument.run(deals, cfg)),
         ("h4", lambda: h4_graduation.run(deals, cfg)),
         ("h5", lambda: h5_allocation.run(deals, cfg, rng)),
+        ("robustness", lambda: robustness.run(cfg)),
     ):
         LOG.info("=" * 78)
         LOG.info("running %s", name)

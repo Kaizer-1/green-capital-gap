@@ -1,0 +1,4 @@
+scheme,em_deals,em_rate_pct,ae_deals,ae_rate_pct,risk_ratio,rr_lo,rr_hi,p_value
+time-varying (headline),1309,2.597,37896,5.425,0.4788,0.3427,0.6689,7.541695780988178e-06
+static present-day income,1064,2.82,38138,5.401,0.522,0.3659,0.7447,0.00021771293005712344
+MSCI Emerging Markets list,1489,3.492,38096,5.402,0.6465,0.4933,0.8471,0.0012889783901923746

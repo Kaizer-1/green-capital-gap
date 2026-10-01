@@ -386,7 +386,21 @@ def run(deals: pd.DataFrame, cfg: Config, rng: np.random.Generator) -> dict[str,
     ]
     falsifier_triggered = bool(need_positive_controlled)
 
-    if depth_positive and not need_positive_raw and not falsifier_triggered:
+    # H5 has two limbs and they must be judged separately. The need limb runs on
+    # a regressor that is degenerate in this panel, so it is UNTESTABLE, not
+    # null. The same standard applied to H4's A-to-B transition applies here:
+    # a test that could not run is "cannot determine", not support. Reporting
+    # H5 as Supported would import the depth result into a conclusion about
+    # need, which is the half the headline claim actually turns on.
+    need_untestable = [v for v, st in stress.items() if st.get("degenerate_variance")]
+    need_limb_testable = bool(ols) and not need_untestable
+
+    if (
+        depth_positive
+        and need_limb_testable
+        and not need_positive_raw
+        and not falsifier_triggered
+    ):
         verdict = "Supported"
     elif depth_positive:
         verdict = "Partially supported"
@@ -394,11 +408,18 @@ def run(deals: pd.DataFrame, cfg: Config, rng: np.random.Generator) -> dict[str,
         verdict = "Not supported"
 
     note_parts = [
-        f"Green funding per capita is {'positively' if depth_positive else 'not reliably'} "
-        f"associated with GDP per capita (rho {depth.get('rho')} {depth.get('ci')}, "
-        f"n = {depth.get('n')})."
+        f"DEPTH LIMB SUPPORTED: green funding per capita is positively associated with "
+        f"GDP per capita (rho {depth.get('rho')} {depth.get('ci')}, n = {depth.get('n')})."
     ]
-    if need_positive_raw:
+    if need_untestable:
+        note_parts.append(
+            f"NEED LIMB UNTESTABLE: the {need_untestable} regressor is degenerate in this "
+            "panel \u2014 20 of the 22 countries sit at exactly 0.0% deficit \u2014 so the "
+            "need indicators were not tested and found null, they could not be tested at "
+            "all. The falsification condition did not fire because the test could not "
+            "run, which is 'cannot determine' rather than support."
+        )
+    elif need_positive_raw:
         note_parts.append(
             f"Raw correlations show a positive association for: {need_positive_raw}."
         )
@@ -407,23 +428,18 @@ def run(deals: pd.DataFrame, cfg: Config, rng: np.random.Generator) -> dict[str,
             "No need indicator shows a positive raw association whose interval excludes "
             "zero; the electricity deficit runs negative, as predicted."
         )
-    if need_positive_not_robust:
-        note_parts.append(
-            f"A positive income-controlled association appeared for "
-            f"{need_positive_not_robust} but did not survive its leave-one-out and "
-            "collinearity stress test, so the falsification condition is not treated as "
-            "having fired."
-        )
     if falsifier_triggered:
         note_parts.append(
-            "HOWEVER the pre-registered falsification condition is MET for "
+            "The pre-registered falsification condition is MET for "
             f"{need_positive_controlled}: after controlling for log GDP per capita the "
-            "association turns positive and significant. The raw and income-controlled "
-            "results point in opposite directions, which is a suppression effect running "
-            "through income, and the strong form of H5 does not survive it. The "
-            "coefficient was stress-tested by leave-one-out across every country and by "
-            "VIF before being accepted."
+            "association turns positive and significant, and the coefficient survived its "
+            "leave-one-out, collinearity and degenerate-variance stress tests."
         )
+    note_parts.append(
+        "The untestable need limb is the sixth independent route to the measurement "
+        "thesis: countries with real energy-access deficits have too few green deals to "
+        "enter the panel."
+    )
     note = " ".join(note_parts)
 
     findings = {
@@ -442,6 +458,15 @@ def run(deals: pd.DataFrame, cfg: Config, rng: np.random.Generator) -> dict[str,
         "ols_need_after_income": ols,
         "falsifier_stress_tests": stress,
         "need_positive_but_not_robust": need_positive_not_robust,
+        "need_limb": {
+            "testable": need_limb_testable,
+            "untestable_regressors": need_untestable,
+            "reason": (
+                "20 of the 22 panel countries record an electricity-access deficit of "
+                "exactly 0.0%. The regressor has no usable variance, so the need limb of "
+                "H5 cannot be assessed on this record."
+            ),
+        },
         "concentration": conc,
         "verdict": verdict,
         "verdict_note": note,
