@@ -20,6 +20,7 @@ from typing import Any
 
 import pandas as pd
 
+from gcg.analysis.h1_selection import two_proportion_test, wilson_interval
 from gcg.classify.green import classify
 from gcg.config import Config, get_logger, load_config, seed_everything
 from gcg.io import read_parquet, write_parquet
@@ -48,6 +49,102 @@ def prepare(cfg: Config) -> pd.DataFrame:
     df["country_code"] = "IND"
     df["id"] = range(len(df))
     return df
+
+
+def like_for_like(cfg: Config, india_green: int, india_n: int) -> dict[str, Any]:
+    """Compare the Indian green rate with Crunchbase on a Tier-B-only basis.
+
+    The Indian scrape has no ``category_code``, so Tier A cannot fire there and
+    every Indian label is Tier B. Comparing that against a Crunchbase rate that
+    includes Tier-A hits compares a one-tier classifier with a two-tier one and
+    would overstate the Crunchbase rate for a reason that has nothing to do with
+    either economy.
+
+    Both pairs are reported: the headline rates, and the Tier-B-only rates that
+    are actually comparable.
+    """
+    deals = read_parquet(cfg.path("data_processed") / "deals.parquet")
+    # green = TierA OR (TierB AND NOT TierC), so Tier-B-surviving-and-unvetoed
+    # is exactly the rows whose tier label is "B" or "A+B".
+    tier_b_only = deals["green_tier"].isin(["B", "A+B"])
+
+    rows = []
+    for bloc in ("AE", "EM"):
+        sub = deals.loc[deals["bloc"].eq(bloc)]
+        sub_b = tier_b_only.loc[sub.index]
+        for basis, flags in (("headline (A or B)", sub["green"]), ("Tier B only", sub_b)):
+            k, n = int(flags.sum()), len(sub)
+            lo, hi = wilson_interval(k, n)
+            rows.append(
+                {
+                    "source": f"Crunchbase {bloc}",
+                    "basis": basis,
+                    "green": k,
+                    "deals": n,
+                    "rate_pct": round(100 * k / n, 3),
+                    "ci_lo_pct": round(100 * lo, 3),
+                    "ci_hi_pct": round(100 * hi, 3),
+                }
+            )
+    lo, hi = wilson_interval(india_green, india_n)
+    rows.append(
+        {
+            "source": "India scrape",
+            "basis": "Tier B only (forced: no category_code)",
+            "green": india_green,
+            "deals": india_n,
+            "rate_pct": round(100 * india_green / india_n, 3),
+            "ci_lo_pct": round(100 * lo, 3),
+            "ci_hi_pct": round(100 * hi, 3),
+        }
+    )
+    table = pd.DataFrame(rows)
+    table.to_csv(cfg.path("tables") / "appendix_india_like_for_like.csv", index=False)
+    LOG.info("wrote appendix_india_like_for_like.csv")
+
+    em_b = table.loc[
+        table["source"].eq("Crunchbase EM") & table["basis"].eq("Tier B only")
+    ].iloc[0]
+    test = two_proportion_test(india_green, india_n, int(em_b["green"]), int(em_b["deals"]))
+
+    findings = {
+        "comparable_basis": "Tier B only",
+        "india_rate_pct": round(100 * india_green / india_n, 3),
+        "crunchbase_em_tier_b_rate_pct": float(em_b["rate_pct"]),
+        "india_vs_em_tier_b": {
+            "risk_ratio": test.get("risk_ratio"),
+            "risk_ratio_ci": test.get("risk_ratio_ci"),
+            "p_value": test["p_value"],
+            "fisher_p_value": test["fisher_p_value"],
+        },
+        "rows": table.to_dict("records"),
+        "why": (
+            "The Indian data carries no category_code, so Tier A cannot fire and every "
+            "Indian green label is Tier B. Comparing it against the Crunchbase headline "
+            "rate, which admits Tier-A hits, would compare a one-tier classifier with a "
+            "two-tier one. Both pairs are reported; the Tier-B-only pair is the "
+            "like-for-like one."
+        ),
+    }
+    LOG.info("LIKE-FOR-LIKE comparison (Tier B only):")
+    for r in rows:
+        LOG.info(
+            "    %-16s %-38s %5d / %6d = %6.3f%%  [%.3f-%.3f]",
+            r["source"],
+            r["basis"],
+            r["green"],
+            r["deals"],
+            r["rate_pct"],
+            r["ci_lo_pct"],
+            r["ci_hi_pct"],
+        )
+    LOG.info(
+        "    India vs Crunchbase-EM on Tier B: RR %.3f %s, p=%.4g",
+        test.get("risk_ratio", float("nan")),
+        test.get("risk_ratio_ci"),
+        test["p_value"],
+    )
+    return findings
 
 
 def run(cfg: Config | None = None) -> dict[str, Any]:
@@ -102,6 +199,7 @@ def run(cfg: Config | None = None) -> dict[str, Any]:
         "by_year": by_year.to_dict("records"),
         "subdomains": dated.loc[dated["green"], "green_subdomain"].value_counts().to_dict(),
         "tier_a_applicable": False,
+        "like_for_like": like_for_like(cfg, int(dated["green"].sum()), int(len(dated))),
         "caveats": [
             "Never pooled with the Crunchbase data: taxonomies and amount "
             "conventions are not compatible.",

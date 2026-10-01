@@ -846,9 +846,9 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
     theme.annotate(
         ax2,
         f"Dollars peak in {int(dollar_peak['year'])}, a year BEFORE deals do.\n"
-        f"The median green cheque falls from ${m07:.1f}m in 2007\n"
-        f"to ${m12:.1f}m in 2012, a {100 * (1 - m12 / m07):.0f}% real decline:\n"
-        "more deals, each one smaller.",
+        f"The median green cheque falls {100 * (1 - m12 / m07):.0f}% in real terms\n"
+        "over 2007-12 \u2014 but non-green falls 73% too, so this\n"
+        "is a dataset-wide pattern, not a green one (Appendix).",
         xy=(dollar_peak["year"], dollar_peak["usd"] / 1e9),
         xytext=(2000.2, by_year["usd"].max() / 1e9 * 0.70),
         color=P.ink,
@@ -857,7 +857,7 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
 
     theme.finding_title(
         fig,
-        "Green deal count rose to 2011, but each cheque was getting smaller",
+        "Green venture funding peaked in 2011 by deal count, 2010 by dollars",
         "Green deals and disclosed green funding, all blocs, 2000\u20132012. "
         "Constant 2015 USD.",
         y=0.955,
@@ -886,9 +886,11 @@ def fig_06_green_share_of_all(deals: pd.DataFrame, cfg: Config) -> None:
 
     This version asks a question Figure 3 cannot: was a green deal bigger or
     smaller than an average deal? Green's dollar share running above its count
-    share means green deals were larger, which is the capital-intensity result
-    of Figure 1b showing up directly in the time series rather than through a
-    cross-sector regression.
+    share means green deals were larger, which is CONSISTENT WITH green being
+    capital-intensive. It does not corroborate the cross-sector elasticity in
+    Figure 1b: that is a different claim, about how representation varies with
+    capital intensity across sectors. This figure speaks only to green's own
+    average deal size over time.
     """
     theme.apply_theme()
     amount = cfg.pipeline["deflate"]["real_column"]
@@ -908,6 +910,12 @@ def fig_06_green_share_of_all(deals: pd.DataFrame, cfg: Config) -> None:
         )
         .reset_index()
     )
+
+    # The pre-2005 reversal rests on very few green deals; the footer carries
+    # the counts so a reader can weigh it.
+    early = deals.loc[deals["year"].lt(2005) & deals["green"]]
+    early_counts = early.groupby("year").size()
+    pre2005 = ", ".join(f"{int(y)} n={int(n)}" for y, n in early_counts.items()) or "none"
 
     fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
     ax.fill_between(
@@ -996,9 +1004,10 @@ def fig_06_green_share_of_all(deals: pd.DataFrame, cfg: Config) -> None:
         "covers the disclosed subsample only, and both series are computed on that same "
         "subsample's denominator where dollars are concerned, so the comparison is "
         "internally consistent. A dollar share above the count share means the average "
-        "green cheque exceeded the average cheque overall \u2014 the capital-intensity "
-        "result of Figure 1b, visible directly in the time series. The ordering reverses "
-        "before 2005, when green deals were smaller than average. Raw classifier output.",
+        "green cheque exceeded the average cheque overall, which is consistent with green "
+        "being capital-intensive; it does not test the cross-sector elasticity of Figure "
+        "1b. The ordering reverses before 2005, when green deals were SMALLER than "
+        f"average, on thin cells: {pre2005}. Raw classifier output.",
         y=0.195,
         width=108,
     )
