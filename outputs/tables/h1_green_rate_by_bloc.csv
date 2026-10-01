@@ -1,0 +1,6 @@
+,bloc,deals,green_deals,green_rate_pct,ci_lo_pct,ci_hi_pct,below_min_cell
+0,AE,37896,2056,5.425,5.202,5.658,False
+1,CHINA,361,20,5.54,3.615,8.402,True
+2,EM,1309,34,2.597,1.865,3.608,False
+3,LDC,13,0,0.0,0.0,22.81,True
+4,UNASSIGNED,1526,64,4.194,3.298,5.32,False

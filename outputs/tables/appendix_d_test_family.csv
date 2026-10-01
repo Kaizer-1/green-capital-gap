@@ -1,0 +1,29 @@
+hypothesis,test,p_raw,effect,p_adjusted,significant_after_bh
+H3,"non-dilutive share, green vs non-green (AE)",1.236232041179619e-07,RR 1.4331,3.4614497153029333e-06,True
+H1,"EM vs AE green rate, Fisher exact",1.259342693253702e-06,RR 0.4788,1.7630797705551827e-05,True
+H3,instrument mix chi-squared (AE),3.114344024681231e-06,Cramer's V 0.0273,2.9067210897024824e-05,True
+H1,"upper bound, unassigned as EM",6.255990032677516e-06,RR 0.6372,4.2233496373533795e-05,True
+H1,"EM vs AE green rate, two-proportion z",7.541695780988178e-06,RR 0.4788,4.2233496373533795e-05,True
+H1b,capital-intensity elasticity,1.4586791968799193e-05,slope -1.1949,6.807169585439623e-05,True
+H5,Spearman green_usd_per_capita vs gdp_per_capita_usd,0.0005887354485823172,rho 0.6736,0.0023549417943292687,True
+H2,pre-trend differential,0.001175810946128994,trend 0.2542/yr,0.004115338311451479,True
+H5,OLS need after income: electricity_deficit_pct,0.010448880543446483,coef 0.222751,0.03250762835738905,True
+H5,Spearman green_usd_per_gdp vs gdp_per_capita_usd,0.05193171305661937,rho 0.4195,0.14475366303328607,False
+H5,Spearman green_usd_per_capita vs co2_per_capita,0.06652699004176235,rho 0.3981,0.14475366303328607,False
+H5,Spearman green_usd_per_capita vs electricity_deficit_pct,0.06720705783688283,rho -0.3972,0.14475366303328607,False
+H5,Spearman green_usd_per_capita vs electricity_access_pct,0.06720705783688283,rho 0.3972,0.14475366303328607,False
+H5,OLS need after income: co2_per_capita,0.18374109650575665,coef 0.116147,0.3674821930115133,False
+H5,Spearman green_usd_per_gdp vs co2_per_capita,0.23990040725366882,rho 0.2614,0.4478140935401818,False
+Audit,EM vs AE false-positive rate,0.4550814298690131,RR 1.4286,0.7548789702118289,False
+H4,"graduation logit, seed to A",0.45831937477146756,OR 1.3,0.7548789702118289,False
+H5,Spearman green_share_of_deals vs renewable_energy_share_pct,0.493384628947119,rho 0.1542,0.7674872005844072,False
+H5,Spearman green_usd_per_capita vs renewable_energy_share_pct,0.5731558222741561,rho -0.127,0.844650685456651,False
+H2,DiD green x post,0.657951980325799,coef 0.41,0.9211327724561187,False
+H5,OLS need after income: renewable_energy_share_pct,0.7507549662379205,coef 0.005517,0.9820931607488158,False
+H5,Spearman green_usd_per_gdp vs renewable_energy_share_pct,0.8242411656048834,rho -0.0503,0.9820931607488158,False
+H5,Spearman green_share_of_deals vs electricity_access_pct,0.8532352973315996,rho -0.0419,0.9820931607488158,False
+H5,Spearman green_share_of_deals vs electricity_deficit_pct,0.8532352973315996,rho 0.0419,0.9820931607488158,False
+H5,Spearman green_share_of_deals vs gdp_per_capita_usd,0.9264735945676482,rho 0.0209,0.9820931607488158,False
+H5,Spearman green_usd_per_gdp vs electricity_access_pct,0.9720927938219591,rho -0.0079,0.9820931607488158,False
+H5,Spearman green_usd_per_gdp vs electricity_deficit_pct,0.9720927938219591,rho 0.0079,0.9820931607488158,False
+H5,Spearman green_share_of_deals vs co2_per_capita,0.9820931607488158,rho 0.0051,0.9820931607488158,False

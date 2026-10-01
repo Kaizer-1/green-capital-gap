@@ -184,7 +184,7 @@ def green_rate_by_year(deals: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(rows).sort_values(["bloc", "year"])
 
 
-def leave_one_out(deals: pd.DataFrame, bloc: str = "EM") -> pd.DataFrame:
+def leave_one_out(deals: pd.DataFrame, cfg: Config, bloc: str = "EM") -> pd.DataFrame:
     """Leave-one-out sensitivity on a bloc's headline green numbers.
 
     With 35 green deals a single curation call moves a reported figure by
@@ -193,19 +193,20 @@ def leave_one_out(deals: pd.DataFrame, bloc: str = "EM") -> pd.DataFrame:
     each deal, because an exclusion decision removes a company and all its
     rounds) and recomputes.
     """
+    amount = cfg.pipeline["deflate"]["real_column"]
     sub = deals.loc[deals["bloc"].eq(bloc)]
     green = sub.loc[sub["green"]]
     companies = green["object_id"].dropna().unique()
 
     base_rate = 100 * len(green) / len(sub) if len(sub) else 0.0
-    base_usd = float(green["raised_amount_usd"].sum())
+    base_usd = float(green[amount].sum())
 
     rows = []
     for obj in companies:
         keep = sub.loc[sub["object_id"].ne(obj)]
         kept_green = keep.loc[keep["green"]]
         rate = 100 * len(kept_green) / len(keep) if len(keep) else 0.0
-        usd = float(kept_green["raised_amount_usd"].sum())
+        usd = float(kept_green[amount].sum())
         dropped = green.loc[green["object_id"].eq(obj)]
         rows.append(
             {
@@ -213,10 +214,10 @@ def leave_one_out(deals: pd.DataFrame, bloc: str = "EM") -> pd.DataFrame:
                 "excluded_name": dropped["name"].iloc[0] if "name" in dropped else "",
                 "excluded_country": dropped["country_code"].iloc[0],
                 "excluded_deals": len(dropped),
-                "excluded_usd_nominal": float(dropped["raised_amount_usd"].sum()),
+                "excluded_usd_real2015": float(dropped[amount].sum()),
                 "green_rate_pct": round(rate, 4),
                 "green_rate_change_pp": round(rate - base_rate, 4),
-                "green_usd_nominal": usd,
+                "green_usd_real2015": usd,
                 "green_usd_change_pct": round(100 * (usd - base_usd) / base_usd, 3)
                 if base_usd
                 else 0.0,
@@ -338,7 +339,7 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
         int(em_ub["green"].sum()), len(em_ub), int(ae["green"].sum()), len(ae)
     )
 
-    loo = leave_one_out(deals, "EM")
+    loo = leave_one_out(deals, cfg, "EM")
 
     findings: dict[str, Any] = {
         "hypothesis": "H1-revised: selection and visibility (the double gap)",
@@ -352,7 +353,7 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
         },
         "leave_one_out_em": {
             "base_green_rate_pct": loo.attrs["base_rate_pct"],
-            "base_green_usd_nominal": loo.attrs["base_usd_nominal"],
+            "base_green_usd_real2015": loo.attrs["base_usd_nominal"],
             "companies_tested": int(len(loo)),
             "green_rate_swing_pp": [
                 round(float(loo["green_rate_change_pp"].min()), 4),
