@@ -63,6 +63,25 @@ _BODY_FONTS = ["Inter", "Source Sans 3", "Helvetica Neue", "DejaVu Sans"]
 
 _resolved: dict[str, str] = {}
 
+# Which variant is being built. Screen variants are standalone exhibits and keep
+# their chrome; print variants carry axes, data and annotations only, because
+# the title, subtitle and source note become caption text set by the document.
+_MODE = "screen"
+
+
+def set_mode(mode: str) -> None:
+    """Select the variant being built: ``screen`` or ``print``."""
+    global _MODE  # noqa: PLW0603
+    if mode not in {"screen", "print"}:
+        msg = f"unknown figure mode {mode!r}"
+        raise ValueError(msg)
+    _MODE = mode
+
+
+def is_print() -> bool:
+    """Whether the print variant is being built."""
+    return _MODE == "print"
+
 
 def _resolve_font(candidates: list[str], fallback: str) -> str:
     """Return the first installed font from ``candidates``.
@@ -92,7 +111,7 @@ def body_font() -> str:
 
 
 def apply_theme() -> None:
-    """Install the house style. Call once per process."""
+    """Install the house style, then the print overrides when in print mode."""
     p = PALETTE
     mpl.rcParams.update(
         {
@@ -132,7 +151,11 @@ def apply_theme() -> None:
             "savefig.pad_inches": 0.03,
         }
     )
-    LOG.info("theme applied: titles %r, body %r", title_font(), body_font())
+    if is_print():
+        from gcg.viz import print_mode
+
+        print_mode.apply_print_rc()
+    LOG.info("theme applied (%s): titles %r, body %r", _MODE, title_font(), body_font())
 
 
 def style_axes(ax: plt.Axes, *, xgrid: bool = False) -> None:
@@ -155,7 +178,13 @@ def finding_title(
     """Set a title that states the finding, with a unit-and-window subtitle.
 
     CLAUDE.md §8: the title is a sentence that states the finding, never a label.
+
+    Suppressed in print mode: the finding sentence is the first tier of the
+    Typst caption there, and a figure titled twice is worse than one titled
+    once.
     """
+    if is_print():
+        return
     fig.text(
         x,
         y,
@@ -186,7 +215,13 @@ def source_footer(
     Wrapped to a fixed character width because the footer is the one artist
     long enough to run off the canvas, and a clipped source line is worse than
     no source line.
+
+    Suppressed in print mode, where the source note is the third tier of the
+    Typst caption and is set in the document's own type rather than rasterised
+    at 7pt inside a PDF.
     """
+    if is_print():
+        return
     base = cfg.pipeline["figures"]["source_line"]
     text = textwrap.fill(f"{base} {note}", width=width)
     fig.text(
@@ -235,24 +270,81 @@ def annotate(
     )
 
 
+def layout(
+    fig: plt.Figure,
+    *,
+    left: float,
+    right: float,
+    top: float,
+    bottom: float,
+    print_top: float = 0.965,
+    print_bottom: float | None = None,
+    print_left: float | None = None,
+    print_right: float | None = None,
+    **kwargs: Any,
+) -> None:
+    """Apply subplot margins appropriate to the variant being built.
+
+    Top and bottom differ because of the chrome: with no title and no source
+    block the print variant reclaims both. Side margins differ too, which is
+    less obvious: the print canvas is 6.22in against the screen's 7.2in while
+    its type is LARGER, so a tick label needs a bigger fraction of a smaller
+    canvas. Figures with long y-axis labels pass explicit print values.
+    """
+    if is_print():
+        fig.subplots_adjust(
+            left=print_left if print_left is not None else left,
+            right=print_right if print_right is not None else right,
+            top=print_top,
+            bottom=print_bottom if print_bottom is not None else 0.135,
+            **kwargs,
+        )
+    else:
+        fig.subplots_adjust(left=left, right=right, top=top, bottom=bottom, **kwargs)
+
+
 def save(fig: plt.Figure, cfg: Config, stem: str) -> list[Path]:
     """Save at 300 dpi as both PNG and PDF with a deterministic filename."""
     spec = cfg.pipeline["figures"]
     out: list[Path] = []
-    target = cfg.path("figures")
-    target.mkdir(parents=True, exist_ok=True)
-    for ext in spec["formats"]:
-        path = target / f"{stem}.{ext}"
-        fig.savefig(path, dpi=spec["dpi"], bbox_inches=None)
+    if is_print():
+        target = cfg.path("figures") / "print"
+        target.mkdir(parents=True, exist_ok=True)
+        path = target / f"{stem}_print.pdf"
+        # bbox_inches=None: the canvas was sized to the text column exactly, and
+        # a tight bbox would silently change that width.
+        fig.savefig(path, format="pdf", bbox_inches=None, pad_inches=0.0)
         out.append(path)
-    LOG.info("saved %s (%s)", stem, ", ".join(spec["formats"]))
+        LOG.info("saved print/%s", path.name)
+    else:
+        target = cfg.path("figures")
+        target.mkdir(parents=True, exist_ok=True)
+        for ext in spec["formats"]:
+            path = target / f"{stem}.{ext}"
+            fig.savefig(path, dpi=spec["dpi"], bbox_inches=None)
+            out.append(path)
+        LOG.info("saved %s (%s)", stem, ", ".join(spec["formats"]))
     plt.close(fig)
     return out
 
 
-def figsize(cfg: Config, kind: str = "single") -> tuple[float, float]:
-    """Figure size from config: ``single`` or ``stacked``."""
-    key = "figsize_stacked" if kind == "stacked" else "figsize_single"
+def figsize(cfg: Config, kind: str = "single", slug: str | None = None) -> tuple[float, float]:
+    """Figure size for the variant being built.
+
+    In print mode the size comes from ``print_mode.SPECS``, so the canvas is the
+    exact width of the text column and nothing is scaled in the document.
+    """
+    if is_print() and slug:
+        from gcg.viz import print_mode
+
+        spec = print_mode.SPECS.get(slug)
+        if spec is not None:
+            return print_mode.size_for(spec)
+    key = {
+        "stacked": "figsize_stacked",
+        "wide": "figsize_wide",
+        "single": "figsize_single",
+    }.get(kind, "figsize_single")
     w, h = cfg.pipeline["figures"][key]
     return float(w), float(h)
 

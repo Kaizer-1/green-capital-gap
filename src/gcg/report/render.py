@@ -100,6 +100,56 @@ class PdfSmokeTestError(RuntimeError):
     """The rendered PDF shows a defect visible in its extracted text."""
 
 
+class ChromeLeakError(RuntimeError):
+    """A print-variant figure still carries the chrome it should have shed."""
+
+
+def check_print_chrome(cfg: Config) -> list[str]:
+    """Fail if a print variant still contains its own caption's finding sentence.
+
+    The print variants exist so the finding sentence, subtitle and source note
+    are set by the document rather than rasterised inside the image. If a figure
+    is built without ``theme.set_mode("print")`` taking effect, the title stays
+    baked in and the reader sees it twice: once in the image and once in the
+    caption. Extracting the text of each print PDF and looking for its own
+    finding sentence catches exactly that.
+    """
+    from gcg.viz.print_mode import SPECS
+
+    if not shutil.which("pdftotext"):
+        LOG.warning("pdftotext not found; skipping the print-chrome check")
+        return []
+
+    hits = []
+    for slug, spec in SPECS.items():
+        path = cfg.path("figures") / "print" / f"{slug}_print.pdf"
+        if not path.is_file():
+            hits.append(f"{slug}: print variant missing at {path}")
+            continue
+        out = subprocess.run(  # noqa: S603
+            ["pdftotext", str(path), "-"],  # noqa: S607
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        if out.returncode != 0:
+            continue
+        # Compare on a normalised form: the image would carry the sentence with
+        # its own spacing and line breaks.
+        text = re.sub(r"\s+", " ", out.stdout).lower()
+        probe = re.sub(r"\s+", " ", spec.finding).lower().rstrip(".")
+        # A seven-word run is enough to identify the sentence without tripping
+        # on an axis label that happens to share two words with it.
+        words = probe.split()
+        if len(words) >= 7 and " ".join(words[:7]) in text:
+            hits.append(
+                f"{slug}: print variant still contains its finding sentence "
+                f"({' '.join(words[:7])!r}) - chrome was not stripped"
+            )
+    return hits
+
+
 def resolve(text: str, findings: dict[str, str]) -> tuple[str, list[str]]:
     """Substitute every placeholder, returning the text and any unresolved keys."""
     missing: list[str] = []
@@ -181,20 +231,28 @@ def build_typst(cfg: Config, body_md: Path) -> Path:
         msg = f"pandoc failed (exit {result.returncode}): {result.stderr.strip()[:800]}"
         raise RuntimeError(msg)
 
-    meta = cfg.pipeline["report"]
+    meta = load_metadata(cfg)
     words = count_words(body_md.read_text(encoding="utf-8"))
+    authors = ", ".join(f'(name: "{a["name"]}", usn: "{a["usn"]}")' for a in meta["authors"])
     main = cfg.root / "report" / ".report.typ"
     main.write_text(
         "\n".join(
             [
-                '#import "template.typ": conf, exhibit, method-exhibit',
+                '#import "template.typ": conf, exhibit, method-exhibit, CAPTIONS',
+                # Captions come from print_mode.SPECS, never from the markdown,
+                # so a caption cannot describe a figure that has changed.
+                caption_table(),
                 "#show: conf.with(",
                 f'  title: "{meta["title"]}",',
                 f'  subtitle: "{meta["subtitle"]}",',
-                f'  author: "{meta["author"]}",',
-                f'  usn: "{meta["usn"]}",',
+                f'  shorttitle: "{meta["shorttitle"]}",',
+                f'  footerright: "{meta["footerright"]}",',
+                f"  authors: ({authors},),",
+                f'  guide: "{meta["guide"]}",',
+                f'  institution: "{meta["institution"]}",',
                 f'  course: "{meta["course"]}",',
                 f'  date: "{meta["date"]}",',
+                # The word count is computed from the prose, never typed.
                 f'  wordcount: "{words:,}",',
                 ")",
                 "",
@@ -204,6 +262,37 @@ def build_typst(cfg: Config, body_md: Path) -> Path:
         encoding="utf-8",
     )
     return main
+
+
+def caption_table() -> str:
+    """Typst source binding every figure slug to its caption.
+
+    The caption is assembled from the same ``PrintSpec`` the figure was rendered
+    from, so the three tiers a reader sees are the three tiers the spec declares.
+    """
+    from gcg.viz.print_mode import SPECS, caption_for
+
+    rows = ",\n".join(f'  "{slug}": [{caption_for(spec)}]' for slug, spec in SPECS.items())
+    return "#CAPTIONS.update((\n" + rows + ",\n))"
+
+
+def load_metadata(cfg: Config) -> dict:
+    """Read report/metadata.yaml, the single source of truth for front matter.
+
+    The author list lives here and nowhere else: the title page, the README and
+    the reproducibility statement all read from it rather than restating four
+    names and four USNs in three places.
+    """
+    import yaml
+
+    path = cfg.root / "report" / "metadata.yaml"
+    if not path.is_file():
+        msg = f"missing {path}"
+        raise FileNotFoundError(msg)
+    text = path.read_text(encoding="utf-8")
+    # The file is fenced like YAML front matter; strip the delimiters.
+    text = re.sub(r"^---\s*$", "", text, flags=re.M)
+    return yaml.safe_load(text)
 
 
 def count_words(markdown: str) -> int:
@@ -323,6 +412,17 @@ def main(cfg: Config | None = None) -> int:
         len(findings),
         words,
     )
+
+    chrome = check_print_chrome(cfg)
+    if chrome:
+        msg = (
+            f"{len(chrome)} print variant(s) kept their chrome:\n  "
+            + "\n  ".join(chrome)
+            + "\n\nRebuild with `make figures`; print variants must carry axes, data "
+            "and annotations only."
+        )
+        raise ChromeLeakError(msg)
+    LOG.info("print-chrome check passed: no figure carries its caption's finding sentence")
 
     main_typ = build_typst(cfg, out)
     pdf = to_pdf(cfg, main_typ)

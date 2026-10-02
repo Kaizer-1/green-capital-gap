@@ -80,6 +80,8 @@ $(FINDINGS): $(DEALS) $(CONFIGS) $(SRC_ANALYSIS) $(SRC_REPORT)
 
 # ---------------------------------------------------------------------------
 figures: $(STAMPS)/figures
+# Builds BOTH variants: screen exhibits to outputs/figures/, print variants to
+# outputs/figures/print/. The report embeds only the print variants.
 $(STAMPS)/figures: $(FINDINGS) $(SRC_VIZ) $(CONFIGS)
 	$(PY) -m gcg.viz.figures
 	@mkdir -p $(STAMPS) && touch $@
@@ -87,7 +89,8 @@ $(STAMPS)/figures: $(FINDINGS) $(SRC_VIZ) $(CONFIGS)
 # ---------------------------------------------------------------------------
 # report — fails loudly on any unresolved {{placeholder}} (CLAUDE.md §2.2).
 report: $(REPORT_PDF)
-$(REPORT_PDF): $(FINDINGS) $(STAMPS)/figures report/report.md $(SRC_REPORT)
+$(REPORT_PDF): $(FINDINGS) $(STAMPS)/figures report/report.md report/template.typ \
+                report/metadata.yaml $(SRC_REPORT)
 	$(PY) -m gcg.report.render
 
 # ---------------------------------------------------------------------------

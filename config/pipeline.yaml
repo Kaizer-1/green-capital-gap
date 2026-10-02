@@ -363,6 +363,8 @@ figures:
   formats: [png, pdf]
   figsize_single: [7.2, 4.4]
   figsize_stacked: [7.2, 8.0]
+  # Two side-by-side panels on screen.
+  figsize_wide: [7.2, 4.0]
   source_line: "Source: Crunchbase 2013 Snapshot (CC BY 4.0); author's calculations."
 
 # --------------------------------------------------------------------------

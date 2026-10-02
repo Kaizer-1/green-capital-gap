@@ -1,0 +1,28 @@
+---
+title: "The Green Capital Gap"
+subtitle: "A deal-level analysis of cleantech venture funding in emerging economies, 2000–2012"
+shorttitle: "The Green Capital Gap"
+footerright: "RV College of Engineering"
+
+# Listed in USN order. Keep this list as the single source of truth —
+# README and the reproducibility statement should read from it, not restate it.
+authors:
+  - usn: "1RV23IS058"
+    name: "Kaizer Dewaswala"
+  - usn: "1RV23IS069"
+    name: "Md Asif Ali"
+  - usn: "1RV23IS110"
+    name: "Shaswat Kumar"
+  - usn: "1RV23IS134"
+    name: "Vansh Bharadwaj"
+
+guide: "Prof. ChandraKumar R"
+institution: "Department of Information Science & Engineering, RV College of Engineering"
+course: "Final Year Chapter Deliverable"
+date: "October 2026"
+
+# Injected by render.py from the computed prose count — never typed by hand.
+wordcount: "{{meta.wordcount}}"
+
+toc: true
+---

@@ -25,22 +25,21 @@ from gcg.analysis.h1_selection import (
 from gcg.config import Config, get_logger, load_config, seed_everything
 from gcg.io import read_parquet
 from gcg.rounding import fmt as rfmt
+from gcg.rounding import fmt_ci as rci
+from gcg.rounding import fmt_multiple as rmult
 from gcg.viz import theme
 from gcg.viz.theme import PALETTE as P
 
 LOG = get_logger("viz.figures")
 
 
-def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) -> None:
-    """Figure 1: the gap is real, and it is not green-specific.
+def fig_01a_double_gap(deals: pd.DataFrame, cfg: Config) -> None:
+    """The headline: green rate by bloc, conditional on dataset membership.
 
-    Two panels, because the headline needs both. Panel (a) is the finding:
-    conditional on being in the record, an emerging-market company is half as
-    likely to be green. Panel (b) is the qualifier, and it cuts against the
-    simplest reading of panel (a): capital intensity predicts the cross-sector
-    pattern, and it over-predicts cleantech's gap. Putting the finding on page
-    one and its qualifier in an appendix would be the same error as suppressing
-    the finding.
+    Previously panel (a) of a two-panel figure. Split because the two panels are
+    discussed in different subsections and the ladder needs a page of its own;
+    splitting also removes the "panel (a) of Figure 2" indirection from the
+    prose.
     """
     theme.apply_theme()
     by_bloc = green_rate_by_bloc(deals, cfg).set_index("bloc")
@@ -58,20 +57,8 @@ def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) ->
     em_ub = ub.loc[ub["b"].eq("EM")]
     ub_rate = 100 * em_ub["green"].mean()
 
-    panel_b = h1b.run(deals, cfg)
-    sectors = panel_b["_tables"]["h1b_sector_capital_intensity"]
-    fitobj = panel_b["primary_fit"]
-    res = panel_b["cleantech_residual_primary"]
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_01a_double_gap"))
 
-    fig, (ax_a, ax_b) = plt.subplots(
-        2, 1, figsize=theme.figsize(cfg, "stacked"), height_ratios=[1.0, 1.95]
-    )
-
-    # ---------------- panel (a): the double gap -------------------------
-    # Every bloc is shown, including UNASSIGNED, so the rows sum to the n in the
-    # footer. Leaving it out made the panel irreconcilable with its own source
-    # line, and its rate is substantively useful: it sits between EM and AE,
-    # which is what a blank-country bucket skewed away from the US should do.
     order = ["AE", "CHINA", "UNASSIGNED", "EM", "LDC"]
     short = {
         "AE": "Advanced economies",
@@ -89,9 +76,9 @@ def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) ->
         r = rows.loc[bloc]
         colour = P.accent_grey if bloc == "UNASSIGNED" else P.bloc(bloc)
         if bloc != "LDC":
-            # The LDC interval runs to 22.8% on 13 deals. Drawing it implies a
-            # precision that does not exist; the annotation says so instead.
-            ax_a.plot(
+            # The LDC interval runs to 22.8% on 13 deals; drawing it implies a
+            # precision that does not exist.
+            ax.plot(
                 [r["ci_lo_pct"], min(r["ci_hi_pct"], xmax)],
                 [yi, yi],
                 color=colour,
@@ -100,8 +87,8 @@ def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) ->
                 alpha=0.5,
                 zorder=2,
             )
-        ax_a.plot(r["green_rate_pct"], yi, "o", color=colour, markersize=7, zorder=4)
-        ax_a.text(
+        ax.plot(r["green_rate_pct"], yi, "o", color=colour, markersize=6.5, zorder=4)
+        ax.text(
             r["green_rate_pct"] + 0.18,
             yi + 0.3,
             rfmt(r["green_rate_pct"], 2, suffix="%"),
@@ -114,41 +101,42 @@ def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) ->
         tick_labels.append(f"{short[bloc]}  (n = {int(r['deals']):,})")
 
     em_y = y[order.index("EM")]
-    ax_a.plot(
+    ax.plot(
         ub_rate,
         em_y,
         "o",
         markerfacecolor="none",
         markeredgecolor=P.em,
-        markersize=7,
+        markersize=6.5,
         markeredgewidth=1.3,
         zorder=4,
     )
     theme.annotate(
-        ax_a,
+        ax,
         "Upper bound: every unattributable deal\n"
-        f"counted as emerging market ({ub_rate:.2f}%). Gap holds.",
+        f"counted as emerging market ({rfmt(ub_rate, 2)}%).\nGap holds.",
         xy=(ub_rate, em_y),
-        xytext=(ub_rate + 0.75, em_y - 0.55),
+        xytext=(ub_rate + 1.2, em_y - 0.52),
         color=P.ink_muted,
         fontsize=7.4,
     )
 
-    # The risk ratio is a comparison, so it is anchored between the two rows it
-    # compares rather than on one of them.
     ae_y, cn_y = y[order.index("AE")], y[order.index("CHINA")]
     mid_y = (ae_y + em_y) / 2
     bracket_x = 0.26
-    ax_a.plot([bracket_x] * 2, [em_y, ae_y], color=P.ink_muted, linewidth=0.8, zorder=2)
+    ax.plot([bracket_x] * 2, [em_y, ae_y], color=P.ink_muted, linewidth=0.8, zorder=2)
     for yy in (em_y, ae_y):
-        ax_a.plot(
-            [bracket_x, bracket_x + 0.13], [yy, yy], color=P.ink_muted, linewidth=0.8, zorder=2
+        ax.plot(
+            [bracket_x, bracket_x + 0.13],
+            [yy, yy],
+            color=P.ink_muted,
+            linewidth=0.8,
+            zorder=2,
         )
-    ax_a.text(
+    ax.text(
         bracket_x + 0.22,
         mid_y,
-        f"EM vs AE\nrisk ratio {test['risk_ratio']:.2f}\n"
-        f"[{test['risk_ratio_ci'][0]:.2f}, {test['risk_ratio_ci'][1]:.2f}]",
+        f"EM vs AE\nrisk ratio {rfmt(test['risk_ratio'], 2)}\n{rci(test['risk_ratio_ci'], 2)}",
         va="center",
         ha="left",
         fontsize=7.8,
@@ -156,17 +144,18 @@ def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) ->
         linespacing=1.35,
     )
     theme.annotate(
-        ax_a,
+        ax,
         "China indistinguishable from AE\n"
-        f"(risk ratio {china_test['risk_ratio']:.2f}, p = {china_test['p_value']:.2f})",
+        f"(risk ratio {rfmt(china_test['risk_ratio'], 2)}, "
+        f"p = {rfmt(china_test['p_value'], 2)})",
         xy=(rows.loc["CHINA", "green_rate_pct"], cn_y),
-        xytext=(8.9, cn_y + 0.5),
+        xytext=(8.9, cn_y + 0.72),
         ha="right",
         color=P.china,
         fontsize=7.4,
     )
     ldc_y = y[order.index("LDC")]
-    ax_a.text(
+    ax.text(
         0.22,
         ldc_y - 0.34,
         "0 of 13 deals: no usable interval",
@@ -177,28 +166,62 @@ def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) ->
         style="italic",
     )
 
-    ax_a.set_xlim(0, xmax)
-    ax_a.set_ylim(-0.75, len(order) - 0.35)
-    ax_a.set_yticks(y)
-    ax_a.set_yticklabels(tick_labels, fontsize=8.4)
-    ax_a.tick_params(axis="y", length=0, pad=6)
-    for lbl in ax_a.get_yticklabels():
+    ax.set_xlim(0, xmax)
+    ax.set_ylim(-0.75, len(order) - 0.35)
+    ax.set_yticks(y)
+    ax.set_yticklabels(tick_labels, fontsize=8.4)
+    ax.tick_params(axis="y", length=0, pad=6)
+    for lbl in ax.get_yticklabels():
         lbl.set_color(P.ink)
-    ax_a.set_xlabel("Green share of the bloc's recorded deals")
-    ax_a.xaxis.set_major_formatter(theme.fmt_pct)
-    ax_a.spines["left"].set_visible(False)
-    theme.style_axes(ax_a, xgrid=True)
-    ax_a.grid(axis="y", visible=False)
-    ax_a.set_title(
-        "(a)  In the record, an emerging-market company is half as likely to be green",
-        fontsize=9.3,
-        fontfamily=theme.title_font(),
-        color=P.ink,
-        loc="left",
-        pad=8,
-    )
+    ax.set_xlabel("Green share of the bloc's recorded deals")
+    ax.xaxis.set_major_formatter(theme.fmt_pct)
+    ax.spines["left"].set_visible(False)
+    theme.style_axes(ax, xgrid=True)
+    ax.grid(axis="y", visible=False)
 
-    # ---------------- panel (b): the capital-intensity ladder -----------
+    theme.finding_title(
+        fig,
+        "In the record, an emerging-market company is half as likely to be green",
+        "Green share of recorded venture deals by bloc. 2000\u20132012.",
+        y=0.955,
+    )
+    theme.source_footer(
+        fig,
+        cfg,
+        f"n = {len(deals):,} deals, {int(deals['green'].sum()):,} green; bloc rows sum to "
+        "the total. Intervals are Wilson score. Headline is raw classifier output; "
+        "bias-corrected risk ratio 0.44, curated 0.40 (Appendix C).",
+        y=0.175,
+        width=108,
+    )
+    theme.layout(
+        fig,
+        left=0.265,
+        right=0.985,
+        top=0.845,
+        bottom=0.275,
+        print_top=0.975,
+        print_bottom=0.155,
+        print_left=0.355,
+        print_right=0.985,
+    )
+    theme.save(fig, cfg, "fig_01a_double_gap")
+
+
+def fig_01b_sector_ladder(deals: pd.DataFrame, cfg: Config) -> None:
+    """The qualifier: sector representation against capital intensity.
+
+    Previously panel (b). At 23 rows this needs a full page: at half a page the
+    category labels collide and the residual segments are unreadable.
+    """
+    theme.apply_theme()
+    panel_b = h1b.run(deals, cfg)
+    sectors = panel_b["_tables"]["h1b_sector_capital_intensity"]
+    fitobj = panel_b["primary_fit"]
+    res = panel_b["cleantech_residual_primary"]
+
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_01b_sector_ladder"))
+
     s = sectors.sort_values("representation_ratio").rename(index={"<none>": "No sector tag"})
     yb = np.arange(len(s))
     obs = s["representation_ratio"].to_numpy()
@@ -206,115 +229,101 @@ def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) ->
     ct = int(s.index.get_loc("cleantech"))
     bio = int(s.index.get_loc("biotech"))
 
-    # Segment colour carries the panel's claim: green where a sector does better
-    # than capital intensity predicts, ochre where it does worse.
+    # Segment colour carries the claim: green where a sector does better than
+    # capital intensity predicts, ochre where it does worse.
     for yi, o, f in zip(yb, obs, fit, strict=False):
-        ax_b.plot(
+        ax.plot(
             [f, o],
             [yi, yi],
             color=P.accent_green if o > f else P.ae,
-            linewidth=1.6,
+            linewidth=1.8,
             alpha=0.55,
             zorder=1,
         )
-
-    ax_b.plot(
+    ax.plot(
         fit,
         yb,
         "o",
         markerfacecolor="none",
         markeredgecolor=P.accent_grey,
-        markersize=4.2,
+        markersize=4.6,
         markeredgewidth=1.0,
         zorder=2,
     )
-    ax_b.plot(obs, yb, "o", color=P.ink, markersize=4.2, zorder=3)
+    ax.plot(obs, yb, "o", color=P.ink, markersize=4.6, zorder=3)
 
-    ax_b.plot([fit[ct], obs[ct]], [ct, ct], color=P.focus, linewidth=2.4, zorder=3)
-    ax_b.plot(
+    ax.plot([fit[ct], obs[ct]], [ct, ct], color=P.focus, linewidth=2.4, zorder=3)
+    ax.plot(
         fit[ct],
         ct,
         "o",
         markerfacecolor="none",
         markeredgecolor=P.focus,
-        markersize=7.5,
+        markersize=8.0,
         markeredgewidth=1.6,
         zorder=5,
     )
-    ax_b.plot(obs[ct], ct, "o", color=P.focus, markersize=7.5, zorder=5)
+    ax.plot(obs[ct], ct, "o", color=P.focus, markersize=8.0, zorder=5)
+    ax.axvline(1.0, color=P.ink_muted, linewidth=0.8, linestyle=(0, (4, 3)), zorder=0)
 
-    ax_b.axvline(1.0, color=P.ink_muted, linewidth=0.8, linestyle=(0, (4, 3)), zorder=0)
-
-    ax_b.set_yticks(yb)
-    ax_b.set_yticklabels([str(n).replace("_", " ") for n in s.index], fontsize=7.5)
-    for lbl, name in zip(ax_b.get_yticklabels(), s.index, strict=False):
+    ax.set_yticks(yb)
+    ax.set_yticklabels([str(n).replace("_", " ") for n in s.index], fontsize=8.2)
+    for lbl, name in zip(ax.get_yticklabels(), s.index, strict=False):
         if name == "cleantech":
             lbl.set_color(P.focus)
             lbl.set_fontweight("bold")
-            lbl.set_fontsize(8.2)
+            lbl.set_fontsize(8.8)
         else:
             lbl.set_color(P.ink_muted)
-    ax_b.tick_params(axis="y", length=0, pad=4)
+    ax.tick_params(axis="y", length=0, pad=4)
 
     theme.annotate(
-        ax_b,
-        f"Cleantech sits {res['residual_ratio_scale']:.2f}x above its\n"
-        f"predicted position [{res['residual_ratio_ci'][0]:.2f}x, "
-        f"{res['residual_ratio_ci'][1]:.2f}x].\n"
+        ax,
+        f"Cleantech sits {rmult(res['residual_ratio_scale'], 2)} above its\n"
+        f"predicted position {rci(res['residual_ratio_ci'], 2, suffix=chr(215))}.\n"
         "Capital intensity OVER-predicts the gap.\n"
-        "The interval includes 1x, so\noutperformance is not confirmed.",
+        "The interval includes 1, so outperformance\nis not confirmed.",
         xy=(obs[ct], ct),
-        xytext=(0.093, ct + 16.2),
+        xytext=(0.093, ct + 11.0),
         ha="left",
         color=P.focus,
-        fontsize=7.3,
+        fontsize=7.6,
     )
     theme.annotate(
-        ax_b,
-        "Biotech: 4.6x more under-represented\n"
-        "than cleantech, and below its own\nprediction too",
+        ax,
+        "Biotech: 4.6x more under-represented\nthan cleantech, and below its own\nprediction "
+        "too",
         xy=(obs[bio], bio),
-        xytext=(0.093, bio + 12.6),
+        xytext=(0.093, bio + 6.4),
         ha="left",
         color=P.ae,
-        fontsize=7.3,
+        fontsize=7.6,
     )
 
-    ax_b.set_xscale("log")
-    ax_b.set_xlim(0.085, 6.2)
-    ax_b.set_ylim(-0.9, len(s) - 0.1)
-    ax_b.set_xticks([0.1, 0.25, 0.5, 1, 2, 4])
-    ax_b.set_xticklabels(["0.1x", "0.25x", "0.5x", "1x", "2x", "4x"])
-    ax_b.set_xlabel(
-        "Emerging-market representation relative to advanced economies "
-        "(1x = proportionate), log scale"
-    )
-    ax_b.spines["left"].set_visible(False)
-    theme.style_axes(ax_b, xgrid=True)
-    ax_b.grid(axis="y", visible=False)
-    ax_b.set_title(
-        "(b)  Capital intensity drives the pattern \u2014 and green beats its prediction",
-        fontsize=9.3,
-        fontfamily=theme.title_font(),
-        color=P.ink,
-        loc="left",
-        pad=8,
-    )
-    ax_b.text(
+    ax.set_xscale("log")
+    ax.set_xlim(0.085, 6.2)
+    ax.set_ylim(-0.9, len(s) - 0.1)
+    ax.set_xticks([0.1, 0.25, 0.5, 1, 2, 4])
+    ax.set_xticklabels(["0.1x", "0.25x", "0.5x", "1x", "2x", "4x"])
+    ax.set_xlabel("EM representation relative to AE (1x = proportionate), log scale")
+    ax.spines["left"].set_visible(False)
+    theme.style_axes(ax, xgrid=True)
+    ax.grid(axis="y", visible=False)
+    ax.text(
         0.985,
-        0.275,
-        f"elasticity {fitobj['slope']:.2f} [{fitobj['slope_ci'][0]:.2f}, "
-        f"{fitobj['slope_ci'][1]:.2f}]\n"
-        f"R\u00b2 = {fitobj['r_squared']:.2f}   \u00b7   {fitobj['n_sectors']} sectors",
-        transform=ax_b.transAxes,
-        fontsize=7.5,
+        0.022,
+        f"elasticity {rfmt(fitobj['slope'], 2)} {rci(fitobj['slope_ci'], 2)}\n"
+        f"R\u00b2 = {rfmt(fitobj['r_squared'], 2)}   \u00b7   "
+        f"{fitobj['n_sectors']} sectors",
+        transform=ax.transAxes,
+        fontsize=7.6,
         color=P.ink_muted,
         ha="right",
     )
 
     handles = [
         Line2D(
-            [], [], marker="o", linestyle="none", color=P.ink, markersize=4.2, label="observed"
+            [], [], marker="o", linestyle="none", color=P.ink, markersize=4.6, label="observed"
         ),
         Line2D(
             [],
@@ -323,49 +332,54 @@ def fig_01_double_gap_and_capital_intensity(deals: pd.DataFrame, cfg: Config) ->
             linestyle="none",
             markerfacecolor="none",
             markeredgecolor=P.accent_grey,
-            markersize=4.2,
+            markersize=4.6,
             label="predicted by capital intensity",
         ),
         Line2D([], [], color=P.accent_green, linewidth=1.8, label="better than predicted"),
         Line2D([], [], color=P.ae, linewidth=1.8, label="worse than predicted"),
     ]
-    leg = ax_b.legend(
+    leg = ax.legend(
         handles=handles,
         loc="lower right",
-        fontsize=7.3,
+        fontsize=7.6,
         handletextpad=0.5,
         borderpad=0.3,
-        bbox_to_anchor=(0.995, 0.015),
+        bbox_to_anchor=(0.995, 0.075),
     )
     for txt in leg.get_texts():
         txt.set_color(P.ink_muted)
 
     theme.finding_title(
         fig,
-        "The emerging-market green gap is real. It is not green-specific.",
-        "Green share of recorded venture deals by bloc, and sector representation "
-        "against capital intensity. 2000\u20132012.",
+        "Capital intensity drives the pattern, and green beats its prediction",
+        "Emerging-market representation relative to advanced economies, 23 sectors. "
+        "2000\u20132012.",
         y=0.965,
     )
     theme.source_footer(
         fig,
         cfg,
-        f"Panel (a) n = {len(deals):,} deals, {int(deals['green'].sum()):,} green; "
-        "bloc rows sum to the total. Panel (b) "
-        f"{fitobj['n_sectors']} sectors with \u2265"
-        f"{cfg.pipeline['capital_intensity']['min_em_deals']} emerging-market and \u2265"
-        f"{cfg.pipeline['capital_intensity']['min_ae_deals']} advanced-economy deals; capital "
-        "intensity is median advanced-economy deal size in constant 2015 USD, so the proxy "
-        "cannot be contaminated by the emerging-market composition it explains. Intervals are "
-        "Wilson score (a) and residual 95% CI (b). Headline is raw classifier output; "
-        "bias-corrected risk ratio 0.44, curated 0.40 (Appendix C).",
-        y=0.125,
+        "Capital intensity is median advanced-economy deal size in constant 2015 USD, so "
+        "the proxy cannot be contaminated by the emerging-market composition it explains. "
+        "Segments run from predicted to observed; intervals are residual 95% CI.",
+        y=0.085,
+        width=108,
     )
-    fig.subplots_adjust(left=0.265, right=0.985, top=0.885, bottom=0.185, hspace=0.26)
-    theme.save(fig, cfg, "fig_01_double_gap_capital_intensity")
+    theme.layout(
+        fig,
+        left=0.225,
+        right=0.985,
+        top=0.895,
+        bottom=0.145,
+        print_top=0.985,
+        print_bottom=0.072,
+        print_left=0.255,
+        print_right=0.985,
+    )
+    theme.save(fig, cfg, "fig_01b_sector_ladder")
 
 
-def fig_m2_capital_intensity_regression(deals: pd.DataFrame, cfg: Config) -> None:
+def fig_m2_elasticity(deals: pd.DataFrame, cfg: Config) -> None:
     """Methodology figure: the capital-intensity regression behind Figure 1b.
 
     The ladder in Figure 1b shows residuals, which is what the argument needs,
@@ -383,7 +397,7 @@ def fig_m2_capital_intensity_regression(deals: pd.DataFrame, cfg: Config) -> Non
     fitobj = panel["primary_fit"]
     res = panel["cleantech_residual_primary"]
 
-    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_m2_elasticity"))
 
     s = s.sort_values("median_deal_usd_real")
     x = s["median_deal_usd_real"].to_numpy() / 1e6
@@ -486,11 +500,21 @@ def fig_m2_capital_intensity_regression(deals: pd.DataFrame, cfg: Config) -> Non
         y=0.205,
         width=112,
     )
-    fig.subplots_adjust(left=0.135, right=0.98, top=0.845, bottom=0.355)
-    theme.save(fig, cfg, "fig_m2_capital_intensity_regression")
+    theme.layout(
+        fig,
+        left=0.135,
+        right=0.98,
+        top=0.845,
+        bottom=0.355,
+        print_top=0.975,
+        print_bottom=0.145,
+        print_left=0.165,
+        print_right=0.975,
+    )
+    theme.save(fig, cfg, "fig_m2_elasticity")
 
 
-def fig_02_coverage_vs_gdp(deals: pd.DataFrame, cfg: Config) -> None:
+def fig_02_coverage_gdp(deals: pd.DataFrame, cfg: Config) -> None:
     """Figure 2: gap one, the denominator check.
 
     Its only job is to show that the conditional green-rate gap in Figure 1a is
@@ -502,7 +526,7 @@ def fig_02_coverage_vs_gdp(deals: pd.DataFrame, cfg: Config) -> None:
     tab = pd.read_csv(cfg.path("tables") / "diag_coverage_bias_by_bloc_year.csv")
     em = tab.loc[tab["bloc"].eq("EM")].sort_values("year")
 
-    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_02_coverage_gdp"))
     ax.fill_between(
         em["year"], em["deal_share_pct"], em["gdp_share_pct"], color=P.em, alpha=0.10, zorder=1
     )
@@ -566,11 +590,13 @@ def fig_02_coverage_vs_gdp(deals: pd.DataFrame, cfg: Config) -> None:
         y=0.195,
         width=108,
     )
-    fig.subplots_adjust(left=0.105, right=0.985, top=0.84, bottom=0.30)
-    theme.save(fig, cfg, "fig_02_coverage_vs_gdp")
+    theme.layout(
+        fig, left=0.105, right=0.985, top=0.84, bottom=0.30, print_left=0.135, print_right=0.80
+    )
+    theme.save(fig, cfg, "fig_02_coverage_gdp")
 
 
-def fig_03_green_rate_by_year(deals: pd.DataFrame, cfg: Config) -> None:
+def fig_03_rate_by_year(deals: pd.DataFrame, cfg: Config) -> None:
     """Figure 3: the gap over time, with every emerging-market cell flagged.
 
     The substantive point is the 2008 convergence. At the peak of Cleantech 1.0
@@ -583,7 +609,7 @@ def fig_03_green_rate_by_year(deals: pd.DataFrame, cfg: Config) -> None:
     ae = by_year.loc[by_year["bloc"].eq("AE")].sort_values("year")
     em = by_year.loc[by_year["bloc"].eq("EM")].sort_values("year")
 
-    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_03_rate_by_year"))
     ax.plot(ae["year"], ae["green_rate_pct"], color=P.ae, linewidth=1.8, zorder=3)
     ax.plot(
         em["year"],
@@ -668,11 +694,13 @@ def fig_03_green_rate_by_year(deals: pd.DataFrame, cfg: Config) -> None:
         y=0.205,
         width=108,
     )
-    fig.subplots_adjust(left=0.125, right=0.985, top=0.84, bottom=0.31)
-    theme.save(fig, cfg, "fig_03_green_rate_by_year")
+    theme.layout(
+        fig, left=0.125, right=0.985, top=0.84, bottom=0.31, print_left=0.155, print_right=0.84
+    )
+    theme.save(fig, cfg, "fig_03_rate_by_year")
 
 
-def fig_04_subdomain_resolution(deals: pd.DataFrame, cfg: Config) -> None:
+def fig_04_subdomain(deals: pd.DataFrame, cfg: Config) -> None:
     """Figure 4: the taxonomy cannot resolve green sub-domains in emerging markets.
 
     This replaces the sub-domain mix comparison that was cut. It reports the
@@ -689,7 +717,7 @@ def fig_04_subdomain_resolution(deals: pd.DataFrame, cfg: Config) -> None:
     unspec = shares.get("general_unspecified", pd.Series(0.0, index=shares.index))
     specific = 100 - unspec
 
-    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_04_subdomain"))
     y = np.arange(len(order))[::-1]
     ax.barh(y, unspec, color=P.accent_grey, height=0.44, zorder=3)
     ax.barh(y, specific, left=unspec, color=P.accent_green, height=0.44, zorder=3)
@@ -777,8 +805,16 @@ def fig_04_subdomain_resolution(deals: pd.DataFrame, cfg: Config) -> None:
         y=0.205,
         width=108,
     )
-    fig.subplots_adjust(left=0.235, right=0.985, top=0.805, bottom=0.30)
-    theme.save(fig, cfg, "fig_04_subdomain_resolution")
+    theme.layout(
+        fig,
+        left=0.235,
+        right=0.985,
+        top=0.805,
+        bottom=0.30,
+        print_left=0.295,
+        print_right=0.985,
+    )
+    theme.save(fig, cfg, "fig_04_subdomain")
 
 
 def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
@@ -797,7 +833,9 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
         .reset_index()
     )
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=theme.figsize(cfg, "stacked"), sharex=True)
+    fig, (ax1, ax2) = plt.subplots(
+        2, 1, figsize=theme.figsize(cfg, "stacked", "fig_05_cycle"), sharex=True
+    )
 
     ax1.bar(by_year["year"], by_year["deals"], color=P.accent_green, width=0.62, zorder=3)
     ax1.set_ylabel("Green deals")
@@ -884,11 +922,20 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
         y=0.072,
         width=118,
     )
-    fig.subplots_adjust(left=0.135, right=0.985, top=0.885, bottom=0.20, hspace=0.22)
+    theme.layout(
+        fig,
+        left=0.135,
+        right=0.985,
+        top=0.885,
+        bottom=0.20,
+        hspace=0.22,
+        print_left=0.165,
+        print_right=0.985,
+    )
     theme.save(fig, cfg, "fig_05_cycle")
 
 
-def fig_06_green_share_of_all(deals: pd.DataFrame, cfg: Config) -> None:
+def fig_06_share_crossover(deals: pd.DataFrame, cfg: Config) -> None:
     """Figure 6: green's share of deals against its share of dollars.
 
     An earlier draft of this figure plotted the green rate by bloc and year,
@@ -928,7 +975,7 @@ def fig_06_green_share_of_all(deals: pd.DataFrame, cfg: Config) -> None:
     early_counts = early.groupby("year").size()
     pre2005 = ", ".join(f"{int(y)} n={int(n)}" for y, n in early_counts.items()) or "none"
 
-    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_06_share_crossover"))
     ax.fill_between(
         by_year["year"],
         by_year["count_share"],
@@ -1022,11 +1069,13 @@ def fig_06_green_share_of_all(deals: pd.DataFrame, cfg: Config) -> None:
         y=0.195,
         width=108,
     )
-    fig.subplots_adjust(left=0.125, right=0.845, top=0.84, bottom=0.30)
-    theme.save(fig, cfg, "fig_06_green_share_of_all")
+    theme.layout(
+        fig, left=0.125, right=0.845, top=0.84, bottom=0.30, print_left=0.155, print_right=0.80
+    )
+    theme.save(fig, cfg, "fig_06_share_crossover")
 
 
-def fig_12_continuity_india(deals: pd.DataFrame, cfg: Config) -> None:
+def fig_11_continuity(deals: pd.DataFrame, cfg: Config) -> None:
     """Figure 12: the continuity probe, deliberately kept apart from the main series.
 
     The two panels never share an axis. Pooling them would be the error the
@@ -1040,7 +1089,12 @@ def fig_12_continuity_india(deals: pd.DataFrame, cfg: Config) -> None:
     em = deals.loc[deals["bloc"].eq("EM")]
     em_year = em.groupby("year")["green"].agg(deals="size", green="sum").reset_index()
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.2, 3.9), width_ratios=[1.25, 1.0])
+    fig, (ax1, ax2) = plt.subplots(
+        1,
+        2,
+        figsize=theme.figsize(cfg, "wide", "fig_11_continuity"),
+        width_ratios=[1.25, 1.0],
+    )
 
     ax1.bar(em_year["year"], em_year["green"], color=P.em, width=0.62, zorder=3)
     ax1.set_title(
@@ -1074,7 +1128,16 @@ def fig_12_continuity_india(deals: pd.DataFrame, cfg: Config) -> None:
     # The divider is positioned from the realised axes geometry. Hard-coding a
     # figure fraction put it inside the left panel, drawing a red line through
     # the data.
-    fig.subplots_adjust(left=0.105, right=0.985, top=0.78, bottom=0.33, wspace=0.10)
+    theme.layout(
+        fig,
+        left=0.105,
+        right=0.985,
+        top=0.78,
+        bottom=0.33,
+        wspace=0.10,
+        print_left=0.135,
+        print_right=0.985,
+    )
     gap = (ax1.get_position().x1 + ax2.get_position().x0) / 2
     fig.text(
         gap,
@@ -1113,10 +1176,10 @@ def fig_12_continuity_india(deals: pd.DataFrame, cfg: Config) -> None:
         y=0.235,
         width=108,
     )
-    theme.save(fig, cfg, "fig_12_continuity_india")
+    theme.save(fig, cfg, "fig_11_continuity")
 
 
-def fig_m1_censoring_artefact(cfg: Config) -> None:
+def fig_m1_censoring(cfg: Config) -> None:
     """Methodology figure: the censoring boundary, established rather than assumed.
 
     CLAUDE.md asked for the uncensored tail plotted as an artefact. Measuring it
@@ -1127,7 +1190,7 @@ def fig_m1_censoring_artefact(cfg: Config) -> None:
     theme.apply_theme()
     tab = pd.read_csv(cfg.path("tables") / "diag_censoring_monthly_counts.csv", index_col=0)
 
-    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_m1_censoring"))
     months = tab.index.to_numpy()
     styles = {"2011": (P.accent_grey, "-"), "2012": (P.ink_muted, "-"), "2013": (P.alert, "-")}
     for year, (colour, ls) in styles.items():
@@ -1197,11 +1260,19 @@ def fig_m1_censoring_artefact(cfg: Config) -> None:
         y=0.22,
         width=108,
     )
-    fig.subplots_adjust(left=0.105, right=0.975, top=0.84, bottom=0.325)
-    theme.save(fig, cfg, "fig_m1_censoring_artefact")
+    theme.layout(
+        fig,
+        left=0.105,
+        right=0.975,
+        top=0.84,
+        bottom=0.325,
+        print_left=0.135,
+        print_right=0.955,
+    )
+    theme.save(fig, cfg, "fig_m1_censoring")
 
 
-def fig_07_crisis_contraction(deals: pd.DataFrame, cfg: Config) -> None:
+def fig_07_crisis(deals: pd.DataFrame, cfg: Config) -> None:
     """Figure 7: the crisis hit green and spared non-green, descriptively.
 
     No difference-in-differences coefficient plot accompanies this figure,
@@ -1215,11 +1286,14 @@ def fig_07_crisis_contraction(deals: pd.DataFrame, cfg: Config) -> None:
     series = res["_tables"]["h2_indexed_series"]
     base = int(cfg.window["did_index_base_year"])
 
-    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_07_crisis"))
+    # The emerging-market green series is NOT plotted. Its 2007 base year holds
+    # a single deal, so indexing it sends 2008 to 1200 and 2012 to 600: that is
+    # not shape, it is one deal amplified. Stating the cell sizes in the
+    # annotation is more honest than drawing a line off the top of the axis.
     styles = {
         "AE-green": (P.accent_green, "-", 2.0),
         "AE-non-green": (P.accent_grey, "-", 1.6),
-        "EM-green": (P.em, (0, (5, 2)), 1.4),
     }
     for name, (colour, ls, lw) in styles.items():
         sub = series.loc[series["series"].eq(name)].sort_values("year")
@@ -1256,7 +1330,7 @@ def fig_07_crisis_contraction(deals: pd.DataFrame, cfg: Config) -> None:
                 ].iloc[0]
             ),
         ),
-        xytext=(2000.3, 330),
+        xytext=(2000.3, 262),
         color=P.ink,
         fontsize=7.6,
     )
@@ -1265,9 +1339,20 @@ def fig_07_crisis_contraction(deals: pd.DataFrame, cfg: Config) -> None:
         "Pre-trends diverge, so no difference-in-differences\n"
         "estimate is reported. These series are descriptive.",
         xy=(2004, 120),
-        xytext=(2000.3, 232),
+        xytext=(2000.3, 150),
         color=P.alert,
         fontsize=7.6,
+    )
+    em_peak = int(series.loc[series["series"].eq("EM-green"), "indexed"].max())
+    ax.text(
+        2000.3,
+        398,
+        "The emerging-market green series is not drawn: its 2007\n"
+        f"base is a single deal, so the index reaches {em_peak:,} in 2008.",
+        fontsize=7.4,
+        color=P.em,
+        va="top",
+        linespacing=1.35,
     )
 
     ax.set_xlim(1999.7, 2014.4)
@@ -1284,8 +1369,8 @@ def fig_07_crisis_contraction(deals: pd.DataFrame, cfg: Config) -> None:
     theme.source_footer(
         fig,
         cfg,
-        f"n = {len(deals):,} deals. The emerging-market green series rests on 0\u2013"
-        f"{res['em_arm']['largest_cell']} deals per year and is plotted for shape only. No "
+        f"n = {len(deals):,} deals. The emerging-market green series is not drawn: its "
+        "2007 base year holds one deal, so indexing it is meaningless. No "
         "difference-in-differences coefficient is shown: green volume was already growing "
         f"{res['pre_trend']['differential_trend_per_year']:+.3f} log-points per year faster "
         f"than non-green before the event window (p = {res['pre_trend']['p_value']:.4f}), so "
@@ -1294,18 +1379,20 @@ def fig_07_crisis_contraction(deals: pd.DataFrame, cfg: Config) -> None:
         y=0.195,
         width=108,
     )
-    fig.subplots_adjust(left=0.105, right=0.845, top=0.84, bottom=0.30)
-    theme.save(fig, cfg, "fig_07_crisis_contraction")
+    theme.layout(
+        fig, left=0.105, right=0.845, top=0.84, bottom=0.30, print_left=0.135, print_right=0.80
+    )
+    theme.save(fig, cfg, "fig_07_crisis")
 
 
-def fig_08_instrument_mix(deals: pd.DataFrame, cfg: Config) -> None:
+def fig_08_instruments(deals: pd.DataFrame, cfg: Config) -> None:
     """Figure 8: non-dilutive dependence, green against non-green."""
     theme.apply_theme()
     res = h3_instrument.run(deals, cfg)
     shares = res["_tables"]["h3_non_dilutive_by_bloc"]
     shares = shares.loc[shares["bloc"].isin(["AE", "EM"])]
 
-    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_08_instruments"))
     labels, values, colours, notes = [], [], [], []
     for bloc in ("AE", "EM"):
         for green in (True, False):
@@ -1340,7 +1427,7 @@ def fig_08_instrument_mix(deals: pd.DataFrame, cfg: Config) -> None:
         f"more likely to use non-dilutive capital "
         f"{foc['risk_ratio_ci']}",
         xy=(values[0], y[0]),
-        xytext=(4.0, y[0] - 0.62),
+        xytext=(4.6, y[0] - 0.46),
         color=P.accent_green,
         fontsize=7.6,
     )
@@ -1349,7 +1436,7 @@ def fig_08_instrument_mix(deals: pd.DataFrame, cfg: Config) -> None:
         f"The emerging-market arm rests on {res['em_arm']['em_green_deals']} deals\n"
         "and is reported as untestable, not as a null",
         xy=(values[2], y[2]),
-        xytext=(4.0, y[2] - 0.6),
+        xytext=(4.6, y[2] - 0.46),
         color=P.em,
         fontsize=7.6,
     )
@@ -1383,11 +1470,19 @@ def fig_08_instrument_mix(deals: pd.DataFrame, cfg: Config) -> None:
         y=0.195,
         width=108,
     )
-    fig.subplots_adjust(left=0.165, right=0.985, top=0.84, bottom=0.30)
-    theme.save(fig, cfg, "fig_08_instrument_mix")
+    theme.layout(
+        fig,
+        left=0.165,
+        right=0.985,
+        top=0.84,
+        bottom=0.30,
+        print_left=0.205,
+        print_right=0.985,
+    )
+    theme.save(fig, cfg, "fig_08_instruments")
 
 
-def fig_09_cell_sizes(
+def fig_09_power_wall(
     deals: pd.DataFrame,  # noqa: ARG001 - every figure takes the deal table
     cfg: Config,
 ) -> None:
@@ -1441,7 +1536,7 @@ def fig_09_cell_sizes(
     values = [r[1] for r in rows]
     tests = [r[2] for r in rows]
 
-    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single"))
+    fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_09_power_wall"))
     y = np.arange(len(rows))[::-1]
     ax.barh(y, values, color=P.em, height=0.5, zorder=3)
     ax.axvline(min_n, color=P.alert, linewidth=1.3, zorder=4)
@@ -1512,11 +1607,19 @@ def fig_09_cell_sizes(
         y=0.195,
         width=108,
     )
-    fig.subplots_adjust(left=0.305, right=0.985, top=0.84, bottom=0.30)
-    theme.save(fig, cfg, "fig_09_cell_sizes")
+    theme.layout(
+        fig,
+        left=0.305,
+        right=0.985,
+        top=0.84,
+        bottom=0.30,
+        print_left=0.375,
+        print_right=0.985,
+    )
+    theme.save(fig, cfg, "fig_09_power_wall")
 
 
-def fig_11_depth_vs_need(deals: pd.DataFrame, cfg: Config, rng) -> None:
+def fig_10_depth_need(deals: pd.DataFrame, cfg: Config, rng) -> None:
     """Figure 11: green funding intensity against market depth.
 
     The planned small-multiple of need indicators is not drawn. Twenty of the
@@ -1531,7 +1634,12 @@ def fig_11_depth_vs_need(deals: pd.DataFrame, cfg: Config, rng) -> None:
     panel = res["_tables"]["h5_country_panel"]
     depth = res["correlations"]["green_usd_per_capita"]["gdp_per_capita_usd"]
 
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.2, 4.0), width_ratios=[1.45, 1.0])
+    fig, (ax1, ax2) = plt.subplots(
+        1,
+        2,
+        figsize=theme.figsize(cfg, "wide", "fig_10_depth_need"),
+        width_ratios=[1.45, 1.0],
+    )
 
     x = panel["gdp_per_capita_usd"] / 1e3
     yv = panel["green_usd_per_capita"].clip(lower=1e-3)
@@ -1553,7 +1661,12 @@ def fig_11_depth_vs_need(deals: pd.DataFrame, cfg: Config, rng) -> None:
         )
     ax1.set_xscale("log")
     ax1.set_yscale("log")
-    ax1.set_xlabel("GDP per capita, 2012 USD thousands (log)")
+    ax1.set_xticks([1, 3, 10, 30, 100])
+    ax1.set_xticklabels(["$1k", "$3k", "$10k", "$30k", "$100k"])
+    ax1.minorticks_off()
+    ax1.set_xlabel("GDP per capita, 2012 USD (log scale)")
+    ax1.set_yticks([0.1, 1, 10, 100])
+    ax1.set_yticklabels(["$0.1", "$1", "$10", "$100"])
     ax1.set_ylabel("Green funding per capita,\nconstant 2015 USD (log)")
     ax1.set_title(
         f"(a)  Depth: rho {depth['rho']:+.3f} {depth['ci']}",
@@ -1608,29 +1721,58 @@ def fig_11_depth_vs_need(deals: pd.DataFrame, cfg: Config, rng) -> None:
         y=0.175,
         width=108,
     )
-    fig.subplots_adjust(left=0.125, right=0.985, top=0.80, bottom=0.275, wspace=0.34)
-    theme.save(fig, cfg, "fig_11_depth_vs_need")
+    theme.layout(
+        fig,
+        left=0.125,
+        right=0.985,
+        top=0.80,
+        bottom=0.275,
+        wspace=0.34,
+        print_left=0.155,
+        print_right=0.985,
+        print_top=0.885,
+        print_bottom=0.165,
+    )
+    theme.save(fig, cfg, "fig_10_depth_need")
+
+
+def _build_all(deals: pd.DataFrame, cfg: Config, rng) -> None:
+    """Render every figure once, in whichever variant is currently selected."""
+    fig_01a_double_gap(deals, cfg)
+    fig_01b_sector_ladder(deals, cfg)
+    fig_02_coverage_gdp(deals, cfg)
+    fig_03_rate_by_year(deals, cfg)
+    fig_04_subdomain(deals, cfg)
+    fig_05_cycle(deals, cfg)
+    fig_06_share_crossover(deals, cfg)
+    fig_07_crisis(deals, cfg)
+    fig_08_instruments(deals, cfg)
+    fig_09_power_wall(deals, cfg)
+    fig_10_depth_need(deals, cfg, rng)
+    fig_11_continuity(deals, cfg)
+    fig_m1_censoring(cfg)
+    fig_m2_elasticity(deals, cfg)
 
 
 def main() -> None:
-    """Render every figure."""
+    """Render both variants of every figure.
+
+    Screen variants are standalone exhibits and keep their chrome. Print
+    variants carry axes, data and annotations only, sized to the text column so
+    that nothing is scaled in the document.
+    """
     cfg = load_config()
     cfg.ensure_dirs()
     rng = seed_everything(cfg)
     deals = read_parquet(cfg.path("data_processed") / "deals.parquet")
-    fig_01_double_gap_and_capital_intensity(deals, cfg)
-    fig_02_coverage_vs_gdp(deals, cfg)
-    fig_03_green_rate_by_year(deals, cfg)
-    fig_04_subdomain_resolution(deals, cfg)
-    fig_05_cycle(deals, cfg)
-    fig_06_green_share_of_all(deals, cfg)
-    fig_07_crisis_contraction(deals, cfg)
-    fig_08_instrument_mix(deals, cfg)
-    fig_09_cell_sizes(deals, cfg)
-    fig_11_depth_vs_need(deals, cfg, rng)
-    fig_12_continuity_india(deals, cfg)
-    fig_m1_censoring_artefact(cfg)
-    fig_m2_capital_intensity_regression(deals, cfg)
+
+    for mode in ("screen", "print"):
+        LOG.info("=" * 70)
+        LOG.info("building %s variants", mode)
+        theme.set_mode(mode)
+        seed_everything(cfg)
+        _build_all(deals, cfg, rng)
+    theme.set_mode("screen")
 
 
 if __name__ == "__main__":

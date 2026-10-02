@@ -119,6 +119,14 @@ def build(cfg: Config | None = None) -> dict[str, Any]:
     f["classifier.green_companies"] = f"{classif['counts']['green_headline']:,}"
     f["classifier.green_deals"] = f"{deal_diag['green_counts']['raw_deals']:,}"
     f["classifier.vetoed"] = f"{classif['counts']['tier_c_vetoed']:,}"
+    lex = cfg.lexicon
+    n_patterns = sum(len(b["patterns"]) for b in lex["subdomains"].values())
+    n_patterns += len(lex["general_unspecified"]["patterns"])
+    n_patterns += sum(len(b["patterns"]) for b in lex.get("gated_patterns", {}).values())
+    f["classifier.patterns"] = str(n_patterns)
+    f["classifier.exclusions"] = str(len(lex["exclusions"]))
+    f["data.blank_country_deals"] = f"{classif['country_recovery']['blank_before']:,}"
+    f["data.country_recovered"] = f"{classif['country_recovery']['recovered_total']:,}"
 
     # -- population by bloc ----------------------------------------------
     for bloc, n in desc["population"]["by_bloc"].items():
@@ -268,6 +276,21 @@ def build(cfg: Config | None = None) -> dict[str, Any]:
     f["india.vs_em_p"] = _p(lfl["india_vs_em_tier_b"]["p_value"])
 
     # -- reproducibility --------------------------------------------------
+    # The author block is read from report/metadata.yaml, which is its single
+    # source of truth; the README and the reproducibility statement render from
+    # these keys rather than restating four names in three places.
+    meta_path = cfg.root / "report" / "metadata.yaml"
+    if meta_path.is_file():
+        import re as _re
+
+        import yaml as _yaml
+
+        meta = _yaml.safe_load(_re.sub(r"^---\s*$", "", meta_path.read_text(), flags=_re.M))
+        f["meta.authors"] = "; ".join(f"{a['name']} ({a['usn']})" for a in meta["authors"])
+        f["meta.author_count"] = str(len(meta["authors"]))
+        f["meta.guide"] = meta["guide"]
+        f["meta.institution"] = meta["institution"]
+
     f["repro.commit"] = _git_hash(cfg)
     f["repro.dirty"] = "yes" if _dirty(cfg) else "no"
     f["repro.python"] = (

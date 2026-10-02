@@ -30,6 +30,112 @@ open data.] That is the paper's finding, not its limitation.
 
 #divider()
 
+== 4. Methodology
+<methodology>
+=== 4.1 The green classifier
+<the-green-classifier>
+Green status is assigned by a three-tier classifier whose every pattern lives in
+`config/green_lexicon.yaml`, not in code. Tier A is the snapshot's own `category_code`
+flag. Tier B is a case-insensitive lexicon of 135 regular expressions
+over the concatenated taxonomy, tag and description fields, mapped to eleven sub‑domains.
+Tier C is an exclusion list that vetoes Tier B hits.
+
+The headline definition is `green = TierA OR (TierB AND NOT TierC)`. Tier C never vetoes
+Tier A: a company the snapshot itself flags as cleantech is not removed by a lexicon
+exclusion. Agreement between the two independent tiers is κ = 0.850 on
+funded companies carrying a taxonomy.
+
+Three design choices in the lexicon are worth stating because each prevents a class of
+false positive. The bare token #emph[green] is not a trigger, only green-compounds: "Green" is
+a common surname and place name, and admitting it then subtracting the errors in Tier C is
+a losing game. The same applies to #emph[carbon], #emph[waste], #emph[organic] and #emph[clean]. A fossil-fuel
+veto was added after inspection showed that Crunchbase's `Energy` bucket mixes renewables
+with oil, gas and coal, so without it an upstream petroleum company classified as green.
+312 companies are vetoed in total, each with a recorded pattern and
+reason, reproduced in Appendix A.
+
+=== 4.2 Bloc assignment
+<bloc-assignment>
+Each deal takes the bloc its country held #strong[in the year the deal closed], derived from
+the World Bank's historical income classification. A deal in Poland in 2004 is not a deal
+in an advanced economy; a deal in Poland in 2013 is. China is reported separately
+throughout, mirroring Climate Policy Initiative's practice, and least developed countries
+are separated on the UN list with graduation years applied per year.
+
+Country codes required repair. The snapshot carries withdrawn ISO-3166-3 codes, and
+108,563 in-window deals carry no country at all. Recovery used the
+flat mirror's own country field first and domain top-level domains second, under an
+explicit allow-list. That allow-list is the methodological point: several country-code
+domains belong to emerging or least developed countries and are sold worldwide as vanity
+domains, so a naive mapping would have manufactured 127 Tuvaluan and 18 São Toméan
+ventures out of domain marketing, in a project whose finding is that such ventures are
+absent. All 23 refusals are enumerated in Appendix B.
+
+=== 4.3 Window, deflation and censoring
+<window-deflation-and-censoring>
+Amounts are converted to constant 2015 USD with the US GDP deflator; both the nominal and
+the real column are retained. Undisclosed amounts are encoded in the source as a literal
+zero rather than as null, which would have dragged every median toward zero while
+reporting complete coverage; 6,000 rows are affected and are
+nulled, never imputed.
+
+The window closes at 2012-12-31. The usual argument for truncating is
+recording lag, and that argument is secondary here. The primary one is differential
+coverage growth: Crunchbase's coverage expanded over the period and expanded faster for
+emerging markets than for the United States, which was near saturation early, so the final
+year is the most coverage-contaminated year for precisely the quantity the headline
+measures. #ref(<fig-censoring>) shows the censoring boundary measured rather than assumed.
+
+#method-exhibit("fig_m1_censoring") <fig-censoring>
+=== 4.4 Statistical approach
+<statistical-approach>
+Proportions carry Wilson score intervals rather than normal approximations, which
+misbehave on small proportions. Deal-size comparisons use rank-based tests because the
+distributions are heavy-tailed. Bootstrap intervals use
+10,000 resamples from a seeded generator. A minimum cell size of 30 was
+fixed in configuration before any hypothesis was tested, and no significance test is
+reported on a cell below it.
+
+Effect sizes are reported alongside every p-value. With tens of thousands of deals almost
+any difference reaches significance, so the question a reader needs answered is whether it
+matters: the instrument-mix χ² in §6.3 is significant at p = 1.2×10⁻⁷ on a Cramér's V of
+0.027, which is why the risk ratio is quoted in the text instead.
+28 tests across the family carry Benjamini-Hochberg adjusted p-values
+in Appendix D, of which 9 survive correction.
+
+The capital‑intensity model in §5.3 regresses log emerging‑market representation on log
+median advanced‑economy deal size across 23 sectors. The proxy is built
+from advanced‑economy deals only, so it cannot be contaminated by the emerging‑market
+composition it is used to explain. #ref(<fig-elasticity>) shows the fit.
+
+#method-exhibit("fig_m2_elasticity") <fig-elasticity>
+=== 4.5 Specifications fixed in advance
+<specifications-fixed-in-advance>
+Four judgement calls that change a headline number were fixed in configuration, with their
+reasoning recorded, before the relevant result was computed: whether a bare `Energy` tag
+admits a company as green, whether angel rounds count as funnel entry for the graduation
+analysis, that H3's grant arm is descriptive only below the minimum cell size, and that
+H4's extended observation window is permitted because it conditions on sample entry. Each
+is run both ways in the robustness appendix. Where a pre-commitment's assumption turned
+out to be wrong --- H4's assumed a direction when the binding failure was power --- that is
+recorded as void rather than quietly satisfied.
+
+=== 4.6 Reproducibility
+<reproducibility>
+This report was produced by 4 authors --- Kaizer Dewaswala (1RV23IS058); Md Asif Ali (1RV23IS069); Shaswat Kumar (1RV23IS110); Vansh Bharadwaj (1RV23IS134) --- under the
+guidance of Prof.~ChandraKumar R at the Department of Information Science & Engineering, RV College of Engineering. That list lives in
+`report/metadata.yaml` and is read from there by the title page, this statement and the
+README; it is not restated anywhere.
+
+`make all` reproduces every number from a clean checkout. All thirteen source files carry
+recorded SHA256 checksums, verified on each run, so a changed upstream file fails the
+build rather than silently changing a result. Every statistic in this report is injected
+from `outputs/findings.json`\; the renderer fails on an unresolved placeholder, so no
+number here was typed by hand. Commit d9d2854, Python 3.11.9, seed
+\20251001.
+
+#divider()
+
 == 5. The double gap
 <the-double-gap>
 === 5.1 Emerging markets are a fiftieth of the record and a fifth of world GDP
@@ -40,16 +146,16 @@ Over 2000--2012 emerging markets held 15.3--22.7% of world GDP and
 the reason the paper's headline result is measured #emph[within] the dataset rather than
 against the world.
 
-#exhibit("fig_02_coverage_vs_gdp", [Emerging-market share of world GDP against its share of recorded venture deals.]) <fig-coverage>
+#exhibit("fig_02_coverage_gdp") <fig-coverage>
 === 5.2 Conditional on being in the record, an emerging‑market company is half as likely to be green
 <conditional-on-being-in-the-record-an-emergingmarket-company-is-half-as-likely-to-be-green>
 1,309 emerging‑market deals carry 2.60% green
 \[1.86, 3.61\], against 5.43% \[5.20, 5.66\] across 37,896
 advanced‑economy deals. The difference is −2.83 percentage points
 \[−3.72, −1.94\]; the risk ratio is 0.479 \[0.343, 0.669\], z-test
-p = 7.5×10⁻⁶, Fisher's exact p = 1.3×10⁻⁶ (panel (a) of #ref(<fig-double-gap>)).
+p = 7.5×10⁻⁶, Fisher's exact p = 1.3×10⁻⁶ (#ref(<fig-double-gap>)).
 
-#exhibit("fig_01_double_gap_capital_intensity", [The double gap by bloc, and the sector representation ladder that qualifies it.]) <fig-double-gap>
+#exhibit("fig_01a_double_gap") <fig-double-gap>
 Both numerator and denominator are drawn from companies Crunchbase chose to index, so the
 result does not depend on the coverage gap in §5.1. Counting every deal with no recorded
 country as emerging‑market --- the most generous possible treatment --- gives
@@ -59,7 +165,7 @@ China, reported separately throughout, sits with the advanced economies rather t
 emerging markets. #ref(<fig-rate-by-year>) shows the two rates by year, with every
 emerging‑market cell annotated by its count.
 
-#exhibit("fig_03_green_rate_by_year", [Green share of recorded deals by bloc and year, emerging‑market counts annotated.]) <fig-rate-by-year>
+#exhibit("fig_03_rate_by_year") <fig-rate-by-year>
 #strong[Verdict: Supported.] Falsified if the emerging‑market green rate were
 indistinguishable from the advanced‑economy rate, or if the gap vanished under the upper
 bound.
@@ -70,9 +176,8 @@ Emerging-market venture capital in this period concentrated in capital-light con
 internet and avoided capital-intensive sectors as a class. Regressing log
 emerging‑market representation on log median advanced‑economy deal size across
 23 sectors gives an elasticity of −1.19
-\[−1.64, −0.75\], p = 1.5×10⁻⁵, R² = 0.60 (panel (b) of
-#ref(<fig-double-gap>)). Doubling a sector's capital intensity roughly halves
-its emerging‑market representation.
+\[−1.64, −0.75\], p = 1.5×10⁻⁵, R² = 0.60 (#ref(<fig-ladder>)). Doubling a sector's capital intensity roughly halves its
+emerging‑market representation.
 
 Cleantech sits #strong[above] the position that fit predicts, at
 1.92× \[0.75×, 4.91×\] of its predicted
@@ -80,11 +185,12 @@ representation. The interval includes 1, so outperformance is not established; w
 established is that there is no green‑specific penalty once capital intensity is
 accounted for. Biotech, by contrast, sits below its own prediction.
 
+#exhibit("fig_01b_sector_ladder") <fig-ladder>
 Green also took a larger share of venture dollars than of venture deals from 2005 onward
 (#ref(<fig-dollar-share>)), which is consistent with green being capital-intensive
 without testing the cross‑sector elasticity above.
 
-#exhibit("fig_06_green_share_of_all", [Green as a share of all recorded deals and of all disclosed dollars.]) <fig-dollar-share>
+#exhibit("fig_06_share_crossover") <fig-dollar-share>
 === 5.4 The taxonomy cannot say what kind of green
 <the-taxonomy-cannot-say-what-kind-of-green>
 88.2% of emerging‑market green deals carry no sub‑domain more
@@ -93,7 +199,7 @@ economies (#ref(<fig-subdomain>)). The mechanism is direct: 26 of the 28 emergin
 companies carry no other taxonomy tag at all. The planned sub‑domain mix comparison was
 cut, because the measurement failure shown here makes it impossible.
 
-#exhibit("fig_04_subdomain_resolution", [Share of green deals resolved to a specific sub‑domain, by bloc.]) <fig-subdomain>
+#exhibit("fig_04_subdomain") <fig-subdomain>
 
 #divider()
 
@@ -124,14 +230,14 @@ the close of the window, with a magnitude that depends on where the comparison s
 This is a size pattern, not an investor motive. The rotation out of hardware that Gaddy
 et al.~document is cited here as external evidence, not as something this dataset shows.
 
-#exhibit("fig_05_cycle", [Green deals and disclosed green funding, in counts and constant 2015 USD.]) <fig-cycle>
+#exhibit("fig_05_cycle") <fig-cycle>
 === 6.2 The crisis hit green and spared non-green, but the test does not identify it
 <the-crisis-hit-green-and-spared-non-green-but-the-test-does-not-identify-it>
 Across 2008--09, advanced‑economy green deals contracted
 −26.5% while non-green #strong[grew]
 13.5% (#ref(<fig-crisis>)).
 
-#exhibit("fig_07_crisis_contraction", [Deal volume indexed to 2007, by bloc and green status.]) <fig-crisis>
+#exhibit("fig_07_crisis") <fig-crisis>
 The difference‑in‑differences designed to test this does not identify it. Green deal
 volume was already growing 0.254 log-points per year faster than non-green
 before the event window, \[0.101, 0.408\], p = 0.001. Parallel trends fail,
@@ -149,7 +255,7 @@ non‑dilutive instruments --- grants, debt, post‑IPO debt --- against
 7.26% of non-green deals. The risk ratio is 1.433
 \[1.256, 1.636\], p = 1.2×10⁻⁷ (#ref(<fig-instrument>)).
 
-#exhibit("fig_08_instrument_mix", [Non-dilutive share of deals by bloc and green status.]) <fig-instrument>
+#exhibit("fig_08_instruments") <fig-instrument>
 The χ² on the full instrument mix is also significant, but its Cramér's V of
 0.027 falls below the conventional threshold for a small effect: with tens of
 thousands of deals the test detects a negligible association, and the risk ratio on the
@@ -187,7 +293,7 @@ Across 22 countries with enough green activity to measure, green
 funding per capita correlates with GDP per capita at ρ = 0.674
 \[0.298, 0.866\] (#ref(<fig-depth>)).
 
-#exhibit("fig_11_depth_vs_need", [Green funding intensity against market depth, beside the need regressor’s distribution.]) <fig-depth>
+#exhibit("fig_10_depth_need") <fig-depth>
 Green funding is extraordinarily concentrated: a Gini of
 0.917, with the top five countries holding 89.9% of all green dollars
 across 42 countries.
@@ -217,6 +323,6 @@ emerging‑market arm is biased by that same coding in a direction stated in adv
 #ref(<fig-cells>) puts the first four on one scale, against the minimum cell size fixed
 in config before any hypothesis was tested. No cell clears it.
 
-#exhibit("fig_09_cell_sizes", [Observations available in each emerging‑market test cell, against the minimum.]) <fig-cells>
+#exhibit("fig_09_power_wall") <fig-cells>
 These are six independent routes to one conclusion. The open venture record cannot
 support the capital-regime analysis the field needs.

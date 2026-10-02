@@ -8,7 +8,6 @@
 // did not. The palette, the serif display face and the rule colour below are
 // the same ones src/gcg/viz/theme.py uses, so the document and its figures read
 // as one artefact.
-
 #let ink = rgb("#141413")
 #let ink-muted = rgb("#6E6E68")
 #let rule-colour = rgb("#E3E1DA")
@@ -17,17 +16,25 @@
 // An exhibit: a vector figure with a one-line caption and a label for
 // cross-referencing. Captions stay short because every figure already carries a
 // finding-sentence title and a source footer of its own.
-#let exhibit(file, caption) = figure(
-  image("/outputs/figures/" + file + ".pdf", width: 100%),
-  caption: caption,
+// An exhibit embeds the PRINT variant: no baked-in title, subtitle or source
+// block, rendered at exactly the text-column width so nothing is scaled here.
+// Captions are injected by render.py from src/gcg/viz/print_mode.py, which is
+// their single source of truth. Writing one into the markdown lets it drift
+// from the spec the figure was built against, which is exactly what happened
+// once: a caption still described a series the figure no longer drew.
+#let CAPTIONS = state("captions", (:))
+
+#let exhibit(file) = figure(
+  image("/outputs/figures/print/" + file + "_print.pdf", width: 100%),
+  caption: context CAPTIONS.get().at(file, default: [MISSING CAPTION: #file]),
   supplement: [Figure],
   // Float rather than leaving a page-tall hole wherever the block will not fit.
   placement: auto,
 )
 
-#let method-exhibit(file, caption) = figure(
-  image("/outputs/figures/" + file + ".pdf", width: 100%),
-  caption: caption,
+#let method-exhibit(file) = figure(
+  image("/outputs/figures/print/" + file + "_print.pdf", width: 100%),
+  caption: context CAPTIONS.get().at(file, default: [MISSING CAPTION: #file]),
   supplement: [Figure],
   kind: "methodology",
   placement: auto,
@@ -36,14 +43,17 @@
 #let conf(
   title: none,
   subtitle: none,
-  author: none,
-  usn: none,
+  shorttitle: none,
+  footerright: none,
+  authors: (),
+  guide: none,
+  institution: none,
   course: none,
   date: none,
   wordcount: none,
   doc,
 ) = {
-  set document(title: title, author: author)
+  set document(title: title, author: authors.map(a => a.name))
 
   set page(
     paper: "a4",
@@ -59,9 +69,9 @@
       v(0.35em)
       grid(
         columns: (1fr, auto, 1fr),
-        align(left)[The Green Capital Gap],
+        align(left)[#shorttitle],
         align(center)[#counter(page).display("1")],
-        align(right)[#usn],
+        align(right)[#footerright],
       )
     },
     footer-descent: 1.1em,
@@ -78,17 +88,19 @@
     text(size: 15pt, weight: "semibold", it.body)
     v(0.45em, weak: true)
     line(length: 100%, stroke: 0.6pt + rule-colour)
-    v(0.5em, weak: true)
+    v(0.72em)
   }
   show heading.where(level: 2): it => {
-    v(1.15em, weak: true)
+    v(1.2em, weak: true)
     text(size: 11.5pt, weight: "semibold", it.body)
-    v(0.3em, weak: true)
+    // NOT weak: a weak space collapses against the paragraph that follows,
+    // which is why level-2 headings ran flush into their first line.
+    v(0.52em)
   }
   show heading.where(level: 3): it => {
-    v(0.9em, weak: true)
+    v(1.0em, weak: true)
     text(size: 10.5pt, weight: "semibold", style: "italic", it.body)
-    v(0.2em, weak: true)
+    v(0.42em)
   }
 
   show link: set text(fill: accent)
@@ -98,15 +110,18 @@
   ))
   show table.cell.where(y: 0): set text(weight: "semibold")
 
-  // Figures: caption below, small, muted, one line. The figures carry their
-  // own finding-sentence titles and source footers, so the caption only needs
-  // to name the exhibit.
-  set figure(gap: 0.9em)
+  // Figures: the caption now carries what the image used to. Print variants
+  // have no baked-in title, subtitle or source block, so those three tiers are
+  // set here in the document's own type rather than rasterised inside a PDF at
+  // a size nobody chose.
+  set figure(gap: 0.85em)
   show figure.caption: it => {
-    set text(size: 8.5pt, fill: ink-muted)
-    set par(justify: false, leading: 0.62em)
+    set text(size: 8.3pt, fill: ink-muted)
+    set par(justify: false, leading: 0.66em)
     align(left)[
-      #text(weight: "semibold", fill: ink)[#it.supplement #context it.counter.display(it.numbering).]
+      #text(weight: "semibold", fill: ink)[
+        #it.supplement #context it.counter.display(it.numbering).
+      ]
       #it.body
     ]
   }
@@ -120,21 +135,31 @@
   show quote: set text(style: "italic", fill: ink-muted)
 
   // ---- title page ----
-  v(5.5cm)
+  v(4.2cm)
   align(left)[
     #text(size: 26pt, weight: "semibold")[#title]
     #v(0.5em)
-    #text(size: 13pt, fill: ink-muted, style: "italic")[#subtitle]
-    #v(2.8cm)
+    #text(size: 12.5pt, fill: ink-muted, style: "italic")[#subtitle]
+    #v(2.4cm)
     #line(length: 38%, stroke: 0.8pt + ink)
-    #v(0.7em)
-    #text(size: 11pt)[#author]
+    #v(0.8em)
+    // The author list is read from report/metadata.yaml, which is the single
+    // source of truth for it; nothing here is typed twice.
+    #grid(
+      columns: (auto, auto),
+      column-gutter: 1.1em,
+      row-gutter: 0.42em,
+      ..authors.map(a => (
+        text(size: 10.5pt)[#a.name],
+        text(size: 10pt, fill: ink-muted)[#a.usn],
+      )).flatten()
+    )
+    #v(1.0em)
+    #text(size: 10pt, fill: ink-muted)[Under the guidance of #guide]
+    #v(0.9em)
+    #text(size: 10pt, fill: ink-muted)[#institution]
     #v(0.25em)
-    #text(size: 10pt, fill: ink-muted)[USN #usn]
-    #v(0.25em)
-    #text(size: 10pt, fill: ink-muted)[#course]
-    #v(0.25em)
-    #text(size: 10pt, fill: ink-muted)[#date]
+    #text(size: 10pt, fill: ink-muted)[#course #sym.dot.c #date]
     #v(0.25em)
     #text(size: 10pt, fill: ink-muted)[#wordcount words, excluding figures, tables, references and appendices]
   ]
