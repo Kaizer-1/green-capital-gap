@@ -322,7 +322,9 @@ Write these on a sticky note:
 
 ## 7. Report outline
 
-Target 3,500–4,500 words excluding figures, tables, references and appendices.
+Target 4,500–5,000 words excluding figures, tables, references and appendices, matching
+CLAUDE.md §10. The per-section word counts below are indicative weights, not a budget:
+they sum to about 7,000 and are meant to show relative emphasis.
 Restructured at build step 3 around the double gap.
 
 **Title page** — title, name, USN, course code, date, word count.
@@ -361,8 +363,8 @@ multiple-comparison correction. The pre-commitments. One paragraph on reproducib
 Gap one: coverage against economic weight, as the denominator check. Gap two: green rate
 conditional on dataset membership, by bloc, with intervals, the upper bound and the
 leave-one-out range. The `general_unspecified` rate as a measurement finding in its own
-right — the taxonomy cannot resolve green sub-domains in emerging markets, because 26 of
-28 emerging-market green companies carry no tag more specific than "Clean Technology".
+right — the taxonomy cannot resolve green sub-domains in emerging markets, because 23 of
+27 emerging-market green companies carry no tag more specific than "Clean Technology".
 Then the careful part: what the absence does and does not license, with the instrument
 argument given as external evidence and the competing explanation left open.
 

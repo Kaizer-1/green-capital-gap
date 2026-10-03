@@ -1,0 +1,1693 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Green Capital Gap</title>
+    <meta
+      name="description"
+      content="A deal-level analysis of cleantech venture funding in emerging economies, 2000–2012. Every statistic is computed by an open pipeline and resolved at runtime."
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap"
+    />
+    <script>
+      // Set before first paint so the no-JS fallbacks never flash. Without it
+      // the chart's reserved box collapses and its data table becomes visible.
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+  </head>
+
+  <body>
+    <div class="rail" aria-hidden="true"><div class="rail__fill"></div></div>
+
+    <main class="wrap">
+      <!-- ================================================== masthead -->
+      <header class="masthead">
+        <h1 class="masthead__title">The Green Capital Gap</h1>
+        <p class="masthead__subtitle">
+          A deal-level analysis of cleantech venture funding in emerging
+          economies, 2000–2012
+        </p>
+
+        <p class="masthead__standfirst">
+          An open-data study of where green venture capital went, and of why the
+          question it set out to answer cannot be answered from the open record.
+        </p>
+
+        <hr class="masthead__rule" />
+
+        <div class="byline">
+          <dl class="byline__authors" data-authors>
+          <dt>Kaizer Dewaswala</dt>
+          <dd>1RV23IS058</dd>
+          <dt>Md Asif Ali</dt>
+          <dd>1RV23IS069</dd>
+          <dt>Shaswat Kumar</dt>
+          <dd>1RV23IS110</dd>
+          <dt>Vansh Bharadwaj</dt>
+          <dd>1RV23IS134</dd>
+        </dl>
+          <p class="byline__line" data-meta="guide">Under the guidance of Prof. ChandraKumar R</p>
+          <p class="byline__line" data-meta="institution">Department of Information Science &amp; Engineering, RV College of Engineering</p>
+          <p class="byline__line" data-meta="course-date">Final Year Chapter Deliverable · October 2026</p>
+        </div>
+
+        <ul class="links">
+          <li><a href="../report/report.pdf">Read the full report (PDF)</a></li>
+          <li>
+            <a href="https://github.com/" data-meta="repo"
+              >Source and pipeline on GitHub</a
+            >
+          </li>
+        </ul>
+
+        <noscript>
+          <div class="noscript">
+            The statistics on this page are injected at build time, so the text
+            reads without JavaScript. The charts are drawn in the browser and
+            need it; each one is showing its data table instead. The
+            <a href="../report/report.pdf"
+              >full report is also available as a PDF</a
+            >.
+          </div>
+        </noscript>
+      </header>
+
+      <!-- ================================================== 1. the finding -->
+      <section class="section" id="finding" aria-labelledby="finding-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="finding-title">The finding</h2>
+
+        <p>
+          Emerging-market green entrepreneurship is almost absent from the open
+          venture record. What absence there is turns out not to be about green.
+        </p>
+
+        <p>
+          Across the Crunchbase 2013 Snapshot, classified by a three-tier
+          classifier whose two independent tiers agree closely, a company that
+          is
+          <em>already in the record</em> is half as likely to be green if it is
+          emerging-market as if it is advanced-economy.
+        </p>
+
+        <dl class="stats">
+          <div class="stat">
+            <dt class="stat__label">
+              of emerging-market deals are green, across
+              <span data-key="pop.em_deals">1,309</span> deals
+            </dt>
+            <dd class="stat__value" data-key="h1.em_rate_pct" data-suffix="%">2.60%</dd>
+            <dd class="stat__interval" data-key="h1.em_ci">[1.86, 3.61]</dd>
+          </div>
+          <div class="stat">
+            <dt class="stat__label">
+              of advanced-economy deals are green, across
+              <span data-key="pop.ae_deals">37,896</span> deals
+            </dt>
+            <dd class="stat__value" data-key="h1.ae_rate_pct" data-suffix="%">5.43%</dd>
+            <dd class="stat__interval" data-key="h1.ae_ci">[5.20, 5.66]</dd>
+          </div>
+          <div class="stat">
+            <dt class="stat__label">risk ratio, emerging against advanced</dt>
+            <dd class="stat__value" data-key="h1.rr">0.479</dd>
+            <dd class="stat__interval">
+              <span data-key="h1.rr_ci">[0.343, 0.669]</span> ·
+              <span class="nowrap"
+                >p = <span data-key="h1.p">7.5×10⁻⁶</span></span
+              >
+            </dd>
+          </div>
+        </dl>
+
+        <p>
+          The gap survives every green definition tested, every bloc scheme, and
+          a permutation test in which no label shuffle reaches the observed
+          value. Counting every unattributable deal as emerging-market — the
+          most generous reading available — still leaves it open<span
+            >, at <span data-key="h1.ub_em_rate_pct">3.46</span>% against
+            <span data-key="h1.ae_rate_pct">5.43</span>%</span
+          >.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig02"></div>
+          <div class="figure__table" data-table="fig02_double_gap"><table><caption>Green share of recorded venture deals by bloc, 2000 to 2012.</caption><thead><tr><th scope="col">Bloc</th><th scope="col">Green share of deals</th><th scope="col">95% CI</th><th scope="col">Deals</th><th scope="col">Green deals</th></tr></thead><tbody><tr><td>Advanced economies</td><td>5.43%</td><td>[5.20, 5.66]</td><td>37,896</td><td>2,056</td></tr><tr><td>China</td><td>5.54%</td><td>[3.61, 8.40]</td><td>361</td><td>20</td></tr><tr><td>No country recorded</td><td>4.19%</td><td>[3.30, 5.32]</td><td>1,526</td><td>64</td></tr><tr><td>Emerging markets</td><td>2.60%</td><td>[1.86, 3.61]</td><td>1,309</td><td>34</td></tr><tr><td>Least developed</td><td>0.00%</td><td>not reported</td><td>13</td><td>0</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >In the record, an emerging-market company is half as likely to be
+              green.</b
+            >
+            Green share of recorded venture deals by bloc, 2000–2012. Intervals
+            are Wilson score. The hollow marker on the emerging-market row is
+            the upper bound, with every unattributable deal counted as
+            emerging-market. China is reported separately throughout because it
+            is not distinguishable from advanced economies (risk ratio
+            <span data-key="china.rr">1.02</span>, p =
+            <span data-key="china.p">0.924</span>). The least-developed row
+            carries no usable interval: its upper bound runs past the axis,
+            which is what thirteen deals and no green ones looks like.
+          </figcaption>
+          <p class="figure__source">
+            Crunchbase 2013 Snapshot (CC BY 4.0); authors' calculations. n =
+            <span data-key="data.deals_in_window">41,105</span> deals,
+            <span data-key="classifier.green_deals">2,174</span> green;
+            inter-tier agreement &kappa; =
+            <span data-key="classifier.kappa">0.850</span>. Headline is raw
+            classifier output; the bias-corrected specification gives
+            <span data-key="h1.bias_rr">0.43</span>
+            <span data-key="h1.bias_rr_ci">[0.26, 0.64]</span>.
+          </p>
+        </figure>
+
+        <p>
+          That gap is <strong>not green-specific</strong>. Across the sectors
+          with enough deals to measure, emerging-market representation falls
+          roughly in proportion to how capital-intensive a sector is<span
+            >, an elasticity of <span data-key="h1b.elasticity">−1.19</span>
+            <span data-key="h1b.elasticity_ci">[−1.64, −0.75]</span> explaining
+            <span data-key="h1b.r2">0.60</span> of the cross-sector
+            variance</span
+          >. Biotech sits further below proportionate representation than
+          cleantech does. Cleantech's residual from that fit is <em>positive</em
+          ><span
+            >, at <span data-key="h1b.cleantech_residual">1.92×</span>
+            <span data-key="h1b.cleantech_residual_ci"
+              >[0.75×, 4.91×]</span>
+        <h2 class="section__title" id="record-title">Why this is hard</h2>
+
+        <p>
+          Deal-level evidence on emerging-market green finance is rare because
+          it is paywalled. The open alternative is the Crunchbase 2013 Snapshot,
+          and its frontier stops where it does for a reason: the snapshot's
+          final months are incomplete, and coverage grew faster for emerging
+          markets than for the United States, which saturated early. The last
+          year in the file is therefore the most coverage-contaminated year for
+          exactly the quantity this paper measures, so the window closes at the
+          end of
+          <span data-key="data.window_end">2012</span>.
+        </p>
+
+        <p>
+          That leaves a second problem, and it is the one that shapes everything
+          after. Emerging markets are a fiftieth of the record and a fifth of
+          world GDP.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig01"></div>
+          <div class="figure__table" data-table="fig01_coverage"><table><caption>Emerging-market share of world GDP against its share of recorded venture deals, by year.</caption><thead><tr><th scope="col">Year</th><th scope="col">Share of world GDP</th><th scope="col">Share of recorded deals</th><th scope="col">Gap</th></tr></thead><tbody><tr><td>2000</td><td>17.71%</td><td>6.4%</td><td>11.31 pp</td></tr><tr><td>2001</td><td>15.89%</td><td>3.23%</td><td>12.67 pp</td></tr><tr><td>2002</td><td>15.32%</td><td>1.74%</td><td>13.58 pp</td></tr><tr><td>2003</td><td>15.39%</td><td>1.95%</td><td>13.44 pp</td></tr><tr><td>2004</td><td>15.72%</td><td>2.45%</td><td>13.28 pp</td></tr><tr><td>2005</td><td>17.36%</td><td>2.04%</td><td>15.32 pp</td></tr><tr><td>2006</td><td>18.57%</td><td>2.37%</td><td>16.2 pp</td></tr><tr><td>2007</td><td>19.68%</td><td>2.43%</td><td>17.25 pp</td></tr><tr><td>2008</td><td>20.77%</td><td>3.19%</td><td>17.58 pp</td></tr><tr><td>2009</td><td>19.4%</td><td>2.8%</td><td>16.6 pp</td></tr><tr><td>2010</td><td>21.8%</td><td>3.24%</td><td>18.56 pp</td></tr><tr><td>2011</td><td>22.74%</td><td>3.67%</td><td>19.07 pp</td></tr><tr><td>2012</td><td>19.75%</td><td>3.51%</td><td>16.23 pp</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >Emerging markets hold a fifth of world GDP and a fiftieth of the
+              venture record.</b
+            >
+            Emerging-market share of world GDP against its share of recorded
+            venture deals, 2000–2012. GDP shares are computed over the same
+            country set the bloc panel covers, so the two series are comparable
+            by construction.
+          </figcaption>
+          <p class="figure__source">
+            Across the window emerging markets hold
+            <span data-key="measure.em_gdp_share_range">15.3–22.7%</span> of
+            world GDP against
+            <span data-key="measure.em_deal_share_range">1.7–6.4%</span> of
+            recorded venture deals, an under-representation of
+            <span data-key="measure.under_rep_range">2.8–8.8×</span>.
+          </p>
+        </figure>
+
+        <p>
+          This is the denominator check. It is why the headline result is
+          measured
+          <em>within</em> the dataset, conditional on a company already being
+          indexed, rather than against the world: that comparison does not
+          require the blocs to be covered equally.
+        </p>
+      </section>
+
+      <!-- ================================================== method note -->
+      <section class="section" id="window" aria-labelledby="window-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="window-title">
+          Why the window closes in 2012
+        </h2>
+
+        <p>
+          The usual argument for truncating a snapshot is recording lag. Here
+          that argument is secondary. The primary one is differential coverage
+          growth, and the censoring boundary is established by measurement
+          rather than assumed.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="figM1"></div>
+          <div class="figure__table" data-table="figM1_censoring"><table><caption>Monthly deals as a share of their own year, 2011 to 2013.</caption><thead><tr><th scope="col">Month</th><th scope="col">2011 share of its year</th><th scope="col">2012 share of its year</th><th scope="col">2013 share of its year</th></tr></thead><tbody><tr><td>1</td><td>11.02%</td><td>12.21%</td><td>9.25%</td></tr><tr><td>2</td><td>7.23%</td><td>6.36%</td><td>6.68%</td></tr><tr><td>3</td><td>8.02%</td><td>8.15%</td><td>7.81%</td></tr><tr><td>4</td><td>7.59%</td><td>8.45%</td><td>8.37%</td></tr><tr><td>5</td><td>7.93%</td><td>8.32%</td><td>8.59%</td></tr><tr><td>6</td><td>8.75%</td><td>8.57%</td><td>9.38%</td></tr><tr><td>7</td><td>7.93%</td><td>9.06%</td><td>9.19%</td></tr><tr><td>8</td><td>8.99%</td><td>8.24%</td><td>8.82%</td></tr><tr><td>9</td><td>8.72%</td><td>7.56%</td><td>9.61%</td></tr><tr><td>10</td><td>7.87%</td><td>8.95%</td><td>9.93%</td></tr><tr><td>11</td><td>7.92%</td><td>7.14%</td><td>8.53%</td></tr><tr><td>12</td><td>8.04%</td><td>6.99%</td><td>3.83%</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >Only December 2013 is censored, which is why the window closes at
+              2012.</b
+            >
+            Monthly deals as a share of their own year, 2011–2013. Expressing
+            each month as a share of its own year removes the level difference
+            between years, so the shapes are comparable. December 2013 holds
+            <span data-key="censor.dec_2013_pct">3.8</span>% of its year against
+            a <span data-key="censor.dec_baseline_pct">7.5</span>% baseline.
+          </figcaption>
+          <p class="figure__source">
+            November 2013 is above both earlier years (<span
+              data-key="censor.nov_counts"
+              >729 / 712 / 944</span>
+        <h2 class="section__title" id="gap-title">The gap over time</h2>
+
+        <p>
+          The gap is not constant. In 2008, at the peak of Cleantech 1.0, the
+          two rates converge to within a sixth of a percentage point —
+          <span data-key="h2.parity_em_rate_pct">10.08</span>% against
+          <span data-key="h2.parity_ae_rate_pct">10.26</span>%. It opens only
+          after the crash.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig03"></div>
+          <div class="figure__table" data-table="fig03_rate_by_year"><table><caption>Green share of recorded deals by bloc and year. No emerging-market year-cell reaches the minimum cell size of 30 green deals.</caption><thead><tr><th scope="col">Year</th><th scope="col">Advanced economies rate</th><th scope="col">Advanced economies green deals</th><th scope="col">Emerging markets rate</th><th scope="col">Emerging markets green deals</th></tr></thead><tbody><tr><td>2000</td><td>0.0%</td><td>0</td><td>0.0%</td><td>0</td></tr><tr><td>2001</td><td>1.2%</td><td>1</td><td>0.0%</td><td>0</td></tr><tr><td>2002</td><td>3.85%</td><td>4</td><td>0.0%</td><td>0</td></tr><tr><td>2003</td><td>2.88%</td><td>4</td><td>0.0%</td><td>0</td></tr><tr><td>2004</td><td>4.18%</td><td>11</td><td>0.0%</td><td>0</td></tr><tr><td>2005</td><td>1.76%</td><td>27</td><td>0.0%</td><td>0</td></tr><tr><td>2006</td><td>2.59%</td><td>58</td><td>0.0%</td><td>0</td></tr><tr><td>2007</td><td>4.17%</td><td>126</td><td>1.28%</td><td>1</td></tr><tr><td>2008</td><td>10.26%</td><td>347</td><td>10.08%</td><td>12</td></tr><tr><td>2009</td><td>6.89%</td><td>255</td><td>3.48%</td><td>4</td></tr><tr><td>2010</td><td>6.01%</td><td>340</td><td>2.0%</td><td>4</td></tr><tr><td>2011</td><td>5.48%</td><td>464</td><td>2.09%</td><td>7</td></tr><tr><td>2012</td><td>4.55%</td><td>419</td><td>1.72%</td><td>6</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >The two rates met in 2008, at the peak of Cleantech 1.0, then
+              diverged.</b
+            >
+            Green share of recorded deals by bloc and year, 2000–2012. Every
+            emerging-market point is marked, because no emerging-market
+            year-cell reaches the minimum cell size of
+            <span data-key="power.min_cell">30</span> green deals — the largest
+            is <span data-key="h2.em_largest_cell">12</span>, in 2008.
+          </figcaption>
+          <p class="figure__source">
+            No per-year test is reported and this figure is descriptive only.
+            Hovering a year gives its cell sizes, which is what the test would
+            have needed.
+          </p>
+        </figure>
+      </section>
+
+      <!-- ================================================== capital intensity -->
+      <section
+        class="section scrolly"
+        id="capital"
+        aria-labelledby="capital-title"
+      >
+        <span class="section__number"></span>
+        <h2 class="section__title" id="capital-title">
+          The gap is a capital-intensity gap
+        </h2>
+
+        <p>
+          Emerging-market venture capital in this period concentrated in
+          capital-light consumer internet and avoided capital-intensive sectors
+          as a class. Cleantech's position follows from where it sits on that
+          gradient, not from anything about being green.
+        </p>
+
+        <div class="scrolly__layout wide">
+          <div class="scrolly__steps">
+            <div class="scrolly__step">
+              <div class="scrolly__step-graphic"></div>
+              <p>
+                <b>Twenty-three sectors</b>, at their emerging-market
+                representation relative to advanced economies. Above the dashed
+                line a sector is over-represented; below it, under-represented.
+                Cleantech is coloured, but nothing about it is remarkable yet.
+              </p>
+            </div>
+
+            <div class="scrolly__step">
+              <div class="scrolly__step-graphic"></div>
+              <p>
+                <b>Re-scale the horizontal axis to capital intensity</b> — the
+                median advanced-economy deal size in each sector — and the dots
+                migrate into a relationship. Representation falls roughly in
+                proportion to how much capital a sector needs per firm: an
+                elasticity of
+                <span data-key="h1b.elasticity">−1.19</span>
+                <span data-key="h1b.elasticity_ci">[−1.64, −0.75]</span>,
+                explaining <span data-key="h1b.r2">0.60</span> of the variance
+                across <span data-key="h1b.n_sectors">23</span> sectors.
+              </p>
+            </div>
+
+            <div class="scrolly__step">
+              <div class="scrolly__step-graphic"></div>
+              <p>
+                <b>The fit predicts a position for every sector.</b> The hollow
+                markers are those predictions and the segments are the residuals
+                — how far each sector sits from where its capital intensity says
+                it should. Biotech is
+                <span data-key="h1b.biotech_vs_cleantech">4.6×</span> further
+                below proportionate representation than cleantech is.
+              </p>
+            </div>
+
+            <div class="scrolly__step">
+              <div class="scrolly__step-graphic"></div>
+              <p>
+                <b>Cleantech sits above its prediction, not below it.</b> Its
+                residual is positive at
+                <span data-key="h1b.cleantech_residual">1.92×</span>
+                <span data-key="h1b.cleantech_residual_ci">[0.75×, 4.91×]</span> sectors, 2000–2012. Capital
+            intensity is median advanced-economy deal size in constant 2015 USD,
+            so the proxy cannot be contaminated by the emerging-market
+            composition it explains.
+          </figcaption>
+          <p class="figure__source">
+            Ordinary least squares on logs; the line is the model's fitted
+            values. Elasticity <span data-key="h1b.elasticity">−1.19</span>
+            <span data-key="h1b.elasticity_ci">[−1.64, −0.75]</span>, R² =
+            <span data-key="h1b.r2">0.60</span>, p =
+            <span data-key="h1b.p">1.5×10⁻⁵</span>.
+          </p>
+        </figure>
+      </section>
+
+
+      <!-- ================================================== capital intensity -->
+      <section class="section scrolly" id="capital" aria-labelledby="capital-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="capital-title">The gap is a capital-intensity gap</h2>
+
+        <p>
+          Emerging-market venture capital in this period concentrated in capital-light
+          consumer internet and avoided capital-intensive sectors as a class. Cleantech's
+          position follows from where it sits on that gradient, not from anything about
+          being green.
+        </p>
+
+        <div class="scrolly__layout">
+          <div class="scrolly__graphic">
+            <div class="figure__frame" data-figure="fig04"></div>
+            <div class="toggle" data-scrolly-toggle></div>
+          </div>
+
+          <div class="scrolly__steps">
+            <div class="scrolly__step">
+              <p>
+                <b>Twenty-three sectors</b>, at their emerging-market representation
+                relative to advanced economies. Above the dashed line a sector is
+                over-represented; below it, under-represented. Cleantech is coloured, but
+                nothing about it is remarkable yet.
+              </p>
+            </div>
+
+            <div class="scrolly__step">
+              <p>
+                <b>Re-scale the horizontal axis to capital intensity</b> — the median
+                advanced-economy deal size in each sector — and the dots migrate into a
+                relationship. Representation falls roughly in proportion to how much
+                capital a sector needs per firm: an elasticity of
+                <span data-key="h1b.elasticity">−1.19</span>
+                <span data-key="h1b.elasticity_ci">[−1.64, −0.75]</span>, explaining
+                <span data-key="h1b.r2">0.60</span> of the variance across
+                <span data-key="h1b.n_sectors">23</span> sectors.
+              </p>
+            </div>
+
+            <div class="scrolly__step">
+              <p>
+                <b>The fit predicts a position for every sector.</b> The hollow markers are
+                those predictions and the segments are the residuals — how far each sector
+                sits from where its capital intensity says it should. Biotech is
+                <span data-key="h1b.biotech_vs_cleantech">4.6×</span> further below
+                proportionate representation than cleantech is.
+              </p>
+            </div>
+
+            <div class="scrolly__step">
+              <p>
+                <b>Cleantech sits above its prediction, not below it.</b> Its residual is
+                positive at <span data-key="h1b.cleantech_residual">1.92×</span>
+                <span data-key="h1b.cleantech_residual_ci">[0.75×, 4.91×]</span>. The interval includes 1,
+                so outperformance is not confirmed — but a green-specific penalty is ruled
+                out. After controlling for capital intensity there is no evidence green was
+                punished beyond its capital needs, and the point estimate runs the other
+                way.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <figure class="figure wide extra-wide">
+          <div class="figure__table" data-table="fig04_ladder"><table><caption>Emerging-market representation relative to advanced economies, by sector, against each sector&#x27;s capital intensity and the position the fit predicts.</caption><thead><tr><th scope="col">Sector</th><th scope="col">Observed representation</th><th scope="col">Predicted</th><th scope="col">Capital intensity (USD)</th><th scope="col">EM deals</th><th scope="col">AE deals</th></tr></thead><tbody><tr><td>biotech</td><td>0.117×</td><td>0.506×</td><td>4,590,306</td><td>18</td><td>4,471</td></tr><tr><td>hardware</td><td>0.335×</td><td>0.762×</td><td>3,257,185</td><td>15</td><td>1,295</td></tr><tr><td>enterprise</td><td>0.363×</td><td>0.705×</td><td>3,474,331</td><td>31</td><td>2,475</td></tr><tr><td>cleantech</td><td>0.54×</td><td>0.282×</td><td>7,488,748</td><td>29</td><td>1,556</td></tr><tr><td>network_hosting</td><td>0.594×</td><td>0.396×</td><td>5,635,023</td><td>15</td><td>731</td></tr><tr><td>&lt;none&gt;</td><td>0.745×</td><td>1.156×</td><td>2,297,535</td><td>23</td><td>894</td></tr><tr><td>software</td><td>0.793×</td><td>0.851×</td><td>2,968,530</td><td>156</td><td>5,695</td></tr><tr><td>analytics</td><td>0.819×</td><td>1.248×</td><td>2,155,194</td><td>27</td><td>955</td></tr><tr><td>advertising</td><td>0.991×</td><td>0.781×</td><td>3,191,344</td><td>62</td><td>1,812</td></tr><tr><td>public_relations</td><td>1.175×</td><td>0.689×</td><td>3,542,067</td><td>17</td><td>419</td></tr><tr><td>games_video</td><td>1.267×</td><td>1.21×</td><td>2,211,402</td><td>69</td><td>1,577</td></tr><tr><td>mobile</td><td>1.339×</td><td>1.295×</td><td>2,088,668</td><td>119</td><td>2,573</td></tr><tr><td>web</td><td>1.394×</td><td>2.178×</td><td>1,352,406</td><td>151</td><td>3,136</td></tr><tr><td>finance</td><td>1.683×</td><td>1.085×</td><td>2,422,853</td><td>35</td><td>602</td></tr><tr><td>consulting</td><td>1.692×</td><td>0.934×</td><td>2,747,308</td><td>18</td><td>308</td></tr><tr><td>search</td><td>1.828×</td><td>1.981×</td><td>1,463,779</td><td>24</td><td>380</td></tr><tr><td>other</td><td>2.032×</td><td>1.765×</td><td>1,612,132</td><td>36</td><td>513</td></tr><tr><td>education</td><td>2.418×</td><td>2.589×</td><td>1,170,159</td><td>38</td><td>455</td></tr><tr><td>fashion</td><td>2.702×</td><td>1.281×</td><td>2,108,115</td><td>21</td><td>225</td></tr><tr><td>social</td><td>2.808×</td><td>4.091×</td><td>797,836</td><td>61</td><td>629</td></tr><tr><td>hospitality</td><td>2.99×</td><td>2.608×</td><td>1,162,717</td><td>22</td><td>213</td></tr><tr><td>ecommerce</td><td>3.666×</td><td>2.041×</td><td>1,427,501</td><td>186</td><td>1,469</td></tr><tr><td>travel</td><td>3.844×</td><td>2.831×</td><td>1,085,728</td><td>32</td><td>241</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b>Capital intensity drives the pattern, and green beats its prediction.</b>
+            Emerging-market representation relative to advanced economies across
+            <span data-key="h1b.n_sectors">23</span> sectors, 2000–2012. Capital intensity is
+            median advanced-economy deal size in constant 2015 USD, so the proxy cannot be
+            contaminated by the emerging-market composition it explains.
+          </figcaption>
+          <p class="figure__source">
+            Ordinary least squares on logs; the line is the model's fitted values.
+            Elasticity <span data-key="h1b.elasticity">−1.19</span>
+            <span data-key="h1b.elasticity_ci">[−1.64, −0.75]</span>, R² =
+            <span data-key="h1b.r2">0.60</span>, p = <span data-key="h1b.p">1.5×10⁻⁵</span>.
+          </p>
+        </figure>
+      </section>
+
+
+      <!-- ================================================== capital intensity -->
+      <section class="section scrolly" id="capital" aria-labelledby="capital-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="capital-title">The gap is a capital-intensity gap</h2>
+
+        <p>
+          Emerging-market venture capital in this period concentrated in capital-light
+          consumer internet and avoided capital-intensive sectors as a class. Cleantech's
+          position follows from where it sits on that gradient, not from anything about
+          being green.
+        </p>
+
+        <div class="scrolly__layout">
+          <div class="scrolly__graphic">
+            <div class="figure__frame" data-figure="fig04"></div>
+            <div class="toggle" data-scrolly-toggle></div>
+          </div>
+
+          <div class="scrolly__steps">
+            <div class="scrolly__step">
+              <p>
+                <b>Twenty-three sectors</b>, at their emerging-market representation
+                relative to advanced economies. Above the dashed line a sector is
+                over-represented; below it, under-represented. Cleantech is coloured, but
+                nothing about it is remarkable yet.
+              </p>
+            </div>
+
+            <div class="scrolly__step">
+              <p>
+                <b>Re-scale the horizontal axis to capital intensity</b> — the median
+                advanced-economy deal size in each sector — and the dots migrate into a
+                relationship. Representation falls roughly in proportion to how much
+                capital a sector needs per firm: an elasticity of
+                <span data-key="h1b.elasticity">−1.19</span>
+                <span data-key="h1b.elasticity_ci">[−1.64, −0.75]</span>, explaining
+                <span data-key="h1b.r2">0.60</span> of the variance across
+                <span data-key="h1b.n_sectors">23</span> sectors.
+              </p>
+            </div>
+
+            <div class="scrolly__step">
+              <p>
+                <b>The fit predicts a position for every sector.</b> The hollow markers are
+                those predictions and the segments are the residuals — how far each sector
+                sits from where its capital intensity says it should. Biotech is
+                <span data-key="h1b.biotech_vs_cleantech">4.6×</span> further below
+                proportionate representation than cleantech is.
+              </p>
+            </div>
+
+            <div class="scrolly__step">
+              <p>
+                <b>Cleantech sits above its prediction, not below it.</b> Its residual is
+                positive at <span data-key="h1b.cleantech_residual">1.92×</span>
+                <span data-key="h1b.cleantech_residual_ci">[0.75×, 4.91×]</span>. The interval includes 1,
+                so outperformance is not confirmed — but a green-specific penalty is ruled
+                out. After controlling for capital intensity there is no evidence green was
+                punished beyond its capital needs, and the point estimate runs the other
+                way.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <figure class="figure wide extra-wide">
+          <div class="figure__table" data-table="fig04_ladder"><table><caption>Emerging-market representation relative to advanced economies, by sector, against each sector&#x27;s capital intensity and the position the fit predicts.</caption><thead><tr><th scope="col">Sector</th><th scope="col">Observed representation</th><th scope="col">Predicted</th><th scope="col">Capital intensity (USD)</th><th scope="col">EM deals</th><th scope="col">AE deals</th></tr></thead><tbody><tr><td>biotech</td><td>0.117×</td><td>0.506×</td><td>4,590,306</td><td>18</td><td>4,471</td></tr><tr><td>hardware</td><td>0.335×</td><td>0.762×</td><td>3,257,185</td><td>15</td><td>1,295</td></tr><tr><td>enterprise</td><td>0.363×</td><td>0.705×</td><td>3,474,331</td><td>31</td><td>2,475</td></tr><tr><td>cleantech</td><td>0.54×</td><td>0.282×</td><td>7,488,748</td><td>29</td><td>1,556</td></tr><tr><td>network_hosting</td><td>0.594×</td><td>0.396×</td><td>5,635,023</td><td>15</td><td>731</td></tr><tr><td>&lt;none&gt;</td><td>0.745×</td><td>1.156×</td><td>2,297,535</td><td>23</td><td>894</td></tr><tr><td>software</td><td>0.793×</td><td>0.851×</td><td>2,968,530</td><td>156</td><td>5,695</td></tr><tr><td>analytics</td><td>0.819×</td><td>1.248×</td><td>2,155,194</td><td>27</td><td>955</td></tr><tr><td>advertising</td><td>0.991×</td><td>0.781×</td><td>3,191,344</td><td>62</td><td>1,812</td></tr><tr><td>public_relations</td><td>1.175×</td><td>0.689×</td><td>3,542,067</td><td>17</td><td>419</td></tr><tr><td>games_video</td><td>1.267×</td><td>1.21×</td><td>2,211,402</td><td>69</td><td>1,577</td></tr><tr><td>mobile</td><td>1.339×</td><td>1.295×</td><td>2,088,668</td><td>119</td><td>2,573</td></tr><tr><td>web</td><td>1.394×</td><td>2.178×</td><td>1,352,406</td><td>151</td><td>3,136</td></tr><tr><td>finance</td><td>1.683×</td><td>1.085×</td><td>2,422,853</td><td>35</td><td>602</td></tr><tr><td>consulting</td><td>1.692×</td><td>0.934×</td><td>2,747,308</td><td>18</td><td>308</td></tr><tr><td>search</td><td>1.828×</td><td>1.981×</td><td>1,463,779</td><td>24</td><td>380</td></tr><tr><td>other</td><td>2.032×</td><td>1.765×</td><td>1,612,132</td><td>36</td><td>513</td></tr><tr><td>education</td><td>2.418×</td><td>2.589×</td><td>1,170,159</td><td>38</td><td>455</td></tr><tr><td>fashion</td><td>2.702×</td><td>1.281×</td><td>2,108,115</td><td>21</td><td>225</td></tr><tr><td>social</td><td>2.808×</td><td>4.091×</td><td>797,836</td><td>61</td><td>629</td></tr><tr><td>hospitality</td><td>2.99×</td><td>2.608×</td><td>1,162,717</td><td>22</td><td>213</td></tr><tr><td>ecommerce</td><td>3.666×</td><td>2.041×</td><td>1,427,501</td><td>186</td><td>1,469</td></tr><tr><td>travel</td><td>3.844×</td><td>2.831×</td><td>1,085,728</td><td>32</td><td>241</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b>Capital intensity drives the pattern, and green beats its prediction.</b>
+            Emerging-market representation relative to advanced economies across
+            <span data-key="h1b.n_sectors">23</span> sectors, 2000–2012. Capital intensity is
+            median advanced-economy deal size in constant 2015 USD, so the proxy cannot be
+            contaminated by the emerging-market composition it explains.
+          </figcaption>
+          <p class="figure__source">
+            Ordinary least squares on logs; the line is the model's fitted values.
+            Elasticity <span data-key="h1b.elasticity">−1.19</span>
+            <span data-key="h1b.elasticity_ci">[−1.64, −0.75]</span>, R² =
+            <span data-key="h1b.r2">0.60</span>, p = <span data-key="h1b.p">1.5×10⁻⁵</span>.
+          </p>
+        </figure>
+      </section>
+
+      <!-- ================================================== 5. what the record cannot say -->
+      <section
+        class="section"
+        id="cannot-say"
+        aria-labelledby="cannot-say-title"
+      >
+        <span class="section__number"></span>
+        <h2 class="section__title" id="cannot-say-title">
+          What the record cannot say
+        </h2>
+
+        <p>
+          Green deals were larger than average deals, and from 2005 green took a
+          bigger share of venture dollars than of deals. That is consistent with
+          green being capital-intensive. It does not test the cross-sector
+          elasticity; that is a different claim.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig05"></div>
+          <div class="figure__table" data-table="fig05_share_crossover"><table><caption>Green as a share of all recorded deals and of all disclosed dollars, by year.</caption><thead><tr><th scope="col">Year</th><th scope="col">Share of green deals</th><th scope="col">Share of green dollars</th><th scope="col">Green deals</th></tr></thead><tbody><tr><td>2000</td><td>0.0%</td><td>0.0%</td><td>0</td></tr><tr><td>2001</td><td>1.08%</td><td>0.54%</td><td>1</td></tr><tr><td>2002</td><td>3.48%</td><td>0.72%</td><td>4</td></tr><tr><td>2003</td><td>3.25%</td><td>1.27%</td><td>5</td></tr><tr><td>2004</td><td>3.85%</td><td>2.56%</td><td>11</td></tr><tr><td>2005</td><td>1.73%</td><td>1.76%</td><td>28</td></tr><tr><td>2006</td><td>2.58%</td><td>3.41%</td><td>62</td></tr><tr><td>2007</td><td>4.04%</td><td>8.88%</td><td>130</td></tr><tr><td>2008</td><td>10.35%</td><td>19.42%</td><td>386</td></tr><tr><td>2009</td><td>6.63%</td><td>14.32%</td><td>272</td></tr><tr><td>2010</td><td>5.79%</td><td>16.31%</td><td>358</td></tr><tr><td>2011</td><td>5.25%</td><td>11.05%</td><td>480</td></tr><tr><td>2012</td><td>4.4%</td><td>9.65%</td><td>437</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >From 2005, green took a bigger share of venture dollars than of
+              deals.</b
+            >
+            Green as a share of all recorded deals and of all disclosed dollars,
+            2000–2012, in constant 2015 USD. The ordering reverses before 2005
+            on very thin cells (<span data-key="measure.thin_cells_pre2005"
+              >2001 n=1, 2002 n=4, 2003 n=5, 2004 n=11</span>% in
+            <span data-key="cycle.peak_dollar_share_year">2008</span>, against
+            <span data-key="cycle.count_share_at_peak_pct">10.4</span>% of
+            deals.
+          </p>
+        </figure>
+
+        <p>
+          But the record cannot say what <em>kind</em> of green any of it is.
+          <span data-key="measure.em_unspecified_pct">88.2</span>% of
+          emerging-market green deals carry no sub-domain more specific than
+          &ldquo;Clean Technology&rdquo;, against
+          <span data-key="measure.ae_unspecified_pct">67.9</span>% in advanced
+          economies. At company level,
+          <span data-key="measure.em_unspecified_companies">23</span> of the
+          <span data-key="measure.em_green_companies">27</span> emerging-market
+          green companies carry no more specific tag at all.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig06"></div>
+          <div class="figure__table" data-table="fig06_subdomain"><table><caption>Share of green deals resolved to a specific sub-domain, by bloc.</caption><thead><tr><th scope="col">Bloc</th><th scope="col">Resolved to a sub‑domain</th><th scope="col">“Clean Technology” and nothing more</th><th scope="col">Green deals</th></tr></thead><tbody><tr><td>Advanced economies</td><td>32.1%</td><td>67.9%</td><td>2,056</td></tr><tr><td>China</td><td>10.0%</td><td>90.0%</td><td>20</td></tr><tr><td>Emerging markets</td><td>11.8%</td><td>88.2%</td><td>34</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >The taxonomy cannot say what kind of green an emerging-market
+              company is.</b
+            >
+            Share of green deals resolved to a specific sub-domain, by bloc,
+            2000–2012. The
+            <span data-key="classifier.subdomains">11</span> specific
+            sub-domains are solar, wind, hydro and geothermal, biofuels,
+            storage, efficiency and smart grid, electric mobility, water, waste
+            and circular, sustainable agriculture, green building, and
+            environmental monitoring.
+          </figcaption>
+          <p class="figure__source">
+            This replaces the planned sub-domain mix comparison, which the
+            measurement failure shown here makes impossible. It is reported as a
+            finding because it is one.
+          </p>
+        </figure>
+
+        <p>
+          The cycle itself is visible in both deal counts and dollars, and the
+          two do not peak together: dollars peak in
+          <span data-key="cycle.peak_usd_year">2010</span>, a year before deals
+          peak at <span data-key="cycle.peak_deals">480</span> in
+          <span data-key="cycle.peak_deals_year">2011</span>. Switching the view
+          below morphs one series into the other, which is where that lag is
+          visible.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig07"></div>
+          <div class="figure__table" data-table="fig07_cycle"><table><caption>Green deals and disclosed green funding by year, in constant 2015 USD.</caption><thead><tr><th scope="col">Year</th><th scope="col">Green deals</th><th scope="col">Disclosed funding (USD bn)</th><th scope="col">Deals with an amount</th></tr></thead><tbody><tr><td>2001</td><td>1</td><td>0.006</td><td>1</td></tr><tr><td>2002</td><td>4</td><td>0.008</td><td>4</td></tr><tr><td>2003</td><td>5</td><td>0.015</td><td>3</td></tr><tr><td>2004</td><td>11</td><td>0.069</td><td>10</td></tr><tr><td>2005</td><td>28</td><td>0.313</td><td>25</td></tr><tr><td>2006</td><td>62</td><td>0.803</td><td>56</td></tr><tr><td>2007</td><td>130</td><td>2.868</td><td>116</td></tr><tr><td>2008</td><td>386</td><td>8.202</td><td>350</td></tr><tr><td>2009</td><td>272</td><td>5.609</td><td>253</td></tr><tr><td>2010</td><td>358</td><td>8.52</td><td>332</td></tr><tr><td>2011</td><td>480</td><td>7.702</td><td>440</td></tr><tr><td>2012</td><td>437</td><td>6.436</td><td>404</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >Green deal sizes fell far faster than non-green within the same
+              stages.</b
+            >
+            Green deals and disclosed green funding, all blocs, 2000–2012, in
+            constant 2015 USD. Counts and dollars are separate series because
+            undisclosed-amount rates differ by instrument and bloc.
+          </figcaption>
+          <p class="figure__source">
+            Within named stages, green cheque sizes fell
+            <span data-key="cheque.green_pct">−50.4</span>% against
+            <span data-key="cheque.nongreen_pct">−1.1</span>% for non-green — a
+            difference of
+            <span data-key="cheque.difference_pp">−49.3</span> percentage points
+            <span data-key="cheque.ci">[−69.3, −22.4]</span>, bootstrapped over
+            <span data-key="repro.bootstrap_draws">10,000</span> draws.
+          </p>
+        </figure>
+
+        <p>
+          The crisis hit green and spared non-green. It is reported
+          descriptively, because the design does not identify it: green volume
+          was already growing
+          <span data-key="h2.pretrend_coef">0.254</span> log-points per year
+          faster than non-green before the event window (p =
+          <span data-key="h2.pretrend_p">0.001</span>), so parallel trends fail.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig08"></div>
+          <div class="figure__table" data-table="fig08_crisis"><table><caption>Deal volume indexed to 2007 = 100, by bloc and green status. The emerging-market green series is not drawn.</caption><thead><tr><th scope="col">Year</th><th scope="col">Advanced economies, green index</th><th scope="col">Advanced economies, green deals</th><th scope="col">Advanced economies, non-green index</th><th scope="col">Advanced economies, non-green deals</th></tr></thead><tbody><tr><td>2000</td><td></td><td></td><td>3.7</td><td>106</td></tr><tr><td>2001</td><td>0.8</td><td>1</td><td>2.8</td><td>82</td></tr><tr><td>2002</td><td>3.2</td><td>4</td><td>3.5</td><td>100</td></tr><tr><td>2003</td><td>3.2</td><td>4</td><td>4.7</td><td>135</td></tr><tr><td>2004</td><td>8.7</td><td>11</td><td>8.7</td><td>252</td></tr><tr><td>2005</td><td>21.4</td><td>27</td><td>52.0</td><td>1,504</td></tr><tr><td>2006</td><td>46.0</td><td>58</td><td>75.4</td><td>2,182</td></tr><tr><td>2007</td><td>100.0</td><td>126</td><td>100.0</td><td>2,894</td></tr><tr><td>2008</td><td>275.4</td><td>347</td><td>104.9</td><td>3,036</td></tr><tr><td>2009</td><td>202.4</td><td>255</td><td>119.1</td><td>3,447</td></tr><tr><td>2010</td><td>269.8</td><td>340</td><td>183.6</td><td>5,314</td></tr><tr><td>2011</td><td>368.3</td><td>464</td><td>276.4</td><td>7,998</td></tr><tr><td>2012</td><td>332.5</td><td>419</td><td>303.7</td><td>8,790</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >The crisis hit green venture funding and left non-green
+              growing.</b
+            >
+            Deal volume indexed to 2007, by bloc and green status, 2000–2012.
+            Across 2008–09 advanced-economy green contracted
+            <span data-key="h2.crisis_ae_green_pct">−26.5</span>% while
+            non-green grew
+            <span data-key="h2.crisis_ae_non_green_pct">13.5</span>%.
+          </figcaption>
+          <p class="figure__source">
+            The emerging-market green series is not drawn: its base year holds
+            <span data-key="h2.em_base_deals">1</span> deal, so the index would
+            reach <span data-key="h2.em_index_2008">1,200</span> in 2008.
+          </p>
+        </figure>
+
+        <p>
+          Green capital is less dilutive than non-green, within advanced
+          economies. Green uses a grant or a debt round on
+          <span data-key="h3.ae_green_nondilutive_pct">10.41</span>% of deals
+          against <span data-key="h3.ae_nongreen_nondilutive_pct">7.26</span>%
+          for non-green: a risk ratio of <span data-key="h3.rr">1.433</span>
+          <span data-key="h3.rr_ci">[1.256, 1.636]</span>, p =
+          <span data-key="h3.p">1.2×10⁻⁷</span>.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig09"></div>
+          <div class="figure__table" data-table="fig09_instruments"><table><caption>Non-dilutive share of deals by bloc and green status.</caption><thead><tr><th scope="col">Group</th><th scope="col">Non-dilutive share</th><th scope="col">Grant rounds</th><th scope="col">Debt rounds</th><th scope="col">Deals</th></tr></thead><tbody><tr><td>Advanced economies, green</td><td>10.41%</td><td>53</td><td>161</td><td>2,056</td></tr><tr><td>Advanced economies, non-green</td><td>7.26%</td><td>424</td><td>2,176</td><td>35,840</td></tr><tr><td>Emerging markets, green</td><td>8.82%</td><td>1</td><td>2</td><td>34</td></tr><tr><td>Emerging markets, non-green</td><td>2.67%</td><td>23</td><td>11</td><td>1,275</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >Green ventures lean harder on grants and debt than non-green ones
+              do.</b
+            >
+            Non-dilutive share of deals by bloc and green status, 2000–2012. The
+            emerging-market arm rests on
+            <span data-key="h3.em_nondilutive_n">3</span> non-dilutive deals and
+            is reported as a pre-registered null rather than as an estimate; its
+            bar is dimmed.
+          </figcaption>
+          <p class="figure__source">
+            Project finance that is debt or concessional in substance but coded
+            as an equity round understates the non-dilutive share on both sides,
+            and more so for emerging markets. That bias direction was stated
+            before these numbers were computed.
+          </p>
+        </figure>
+
+        <p>
+          And green capital tracks the depth of the market it lands in, not
+          need. Across
+          <span data-key="h5.depth_n">22</span> countries with enough green
+          activity to measure, green funding per capita correlates with GDP per
+          capita at a Spearman ρ of <span data-key="h5.depth_rho">0.674</span>
+          <span data-key="h5.depth_ci">[0.298, 0.866]</span>. Whether it tracks
+          need cannot be determined:
+          <span data-key="h5.depth_zero_countries">20</span> of the
+          <span data-key="h5.depth_n">22</span> panel countries record an
+          electricity-access deficit of exactly zero.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig10"></div>
+          <div class="figure__table" data-table="fig10_depth_need"><table><caption>Green funding intensity and market depth, by country. The electricity-access deficit column is the regressor that could not be tested.</caption><thead><tr><th scope="col">Country</th><th scope="col">GDP per capita (USD)</th><th scope="col">Green funding per capita (USD)</th><th scope="col">Green deals</th><th scope="col">Electricity deficit</th></tr></thead><tbody><tr><td>AUS</td><td>68,301</td><td>6.5286</td><td>8</td><td>0.0%</td></tr><tr><td>BEL</td><td>44,874</td><td>2.5155</td><td>4</td><td>0.0%</td></tr><tr><td>CAN</td><td>52,670</td><td>36.4889</td><td>62</td><td>0.0%</td></tr><tr><td>CHE</td><td>87,270</td><td>37.321</td><td>7</td><td>0.0%</td></tr><tr><td>CHN</td><td>6,405</td><td>0.4048</td><td>20</td><td>0.1%</td></tr><tr><td>DEU</td><td>44,718</td><td>5.2508</td><td>30</td><td>0.0%</td></tr><tr><td>DNK</td><td>58,444</td><td>12.1446</td><td>5</td><td>0.0%</td></tr><tr><td>ESP</td><td>28,456</td><td>0.3287</td><td>8</td><td>0.0%</td></tr><tr><td>FIN</td><td>47,552</td><td>2.9318</td><td>7</td><td>0.0%</td></tr><tr><td>FRA</td><td>40,864</td><td>2.3313</td><td>26</td><td>0.0%</td></tr><tr><td>GBR</td><td>42,688</td><td>22.4303</td><td>127</td><td>0.0%</td></tr><tr><td>IND</td><td>1,429</td><td>0.4427</td><td>20</td><td>20.1%</td></tr><tr><td>IRL</td><td>49,336</td><td>19.7204</td><td>14</td><td>0.0%</td></tr><tr><td>ISR</td><td>33,269</td><td>21.4799</td><td>30</td><td>0.0%</td></tr><tr><td>ITA</td><td>34,854</td><td>0.3199</td><td>13</td><td>0.0%</td></tr><tr><td>JPN</td><td>49,627</td><td>2.3117</td><td>8</td><td>0.0%</td></tr><tr><td>NLD</td><td>50,474</td><td>14.6627</td><td>20</td><td>0.0%</td></tr><tr><td>NOR</td><td>104,628</td><td>96.9849</td><td>16</td><td>0.0%</td></tr><tr><td>PRT</td><td>20,593</td><td>0.9613</td><td>3</td><td>0.0%</td></tr><tr><td>SGP</td><td>55,548</td><td>16.3822</td><td>8</td><td>0.0%</td></tr><tr><td>SWE</td><td>57,750</td><td>6.8316</td><td>20</td><td>0.0%</td></tr><tr><td>USA</td><td>51,708</td><td>101.9869</td><td>1,626</td><td>0.0%</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >Capital tracks market depth; whether it tracks need cannot be
+              measured here.</b
+            >
+            Panel (a) is a scatter you can interrogate country by country. Panel
+            (b) is deliberately inert: there is nothing in it to explore, which
+            is the finding. Green funding is highly concentrated — a Gini of
+            <span data-key="h5.gini">0.917</span>, with the top five countries
+            holding <span data-key="h5.top5_pct">89.9</span>% of all green
+            dollars.
+          </figcaption>
+          <p class="figure__source">
+            The countries where need is highest are the countries with too few
+            green deals to enter the panel. That is not a missing variable; it
+            is the same selection this page has been describing.
+          </p>
+        </figure>
+      </section>
+
+      <!-- ================================================== six routes -->
+      <section class="section" id="routes" aria-labelledby="routes-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="routes-title">
+          Six routes, one conclusion
+        </h2>
+
+        <p>
+          Three hypotheses were unresolved, each for a different stated reason.
+          Three further failures are properties of the record rather than of any
+          hypothesis. The minimum cell size of
+          <span data-key="power.min_cell">30</span> was fixed in configuration
+          before any hypothesis was tested, and no bar clears it.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig11"></div>
+          <div class="figure__table" data-table="fig11_power_wall"><table><caption>Observations available in each emerging-market test cell, against the pre-registered minimum of 30.</caption><thead><tr><th scope="col">Hypothesis</th><th scope="col">Cell</th><th scope="col">Observations</th><th scope="col">Test it blocks</th><th scope="col">Clears the minimum</th></tr></thead><tbody><tr><td>H2</td><td>Largest EM green year‑cell</td><td>12</td><td>difference‑in‑differences</td><td>no</td></tr><tr><td>H3</td><td>EM green non‑dilutive deals</td><td>3</td><td>instrument-mix test</td><td>no</td></tr><tr><td>H4</td><td>EM green seed entrants</td><td>0</td><td>graduation model</td><td>no</td></tr><tr><td>H4</td><td>AE green Series A to B pool</td><td>13</td><td>missing‑middle transition</td><td>no</td></tr><tr><td>H5</td><td>Countries with any energy deficit</td><td>2</td><td>need-indicator regression</td><td>no</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >Every emerging-market test fails on the same wall, for different
+              reasons.</b
+            >
+            Observations available against the pre-registered minimum, across
+            H2–H5. These are five distinct failures rather than one repeated.
+          </figcaption>
+          <p class="figure__source">
+            Three figures that would have plotted these quantities as estimates
+            were cut rather than drawn.
+          </p>
+        </figure>
+      </section>
+
+      <!-- ================================================== does it persist -->
+      <section class="section" id="persist" aria-labelledby="persist-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="persist-title">Does it persist?</h2>
+
+        <p>
+          The scarcity is not an artefact of the window. The Indian startup
+          funding scrape covers 2015–2020 with
+          <span data-key="india.deals">3,036</span> dated deals, of which
+          <span data-key="india.green">54</span> are green under the same
+          lexicon — a rate of <span data-key="india.rate_pct">1.78</span>%,
+          against <span data-key="h1.em_rate_pct">2.60</span>% for emerging
+          markets in the Crunchbase window.
+        </p>
+
+        <figure class="figure wide">
+          <div class="figure__frame" data-figure="fig12"></div>
+          <div class="figure__table" data-table="fig12_continuity"><table><caption>Green deals per year in two instruments measuring two populations. The panels share no axis and the data is never pooled.</caption><thead><tr><th scope="col">Source</th><th scope="col">Year</th><th scope="col">Green deals</th><th scope="col">All deals</th></tr></thead><tbody><tr><td>Crunchbase 2013 Snapshot</td><td>2000</td><td>0</td><td>8</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2001</td><td>0</td><td>3</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2002</td><td>0</td><td>2</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2003</td><td>0</td><td>3</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2004</td><td>0</td><td>7</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2005</td><td>0</td><td>33</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2006</td><td>0</td><td>57</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2007</td><td>1</td><td>78</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2008</td><td>12</td><td>119</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2009</td><td>4</td><td>115</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2010</td><td>4</td><td>200</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2011</td><td>7</td><td>335</td></tr><tr><td>Crunchbase 2013 Snapshot</td><td>2012</td><td>6</td><td>349</td></tr><tr><td>Indian startup funding scrape</td><td>2015</td><td>17</td><td>929</td></tr><tr><td>Indian startup funding scrape</td><td>2016</td><td>15</td><td>993</td></tr><tr><td>Indian startup funding scrape</td><td>2017</td><td>9</td><td>687</td></tr><tr><td>Indian startup funding scrape</td><td>2018</td><td>3</td><td>309</td></tr><tr><td>Indian startup funding scrape</td><td>2019</td><td>10</td><td>111</td></tr></tbody></table></div>
+          <figcaption class="figure__caption">
+            <b
+              >A later window in one large emerging market reproduces the same
+              scarcity.</b
+            >
+            Two different instruments measuring two different populations. The
+            panels share no axis and the data is never pooled: the taxonomies
+            and amount conventions are not compatible, and the Indian data has
+            no <code>category_code</code>, so Tier A of the classifier cannot
+            fire.
+          </figcaption>
+          <p class="figure__source">
+            This section is suggestive and is not a test.
+          </p>
+        </figure>
+      </section>
+
+      <!-- ================================================== how this was built -->
+      <section class="section" id="built" aria-labelledby="built-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="built-title">How this was built</h2>
+
+        <p>
+          Three of the five pre-registered hypotheses were not resolved. They
+          are reported as unresolved, with the condition each was registered to
+          fail on, because a pre-registration that only survives when the
+          results cooperate is not one. That is the part of this section worth
+          reading: the engineering below exists to make those three verdicts
+          trustworthy, not to distract from them.
+        </p>
+
+        <h3 class="section__sub">The pipeline</h3>
+
+        <p>
+          Six stages, each one checked before the next can use it. Every gate
+          below fails the build rather than warning.
+        </p>
+
+        <svg
+          class="pipeline wide"
+          viewBox="0 0 736 232"
+          role="img"
+          aria-label="Six pipeline stages in sequence: sources, classifier, bloc assignment, deal table, hypotheses, report. Checksums gate the sources, inter-tier agreement gates the classifier, the attrition ledger gates the deal table, pre-registration and multiplicity correction gate the hypotheses, and eight render gates stand before the report."
+        >
+          <g class="pipeline__box">
+            <rect x="1" y="40" width="104" height="46" />
+            <rect x="127" y="40" width="104" height="46" />
+            <rect x="253" y="40" width="104" height="46" />
+            <rect x="379" y="40" width="104" height="46" />
+            <rect x="505" y="40" width="104" height="46" />
+            <rect x="631" y="40" width="104" height="46" />
+          </g>
+
+          <g class="pipeline__stage">
+            <text x="13" y="62">Sources</text>
+            <text x="139" y="62">Classifier</text>
+            <text x="265" y="62">Blocs</text>
+            <text x="391" y="62">Deal table</text>
+            <text x="517" y="62">Hypotheses</text>
+            <text x="643" y="62">Report</text>
+          </g>
+
+          <g class="pipeline__detail">
+            <text x="13" y="78">4 providers</text>
+            <text x="139" y="78">3 tiers</text>
+            <text x="265" y="78">by deal year</text>
+            <text x="391" y="78">41,105 deals</text>
+            <text x="517" y="78">H1–H5</text>
+            <text x="643" y="78">PDF + web</text>
+          </g>
+
+          <g class="pipeline__arrow">
+            <path d="M 107 63 L 125 63" marker-end="url(#pipe-arrow)" />
+            <path d="M 233 63 L 251 63" marker-end="url(#pipe-arrow)" />
+            <path d="M 359 63 L 377 63" marker-end="url(#pipe-arrow)" />
+            <path d="M 485 63 L 503 63" marker-end="url(#pipe-arrow)" />
+            <path d="M 611 63 L 629 63" marker-end="url(#pipe-arrow)" />
+          </g>
+
+          <defs>
+            <marker
+              id="pipe-arrow"
+              viewBox="0 0 8 8"
+              refX="7"
+              refY="4"
+              markerWidth="6"
+              markerHeight="6"
+              orient="auto"
+            >
+              <path
+                d="M 0 1 L 7 4 L 0 7"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1"
+              />
+            </marker>
+          </defs>
+
+          <g class="pipeline__tick">
+            <path d="M 53 86 L 53 104" />
+            <path d="M 179 86 L 179 104" />
+            <path d="M 431 86 L 431 104" />
+            <path d="M 557 86 L 557 104" />
+            <path d="M 683 86 L 683 104" />
+          </g>
+
+          <g class="pipeline__gate">
+            <text x="13" y="118">SHA256,</text>
+            <text x="13" y="133">verified each run</text>
+            <text x="139" y="118">κ between tiers,</text>
+            <text x="139" y="133">40 fixture cases</text>
+            <text x="391" y="118">attrition ledger,</text>
+            <text x="391" y="133">complete</text>
+            <text x="517" y="118">pre-registered,</text>
+            <text x="517" y="133">BH corrected</text>
+            <text x="643" y="118">8 render</text>
+            <text x="643" y="133">gates</text>
+          </g>
+
+          <g class="pipeline__detail">
+            <text x="1" y="176">
+              One command rebuilds every number, every figure and both
+              artefacts.
+            </text>
+            <text x="1" y="196">
+              A gate that fires stops the build; nothing downstream runs on a
+              value that failed one.
+            </text>
+          </g>
+        </svg>
+
+        <h3 class="section__sub">What was pre-registered, and what happened</h3>
+
+        <p>
+          Each hypothesis carried a falsification condition fixed before the
+          result was computed. Two were resolved. Three were not, each for a
+          different and separately verifiable reason, and all three are reported
+          as unresolved rather than as nulls.
+        </p>
+
+        <table class="verdicts wide">
+          <thead>
+            <tr>
+              <th scope="col">Hypothesis</th>
+              <th scope="col">Verdict</th>
+              <th scope="col">Registered to fail if</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>H1 · the double gap</td>
+              <td>
+                <span class="chip chip--supported" data-key="h1.verdict"
+                  >Supported</span> companies. That commitment is
+          recorded as void on its own assumption rather than quietly treated as
+          satisfied. <span data-key="robust.tests_significant">9</span> of
+          <span data-key="robust.tests_total">28</span> tests survive
+          Benjamini–Hochberg correction across the whole family.
+        </p>
+
+        <h3 class="section__sub">What the process caught</h3>
+
+        <p>
+          Eleven defects were found and corrected after first being reported.
+          They are grouped by which artefact was at risk, because that is the
+          distinction that matters: the first group reached the submitted PDF,
+          the second only ever reached this page. Across both, ten of the
+          fourteen individual instances are the same failure —
+          <b
+            >an instrument that reported success while measuring something
+            else</b
+          >
+          — which makes it the largest group in the catalogue by some margin.
+          That class is invisible to testing that asks whether a stage ran,
+          because the stage did run. It answered a different question than the
+          one asked, and answered it cleanly. Every instance was caught by
+          testing the check rather than trusting its result, and that is a more
+          useful claim than any single bug below.
+        </p>
+
+        <h4 class="defects__group">In the pipeline: eight</h4>
+
+        <p>
+          These changed numbers in <code>report.pdf</code>. Six are the
+          instrument class.
+        </p>
+
+        <ol class="defects">
+          <li>
+            <b>A regression that tested a dummy for one country.</b> The H5
+            falsifier came back positive, significant, and survived both a
+            leave-one-out check and a collinearity check. Then a variance check
+            showed that <span data-key="h5.depth_zero_countries">20</span> of
+            the <span data-key="h5.depth_n">22</span> panel countries recorded
+            an electricity-access deficit of exactly zero: the regressor was a
+            dummy for two countries and the coefficient was identified off
+            almost nothing.
+            <span class="defects__how"
+              >Caught by the leave-one-out <em>coefficient range</em>, which
+              spanned two orders of magnitude while the sign never flipped. The
+              sign test passed; the range is what gave it away.</span
+            >
+          </li>
+          <li>
+            <b>A gate that could only catch whole numbers.</b> The rule stopping
+            hand-typed statistics exempted anything shaped like a section
+            reference, which also matched 5.43, 1.92, 22.81 — and would have
+            matched a wrong <span class="was">5.44</span> just as readily. For
+            most of its life it was checking integers and reporting success.
+            <span class="defects__how"
+              >Caught by auditing what the gate had actually exempted rather
+              than trusting that it passed. References are now exempted by
+              context. Re-run, it immediately found 15 numbers drawn into
+              figures that no finding supported.</span
+            >
+          </li>
+          <li>
+            <b>An instrument field that measured a different thing.</b>
+            <code>funding_round_type</code> files
+            <span data-key="instrument.seed_as_angel">10,189</span> seed rounds
+            under <code>angel</code>, and
+            <span data-key="instrument.debt_as_other">3,409</span> debt and
+            <span data-key="instrument.grant_as_other">776</span> grant rounds
+            under <code>other</code>. Reading instruments from it makes the
+            graduation funnel unmeasurable and the non-dilutive share invisible,
+            with no error raised.
+            <span class="defects__how"
+              >Caught by inventorying the raw field instead of trusting the
+              specification.</span
+            >
+          </li>
+          <li>
+            <b>Undisclosed amounts encoded as zero.</b>
+            <span data-key="data.undisclosed_zero_rows">6,000</span> rows carry
+            a literal <code>0.0</code> where the amount is unknown. Coverage
+            reports 100% and every median, total and interquartile range is
+            dragged toward zero.
+            <span class="defects__how"
+              >Caught by a sentinel sweep; the decisive evidence was
+              <span data-key="data.fx_failures">362</span> rows carrying a
+              positive local-currency amount against a USD value of exactly
+              zero.</span
+            >
+          </li>
+          <li>
+            <b>A figure that disagreed with the sentence beside it.</b> The
+            depth figure re-ran its own bootstrap to label itself, using a
+            generator the figure stage had already advanced. The two variants
+            drew different intervals, and the one embedded in the report printed
+            <span class="was"><code>[0.3068, 0.8665]</code></span> on a page
+            whose prose read <span data-key="h5.depth_ci">[0.298, 0.866]</span>.
+            <span class="defects__how"
+              >Invisible to every check then in place, because figure text is
+              rasterised into a PDF before any renderer sees it. A gate now
+              harvests every string drawn into a figure and applies the prose
+              rule to it.</span
+            >
+          </li>
+          <li>
+            <b>Every figure silently scaled to 96%.</b> The canvas was built for
+            a 2.6cm page margin while the template set 2.9cm, so each figure was
+            resized on embedding and the type size chosen for them was not the
+            size readers got.
+            <span class="defects__how"
+              >Caught by measuring a rendered page rather than trusting the
+              constant. The canvas width is now derived from the same numbers
+              the template uses, and a gate compares them.</span
+            >
+          </li>
+          <li>
+            <b>Two stages, two populations.</b> Deal-level diagnostics ran
+            against their own join rather than the canonical table, so
+            advanced-economy deals were <span class="was">37,965</span> in one
+            stage and <span data-key="pop.ae_deals">37,896</span> in another.
+            <span class="defects__how"
+              >Fixed structurally rather than instance by instance: every
+              deal-level number now reads the post-ledger table.</span
+            >
+          </li>
+          <li>
+            <b
+              >Two halves of a share summing to
+              <span class="was">100.1%</span>.</b
+            >
+            A percentage and its complement were each rounded independently from
+            a pre-rounded input, so one figure read 67.9% and 32.1% while the
+            prose read 67.9% and <span class="was">32.2%</span>.
+            <span class="defects__how"
+              >Caught by a check asserting that any quantity both exports state
+              rounds identically in each.</span
+            >
+          </li>
+        </ol>
+
+        <p>
+          Of the eight, <b>two</b> overclaimed a refutation and
+          <b>one</b> overclaimed support, so the errors were not directional.
+          They were not bias dressed as rigour; they were instruments believed
+          on their own account.
+        </p>
+
+        <h4 class="defects__group">In this edition: three</h4>
+
+        <p>
+          These changed nothing in <code>report.pdf</code>, which is built by a
+          separate path. All three were found by the accessibility gate, and
+          none of them was visible in a screenshot.
+        </p>
+
+        <ol class="defects">
+          <li>
+            <b
+              >Four captions carrying an argument, dimmed to
+              <span class="was">1.49:1</span>.</b
+            >
+            The scrollytelling sequence marked its inactive steps with
+            <code><span class="was">opacity: 0.35</span></code
+            >. Three of the four captions were therefore below any contrast
+            threshold at any moment, and those four captions are where the
+            capital-intensity argument is actually made. The de-emphasis was
+            meant to say "not this step"; what it did was make three quarters of
+            the argument unreadable to anyone who wanted to read ahead or back.
+            <span class="defects__how"
+              >Caught by a contrast check that multiplied opacity down the
+              ancestor chain, not by looking at it. Dimmed-but-present text
+              reads as deliberate in a screenshot, which is exactly why visual
+              review was never going to flag it. Role is now carried by a rule
+              and a change of ink, so both states stay legible.</span
+            >
+          </li>
+          <li>
+            <b>Two requirements that were each right and jointly impossible.</b>
+            The build spec fixes the palette to named hex values and separately
+            requires direct labelling at a series terminus instead of a legend.
+            Together they make those hues into <em>text</em>, and three of them
+            fail the readability floor as text: burnt ochre at
+            <span class="was">4.34:1</span>, muted plum at
+            <span class="was">3.67:1</span>, comparison grey at
+            <span class="was">2.44:1</span>. Neither requirement is wrong. Their
+            conjunction had never been checked because no gate spanned both.
+            <span class="defects__how"
+              >Caught by extending the contrast gate from page text to text
+              drawn inside the figures, where the two requirements meet.
+              Resolved without moving the palette, which the PDF shares: label
+              text now takes a darkened variant of the same hue, the data ink
+              keeps the published colour, and a label reversed out inside a bar
+              picks its ink from the bar rather than assuming white.</span
+            >
+          </li>
+          <li>
+            <b
+              >Four checks that measured something other than what they
+              asserted.</b
+            >
+            A contrast check took the <code>&lt;svg&gt;</code> root's inherited
+            default black as a background and reported
+            <span class="was">4.09:1</span> for every tick label, against a
+            backdrop that is not painted. A keyboard check matched
+            <code>[href]</code>, which also matches <code>&lt;link&gt;</code> in
+            the document head, and reported
+            <span class="was">12 of 17</span> controls reached when all twelve
+            were. A tooltip check read an attribute the tooltip does not set. A
+            fourth hit-tested figures below the fold, where the API it used
+            returns nothing, so every in-bar label was scored against white.
+            <span class="defects__how"
+              >Caught by reading what each check had actually measured when it
+              disagreed with the page, rather than accepting the verdict. All
+              four failed loudly rather than passing, which is the one piece of
+              luck in the set — the same mistake in a check that fails open is
+              undetectable by definition.</span
+            >
+          </li>
+        </ol>
+
+        <h3 class="section__sub">Reproducing it</h3>
+
+        <div class="colophon">
+          <p>
+            <code>make clean &amp;&amp; make all</code> rebuilds every number,
+            every figure and the PDF from a clean checkout in about a hundred
+            seconds. <code>make web</code> rebuilds this page and runs its
+            checks. No manual steps, no notebook-only results, no hand-edited
+            intermediate files.
+          </p>
+          <dl>
+            <dt>Commit</dt>
+            <dd data-key="repro.commit">87c48f9</dd>
+            <dt>Python</dt>
+            <dd data-key="repro.python">3.11.9</dd>
+            <dt>Seed</dt>
+            <dd data-key="repro.seed">20251001</dd>
+            <dt>Bootstrap draws</dt>
+            <dd data-key="repro.bootstrap_draws">10,000</dd>
+            <dt>Source files</dt>
+            <dd>
+              <span data-key="repro.source_files">12</span>, each with a
+              recorded SHA256 verified on every run
+            </dd>
+            <dt>Generated</dt>
+            <dd data-key="repro.generated">2026-10-03 13:17 UTC</dd>
+          </dl>
+        </div>
+      </section>
+
+      <!-- ================================================== limitations -->
+      <section class="section" id="limits" aria-labelledby="limits-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="limits-title">What would break this</h2>
+
+        <p>
+          Written for a reader looking for the weakness this project missed, and
+          ordered by how much damage each threat does rather than by how
+          comfortable it is to discuss.
+        </p>
+
+        <h3 class="section__sub">
+          Coverage bias, which is not fully mitigable
+        </h3>
+
+        <p>
+          Crunchbase 2013 under-covers non-US, non-English-language ecosystems.
+          Every absolute emerging-market quantity here is an underestimate of
+          the world by an unknown factor. Three things limit the damage. The
+          headline is a comparison
+          <em>within</em> the dataset, conditional on a company already being
+          indexed, so it does not require the blocs to be covered equally. The
+          coverage gap is measured rather than disclaimed. And the clerical
+          version of the bias is ruled out empirically: across
+          <span data-key="tax.em_companies">1,019</span> emerging-market
+          companies the mean taxonomy tag count is
+          <span data-key="tax.em_mean_tags">2.63</span> against
+          <span data-key="tax.ae_mean_tags">2.24</span> for advanced economies —
+          more tags, not fewer, which is the opposite of what would explain the
+          result away.
+        </p>
+
+        <p>
+          <b>What remains cannot be excluded.</b> If the emerging-market
+          companies that reach Crunchbase are systematically less green than
+          those that do not, the gap is overstated. Nothing in this data can
+          test that, and no robustness check in the appendix addresses it,
+          because none can.
+        </p>
+
+        <h3 class="section__sub">A sample of thirty-four deals</h3>
+
+        <p>
+          Thirteen years,
+          <span data-key="h3.em_green_deals">34</span> emerging-market green
+          deals,
+          <span data-key="measure.em_green_companies">27</span> companies. That
+          forbids essentially every disaggregation the original design assumed:
+          by year, by sub-domain, by instrument, by country, by stage. The
+          minimum cell size of <span data-key="power.min_cell">30</span> was
+          fixed in configuration before any hypothesis was tested, and no
+          emerging-market cell clears it.
+        </p>
+
+        <p>
+          The temptation this creates is to widen the green definition until the
+          sample becomes workable. That was tested and refused: the risk ratio
+          moves only across
+          <span data-key="robust.green_def_rr_range">0.399–0.540</span> over
+          four green definitions and
+          <span data-key="robust.bloc_rr_range">0.479–0.646</span> over three
+          bloc schemes. The constraint is the record, not the classifier, and
+          widening the definition would buy significance without buying
+          evidence.
+        </p>
+
+        <p>
+          Nor are dollar-denominated emerging-market claims made anywhere here.
+          Removing any single emerging-market green company moves the green
+          dollar total by
+          <span data-key="h1.loo_usd_swing">−20.3% to 0.0%</span> across the
+          <span data-key="h1.loo_companies">27</span> of them. A quantity one
+          company can move that far is not a population quantity.
+        </p>
+
+        <h3 class="section__sub">
+          The audit is underdetermined, not reassuring
+        </h3>
+
+        <p>
+          The emerging-market green set was audited exhaustively, company by
+          company; the advanced-economy set on a random sample of
+          <span data-key="audit.ae_sample_n">60</span> drawn with the project
+          seed from <span data-key="audit.ae_green_total">1,114</span>. The
+          asymmetry biases toward finding a gap. Measured false-positive rates
+          are <span data-key="audit.em_fp_pct">22.2</span>% and
+          <span data-key="audit.ae_fp_pct">15.0</span>%, p =
+          <span data-key="audit.p">0.409</span>.
+          <b>That is an absence of power, not a demonstration of equality.</b>
+          At <span data-key="audit.em_census_n">27</span> and
+          <span data-key="audit.ae_sample_n">60</span> companies the comparison
+          cannot detect a seven-point difference. The headline is therefore
+          reported on raw classifier output, which applies no curation to either
+          bloc and is symmetric by construction.
+        </p>
+
+        <h3 class="section__sub">And the rest</h3>
+
+        <p>
+          The two Crunchbase mirrors are different vintages, which bounds rather
+          than resolves roughly
+          <span data-key="data.under_recording_pct">6.5</span>% of deals
+          under-recorded in the relational dump. Undisclosed amounts mean counts
+          and dollars are separate series throughout; dollar series cover
+          <span data-key="classifier.green_with_amount">1,994</span> of
+          <span data-key="classifier.green_deals">2,174</span> green deals. A
+          2013 snapshot's categories reflect 2013 ideas about what is green, so
+          sub-domains that matter now are invisible. H2 fails its identifying
+          assumption outright and H5 has no causal identification; neither is
+          presented as though it did.
+        </p>
+
+        <p>
+          Finally, what this project does <em>not</em> attempt. It does not
+          measure the emerging-market green capital regime. It demonstrates that
+          the regime cannot be measured in open data, which is a different and
+          smaller claim. The mechanism that would explain the absence — capital
+          moving through concessional and development-finance instruments a
+          venture database cannot index — is argued from external evidence and
+          is explicitly not identified here. The competing explanation, that
+          these ecosystems were genuinely less green, cannot be excluded.
+        </p>
+      </section>
+
+      <!-- ================================================== colophon -->
+      <section class="section" id="colophon" aria-labelledby="colophon-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="colophon-title">Colophon</h2>
+
+        <div class="colophon">
+          <p>
+            <b>Data.</b> The Crunchbase 2013 Snapshot (CC BY 4.0), obtained
+            through two Kaggle mirrors and joined on a normalised permalink;
+            they are different vintages and the flat file is used for its
+            taxonomy only. Enrichment from the World Bank and Our World in Data
+            (CC BY 4.0): historical income classifications for the time-varying
+            bloc assignment, GDP, population, electricity access, renewable
+            share, and the US GDP deflator. The continuity probe uses a Kaggle
+            scrape of Indian startup funding, never pooled with the Crunchbase
+            data. Provenance, licences and per-file checksums are in
+            <code>data/MANIFEST.md</code> and <code>docs/DATA_SOURCES.md</code>.
+          </p>
+
+          <p>
+            <b>Tools.</b> Python 3.11 with pandas, NumPy, SciPy, statsmodels and
+            matplotlib; the report is set in Typst. This page is vanilla ES
+            modules with no framework, no bundler and no build step — the charts
+            are hand-written SVG against pre-computed arrays, and the only
+            external resources are two typefaces. Playwright drives the checks
+            and the screenshot captures.
+          </p>
+
+          <p>
+            <b>The figure design system is shared, not duplicated.</b> The
+            palette, the serif-display and sans-label split, and the rule that
+            every figure's leftmost ink sits on the prose's left edge are all
+            inherited from <code>src/gcg/viz/theme.py</code>, which draws the
+            PDF's figures. This page resolves the same colours through semantic
+            roles rather than hex values, so a bloc cannot be teal in one
+            artefact and grey in the other, and the two read as one project
+            rather than as a document and a website that happen to share a
+            title.
+          </p>
+
+          <p>
+            <b>Type.</b> Source Serif 4 for display and body, Inter for labels,
+            axes and anything numeric. Two families, six sizes, nothing between
+            them.
+          </p>
+
+          <ul class="links">
+            <li><a href="../report/report.pdf">The full report as a PDF</a></li>
+            <li>
+              <a href="https://github.com/" data-meta="repo"
+                >Source and pipeline on GitHub</a
+              >
+            </li>
+          </ul>
+        </div>
+      </section>
+      <!-- ================================================== limitations -->
+      <section class="section" id="limits" aria-labelledby="limits-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="limits-title">What would break this</h2>
+
+        <p>
+          Written for a reader looking for the weakness this project missed, and ordered by
+          how much damage each threat does rather than by how comfortable it is to discuss.
+        </p>
+
+        <h3 class="section__sub">Coverage bias, which is not fully mitigable</h3>
+
+        <p>
+          Crunchbase 2013 under-covers non-US, non-English-language ecosystems. Every
+          absolute emerging-market quantity here is an underestimate of the world by an
+          unknown factor. Three things limit the damage. The headline is a comparison
+          <em>within</em> the dataset, conditional on a company already being indexed, so it
+          does not require the blocs to be covered equally. The coverage gap is measured
+          rather than disclaimed. And the clerical version of the bias is ruled out
+          empirically: across <span data-key="tax.em_companies">1,019</span> emerging-market
+          companies the mean taxonomy tag count is
+          <span data-key="tax.em_mean_tags">2.63</span> against
+          <span data-key="tax.ae_mean_tags">2.24</span> for advanced economies — more tags, not
+          fewer, which is the opposite of what would explain the result away.
+        </p>
+
+        <p>
+          <b>What remains cannot be excluded.</b> If the emerging-market companies that
+          reach Crunchbase are systematically less green than those that do not, the gap is
+          overstated. Nothing in this data can test that, and no robustness check in the
+          appendix addresses it, because none can.
+        </p>
+
+        <h3 class="section__sub">A sample of thirty-four deals</h3>
+
+        <p>
+          Thirteen years, <span data-key="h3.em_green_deals">34</span> emerging-market green
+          deals, <span data-key="measure.em_green_companies">27</span> companies. That forbids
+          essentially every disaggregation the original design assumed: by year, by
+          sub-domain, by instrument, by country, by stage. The minimum cell size of
+          <span data-key="power.min_cell">30</span> was fixed in configuration before any
+          hypothesis was tested, and no emerging-market cell clears it.
+        </p>
+
+        <p>
+          The temptation this creates is to widen the green definition until the sample
+          becomes workable. That was tested and refused: the risk ratio moves only across
+          <span data-key="robust.green_def_rr_range">0.399–0.540</span> over four green definitions and
+          <span data-key="robust.bloc_rr_range">0.479–0.646</span> over three bloc schemes. The
+          constraint is the record, not the classifier, and widening the definition would
+          buy significance without buying evidence.
+        </p>
+
+        <p>
+          Nor are dollar-denominated emerging-market claims made anywhere here. Removing any
+          single emerging-market green company moves the green dollar total by
+          <span data-key="h1.loo_usd_swing">−20.3% to 0.0%</span> across the
+          <span data-key="h1.loo_companies">27</span> of them. A quantity one company can move
+          that far is not a population quantity.
+        </p>
+
+        <h3 class="section__sub">The audit is underdetermined, not reassuring</h3>
+
+        <p>
+          The emerging-market green set was audited exhaustively, company by company; the
+          advanced-economy set on a random sample of
+          <span data-key="audit.ae_sample_n">60</span> drawn with the project seed from
+          <span data-key="audit.ae_green_total">1,114</span>. The asymmetry biases toward finding
+          a gap. Measured false-positive rates are
+          <span data-key="audit.em_fp_pct">22.2</span>% and
+          <span data-key="audit.ae_fp_pct">15.0</span>%, p = <span data-key="audit.p">0.409</span>.
+          <b>That is an absence of power, not a demonstration of equality.</b> At
+          <span data-key="audit.em_census_n">27</span> and
+          <span data-key="audit.ae_sample_n">60</span> companies the comparison cannot detect
+          a seven-point difference. The headline is therefore reported on raw classifier
+          output, which applies no curation to either bloc and is symmetric by
+          construction.
+        </p>
+
+        <h3 class="section__sub">And the rest</h3>
+
+        <p>
+          The two Crunchbase mirrors are different vintages, which bounds rather than
+          resolves roughly <span data-key="data.under_recording_pct">6.5</span>% of deals
+          under-recorded in the relational dump. Undisclosed amounts mean counts and dollars
+          are separate series throughout; dollar series cover
+          <span data-key="classifier.green_with_amount">1,994</span> of
+          <span data-key="classifier.green_deals">2,174</span> green deals. A 2013 snapshot's
+          categories reflect 2013 ideas about what is green, so sub-domains that matter now
+          are invisible. H2 fails its identifying assumption outright and H5 has no causal
+          identification; neither is presented as though it did.
+        </p>
+
+        <p>
+          Finally, what this project does <em>not</em> attempt. It does not measure the
+          emerging-market green capital regime. It demonstrates that the regime cannot be
+          measured in open data, which is a different and smaller claim. The mechanism that
+          would explain the absence — capital moving through concessional and
+          development-finance instruments a venture database cannot index — is argued from
+          external evidence and is explicitly not identified here. The competing
+          explanation, that these ecosystems were genuinely less green, cannot be excluded.
+        </p>
+      </section>
+
+      <!-- ================================================== colophon -->
+      <section class="section" id="colophon" aria-labelledby="colophon-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="colophon-title">Colophon</h2>
+
+        <div class="colophon">
+          <p>
+            <b>Data.</b> The Crunchbase 2013 Snapshot (CC BY 4.0), obtained through two
+            Kaggle mirrors and joined on a normalised permalink; they are different
+            vintages and the flat file is used for its taxonomy only. Enrichment from the
+            World Bank and Our World in Data (CC BY 4.0): historical income classifications
+            for the time-varying bloc assignment, GDP, population, electricity access,
+            renewable share, and the US GDP deflator. The continuity probe uses a Kaggle
+            scrape of Indian startup funding, never pooled with the Crunchbase data.
+            Provenance, licences and per-file checksums are in
+            <code>data/MANIFEST.md</code> and <code>docs/DATA_SOURCES.md</code>.
+          </p>
+
+          <p>
+            <b>Tools.</b> Python 3.11 with pandas, NumPy, SciPy, statsmodels and matplotlib;
+            the report is set in Typst. This page is vanilla ES modules with no framework,
+            no bundler and no build step — the charts are hand-written SVG against
+            pre-computed arrays, and the only external resources are two typefaces.
+            Playwright drives the checks and the screenshot captures.
+          </p>
+
+          <p>
+            <b>The figure design system is shared, not duplicated.</b> The palette, the
+            serif-display and sans-label split, and the rule that every figure's leftmost
+            ink sits on the prose's left edge are all inherited from
+            <code>src/gcg/viz/theme.py</code>, which draws the PDF's figures. This page
+            resolves the same colours through semantic roles rather than hex values, so a
+            bloc cannot be teal in one artefact and grey in the other, and the two read as
+            one project rather than as a document and a website that happen to share a
+            title.
+          </p>
+
+          <p>
+            <b>Type.</b> Source Serif 4 for display and body, Inter for labels, axes and
+            anything numeric. Two families, six sizes, nothing between them.
+          </p>
+
+          <ul class="links">
+            <li><a href="../report/report.pdf">The full report as a PDF</a></li>
+            <li><a href="https://github.com/" data-meta="repo">Source and pipeline on GitHub</a></li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ================================================== limitations -->
+      <section class="section" id="limits" aria-labelledby="limits-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="limits-title">What would break this</h2>
+
+        <p>
+          Written for a reader looking for the weakness this project missed, and ordered by
+          how much damage each threat does rather than by how comfortable it is to discuss.
+        </p>
+
+        <h3 class="section__sub">Coverage bias, which is not fully mitigable</h3>
+
+        <p>
+          Crunchbase 2013 under-covers non-US, non-English-language ecosystems. Every
+          absolute emerging-market quantity here is an underestimate of the world by an
+          unknown factor. Three things limit the damage. The headline is a comparison
+          <em>within</em> the dataset, conditional on a company already being indexed, so it
+          does not require the blocs to be covered equally. The coverage gap is measured
+          rather than disclaimed. And the clerical version of the bias is ruled out
+          empirically: across <span data-key="tax.em_companies">1,019</span> emerging-market
+          companies the mean taxonomy tag count is
+          <span data-key="tax.em_mean_tags">2.63</span> against
+          <span data-key="tax.ae_mean_tags">2.24</span> for advanced economies — more tags, not
+          fewer, which is the opposite of what would explain the result away.
+        </p>
+
+        <p>
+          <b>What remains cannot be excluded.</b> If the emerging-market companies that
+          reach Crunchbase are systematically less green than those that do not, the gap is
+          overstated. Nothing in this data can test that, and no robustness check in the
+          appendix addresses it, because none can.
+        </p>
+
+        <h3 class="section__sub">A sample of thirty-four deals</h3>
+
+        <p>
+          Thirteen years, <span data-key="h3.em_green_deals">34</span> emerging-market green
+          deals, <span data-key="measure.em_green_companies">27</span> companies. That forbids
+          essentially every disaggregation the original design assumed: by year, by
+          sub-domain, by instrument, by country, by stage. The minimum cell size of
+          <span data-key="power.min_cell">30</span> was fixed in configuration before any
+          hypothesis was tested, and no emerging-market cell clears it.
+        </p>
+
+        <p>
+          The temptation this creates is to widen the green definition until the sample
+          becomes workable. That was tested and refused: the risk ratio moves only across
+          <span data-key="robust.green_def_rr_range">0.399–0.540</span> over four green definitions and
+          <span data-key="robust.bloc_rr_range">0.479–0.646</span> over three bloc schemes. The
+          constraint is the record, not the classifier, and widening the definition would
+          buy significance without buying evidence.
+        </p>
+
+        <p>
+          Nor are dollar-denominated emerging-market claims made anywhere here. Removing any
+          single emerging-market green company moves the green dollar total by
+          <span data-key="h1.loo_usd_swing">−20.3% to 0.0%</span> across the
+          <span data-key="h1.loo_companies">27</span> of them. A quantity one company can move
+          that far is not a population quantity.
+        </p>
+
+        <h3 class="section__sub">The audit is underdetermined, not reassuring</h3>
+
+        <p>
+          The emerging-market green set was audited exhaustively, company by company; the
+          advanced-economy set on a random sample of
+          <span data-key="audit.ae_sample_n">60</span> drawn with the project seed from
+          <span data-key="audit.ae_green_total">1,114</span>. The asymmetry biases toward finding
+          a gap. Measured false-positive rates are
+          <span data-key="audit.em_fp_pct">22.2</span>% and
+          <span data-key="audit.ae_fp_pct">15.0</span>%, p = <span data-key="audit.p">0.409</span>.
+          <b>That is an absence of power, not a demonstration of equality.</b> At
+          <span data-key="audit.em_census_n">27</span> and
+          <span data-key="audit.ae_sample_n">60</span> companies the comparison cannot detect
+          a seven-point difference. The headline is therefore reported on raw classifier
+          output, which applies no curation to either bloc and is symmetric by
+          construction.
+        </p>
+
+        <h3 class="section__sub">And the rest</h3>
+
+        <p>
+          The two Crunchbase mirrors are different vintages, which bounds rather than
+          resolves roughly <span data-key="data.under_recording_pct">6.5</span>% of deals
+          under-recorded in the relational dump. Undisclosed amounts mean counts and dollars
+          are separate series throughout; dollar series cover
+          <span data-key="classifier.green_with_amount">1,994</span> of
+          <span data-key="classifier.green_deals">2,174</span> green deals. A 2013 snapshot's
+          categories reflect 2013 ideas about what is green, so sub-domains that matter now
+          are invisible. H2 fails its identifying assumption outright and H5 has no causal
+          identification; neither is presented as though it did.
+        </p>
+
+        <p>
+          Finally, what this project does <em>not</em> attempt. It does not measure the
+          emerging-market green capital regime. It demonstrates that the regime cannot be
+          measured in open data, which is a different and smaller claim. The mechanism that
+          would explain the absence — capital moving through concessional and
+          development-finance instruments a venture database cannot index — is argued from
+          external evidence and is explicitly not identified here. The competing
+          explanation, that these ecosystems were genuinely less green, cannot be excluded.
+        </p>
+      </section>
+
+      <!-- ================================================== colophon -->
+      <section class="section" id="colophon" aria-labelledby="colophon-title">
+        <span class="section__number"></span>
+        <h2 class="section__title" id="colophon-title">Colophon</h2>
+
+        <div class="colophon">
+          <p>
+            <b>Data.</b> The Crunchbase 2013 Snapshot (CC BY 4.0), obtained through two
+            Kaggle mirrors and joined on a normalised permalink; they are different
+            vintages and the flat file is used for its taxonomy only. Enrichment from the
+            World Bank and Our World in Data (CC BY 4.0): historical income classifications
+            for the time-varying bloc assignment, GDP, population, electricity access,
+            renewable share, and the US GDP deflator. The continuity probe uses a Kaggle
+            scrape of Indian startup funding, never pooled with the Crunchbase data.
+            Provenance, licences and per-file checksums are in
+            <code>data/MANIFEST.md</code> and <code>docs/DATA_SOURCES.md</code>.
+          </p>
+
+          <p>
+            <b>Tools.</b> Python 3.11 with pandas, NumPy, SciPy, statsmodels and matplotlib;
+            the report is set in Typst. This page is vanilla ES modules with no framework,
+            no bundler and no build step — the charts are hand-written SVG against
+            pre-computed arrays, and the only external resources are two typefaces.
+            Playwright drives the checks and the screenshot captures.
+          </p>
+
+          <p>
+            <b>The figure design system is shared, not duplicated.</b> The palette, the
+            serif-display and sans-label split, and the rule that every figure's leftmost
+            ink sits on the prose's left edge are all inherited from
+            <code>src/gcg/viz/theme.py</code>, which draws the PDF's figures. This page
+            resolves the same colours through semantic roles rather than hex values, so a
+            bloc cannot be teal in one artefact and grey in the other, and the two read as
+            one project rather than as a document and a website that happen to share a
+            title.
+          </p>
+
+          <p>
+            <b>Type.</b> Source Serif 4 for display and body, Inter for labels, axes and
+            anything numeric. Two families, six sizes, nothing between them.
+          </p>
+
+          <ul class="links">
+            <li><a href="../report/report.pdf">The full report as a PDF</a></li>
+            <li><a href="https://github.com/" data-meta="repo">Source and pipeline on GitHub</a></li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

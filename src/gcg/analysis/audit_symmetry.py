@@ -1,8 +1,8 @@
 """Measure the differential-audit asymmetry and its direction.
 
-The emerging-market green set (28 companies) was audited exhaustively. The
-advanced-economy green set (1,114 companies) was audited only at the top of the
-funding distribution. Removing false positives more thoroughly from one bloc
+The emerging-market green set was audited exhaustively, company by company. The
+advanced-economy green set was audited only at the top of the funding
+distribution. Removing false positives more thoroughly from one bloc
 than the other biases the double gap, and the direction is knowable: if the
 emerging-market false-positive rate is higher, curation lowers the
 emerging-market green rate further and **widens** the gap, which means the raw
@@ -26,15 +26,45 @@ from gcg.config import Config, get_logger
 LOG = get_logger("analysis.audit")
 
 
-def run(cfg: Config) -> dict[str, Any]:
-    """Compare emerging-market and advanced-economy false-positive rates."""
+def run(cfg: Config, deals: pd.DataFrame) -> dict[str, Any]:
+    """Compare emerging-market and advanced-economy false-positive rates.
+
+    The emerging-market denominator is counted from ``deals`` rather than read
+    from config. It used to be the literal 28, which was the population at the
+    time of the audit; the Algenol Biofuel country correction later moved one
+    company to the advanced-economy bloc and the literal went stale without
+    anything noticing. A census denominator is a property of the data, so it is
+    derived from the data, and the named exclusions are checked against it.
+    """
     spec = cfg.audit_calls["ae_random_audit"]
     census = cfg.audit_calls["em_census"]
 
     ae_n = int(spec["sample_size"])
     ae_fp = len(spec["false_positive"])
-    em_n = int(census["companies"])
-    em_fp = int(census["excluded"])
+
+    em_green = deals.loc[deals["green"] & deals["bloc"].eq("EM")]
+    em_companies = set(em_green["permalink_norm"].unique())
+    em_n = len(em_companies)
+
+    excluded = list(census["excluded_companies"])
+    unknown = sorted(set(excluded) - em_companies)
+    if unknown:
+        msg = (
+            f"{len(unknown)} audited exclusion(s) are not in the emerging-market green "
+            f"set any more: {unknown}. Either the classifier changed or a bloc "
+            "assignment moved; reconcile config/audit_calls.yaml before reporting a rate."
+        )
+        raise ValueError(msg)
+    em_fp = len(excluded)
+
+    utility = [c["permalink"] for c in census["utility_scale"]]
+    missing_utility = sorted(set(utility) - em_companies)
+    if missing_utility:
+        msg = (
+            f"{len(missing_utility)} utility-scale company(ies) are not in the "
+            f"emerging-market green set: {missing_utility}."
+        )
+        raise ValueError(msg)
 
     ae_lo, ae_hi = wilson_interval(ae_fp, ae_n)
     em_lo, em_hi = wilson_interval(em_fp, em_n)
@@ -44,6 +74,8 @@ def run(cfg: Config) -> dict[str, Any]:
     differs = test["p_value"] < cfg.threshold("alpha")
 
     findings: dict[str, Any] = {
+        "utility_scale_companies": len(utility),
+        "reclassified_out_of_census": [r["permalink"] for r in census["reclassified"]],
         "em": {
             "companies": em_n,
             "false_positives": em_fp,

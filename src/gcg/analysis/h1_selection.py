@@ -260,7 +260,10 @@ def bias_corrected_gap(
     em_g, ae_g = int(em["green"].sum()), int(ae["green"].sum())
 
     # Jeffreys posteriors on the two false-positive rates.
-    em_k, em_audited = int(census["excluded"]), int(census["companies"])
+    # Census denominator counted from the data, matching audit_symmetry: the
+    # config no longer carries a literal, because the literal went stale.
+    em_k = len(census["excluded_companies"])
+    em_audited = int(em.loc[em["green"]].drop_duplicates(subset=["permalink_norm"]).shape[0])
     ae_k, ae_audited = len(spec["false_positive"]), int(spec["sample_size"])
     fp_em = rng.beta(em_k + 0.5, em_audited - em_k + 0.5, size=draws)
     fp_ae = rng.beta(ae_k + 0.5, ae_audited - ae_k + 0.5, size=draws)
@@ -341,7 +344,23 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
         int(em_ub["green"].sum()), len(em_ub), int(ae["green"].sum()), len(ae)
     )
 
+    # China against the advanced-economy benchmark. It is reported separately
+    # throughout, and the reason is this test rather than an assumption: the two
+    # rates are not distinguishable, so folding China into the emerging-market
+    # bloc would mix a population that behaves like the benchmark into the one
+    # being compared against it.
+    cn = deals.loc[deals["bloc"].eq("CHINA")]
+    china = two_proportion_test(
+        int(cn["green"].sum()), len(cn), int(ae["green"].sum()), len(ae)
+    )
+
     loo = leave_one_out(deals, cfg, "EM")
+
+    # Third specification, pre-committed in docs/METHODOLOGY.md §12: correct both
+    # blocs by their own measured false-positive rate rather than by the
+    # asymmetric manual curation.
+    rng = np.random.default_rng(int(cfg.pipeline["seed"]))
+    bias_corrected = bias_corrected_gap(deals, cfg, rng)
 
     findings: dict[str, Any] = {
         "hypothesis": "H1-revised: selection and visibility (the double gap)",
@@ -352,6 +371,8 @@ def run(deals: pd.DataFrame, cfg: Config) -> dict[str, Any]:
             "by_year_no_test_permitted": by_year.to_dict("records"),
             "per_year_tests_permitted": int(by_year["test_permitted"].sum()),
             "min_cell_size": _MIN_CELL,
+            "bias_corrected": bias_corrected,
+            "china_vs_ae": china,
         },
         "leave_one_out_em": {
             "base_green_rate_pct": loo.attrs["base_rate_pct"],

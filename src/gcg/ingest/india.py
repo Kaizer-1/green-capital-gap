@@ -117,8 +117,9 @@ def ingest(cfg: Config) -> tuple[dict[str, pd.DataFrame], list[SourceRecord], di
             size_bytes=path.stat().st_size,
             fetched_at=_mtime(path),
             rows=len(df),
-            note="Continuity probe only (report §7). Never pooled with Crunchbase. "
-            + src.get("notes", ""),
+            # The note is config's to state; prefixing it here duplicated the
+            # sentence in the manifest.
+            note=src.get("notes", ""),
         )
     ]
     return {"india_funding": df}, rec, stats

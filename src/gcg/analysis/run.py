@@ -158,7 +158,7 @@ def main() -> int:
     for name, fn in (
         ("descriptives", lambda: descriptives.run(cfg)),
         ("cheque_size", lambda: cheque_size.run(cfg)),
-        ("audit", lambda: audit_symmetry.run(cfg)),
+        ("audit", lambda: audit_symmetry.run(cfg, deals)),
         ("continuity", lambda: continuity.run(cfg)),
         ("h1", lambda: h1_selection.run(deals, cfg)),
         ("h1b", lambda: h1b_capital_intensity.run(deals, cfg)),

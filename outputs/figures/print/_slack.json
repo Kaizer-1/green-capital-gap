@@ -1,0 +1,170 @@
+{
+  "fig_01a_double_gap": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": 0.0117,
+      "right": 0.0065,
+      "bottom": -0.015,
+      "top": 0.01
+    }
+  },
+  "fig_01b_sector_ladder": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": 0.0033,
+      "right": 0.0167,
+      "bottom": 0.01,
+      "top": 0.01
+    }
+  },
+  "fig_02_coverage_gdp": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": -0.0183,
+      "right": 0.0029,
+      "bottom": -0.015,
+      "top": -0.0167
+    }
+  },
+  "fig_03_rate_by_year": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": -0.0183,
+      "right": 0.008,
+      "bottom": 0.01,
+      "top": 0.015
+    }
+  },
+  "fig_04_subdomain": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": 0.0049,
+      "right": 0.0,
+      "bottom": 0.01,
+      "top": 0.01
+    }
+  },
+  "fig_05_cycle": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": -0.0183,
+      "right": 0.0167,
+      "bottom": -0.015,
+      "top": -0.02
+    }
+  },
+  "fig_06_share_crossover": {
+    "left": 0.01,
+    "right": 0.0117,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": -0.0183,
+      "right": 0.0046,
+      "bottom": -0.015,
+      "top": -0.0167
+    }
+  },
+  "fig_07_crisis": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": -0.0183,
+      "right": 0.003,
+      "bottom": -0.015,
+      "top": 0.015
+    }
+  },
+  "fig_08_instruments": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": 0.0033,
+      "right": 0.0167,
+      "bottom": 0.01,
+      "top": 0.01
+    }
+  },
+  "fig_09_power_wall": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": 0.0017,
+      "right": 0.0167,
+      "bottom": 0.01,
+      "top": 0.01
+    }
+  },
+  "fig_10_depth_need": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": -0.0183,
+      "right": 0.0167,
+      "bottom": 0.01,
+      "top": -0.02
+    }
+  },
+  "fig_11_continuity": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": -0.0167,
+      "right": 0.0167,
+      "bottom": -0.015,
+      "top": -0.0183
+    }
+  },
+  "fig_m1_censoring": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": -0.0167,
+      "right": 0.0167,
+      "bottom": -0.015,
+      "top": 0.015
+    }
+  },
+  "fig_m2_elasticity": {
+    "left": 0.01,
+    "right": 0.01,
+    "top": 0.01,
+    "bottom": 0.01,
+    "tightbbox": {
+      "left": -0.02,
+      "right": 0.0172,
+      "bottom": 0.01,
+      "top": 0.015
+    }
+  }
+}

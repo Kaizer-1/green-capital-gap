@@ -283,7 +283,7 @@ Table: `outputs/tables/appendix_mirror_vintage.csv`.
 
 **Named before the results are reported, with its direction stated.**
 
-The 28 emerging-market green companies were audited exhaustively, company by
+The 27 emerging-market green companies were audited exhaustively, company by
 company. The 1,114 advanced-economy green companies were audited only at the top of
 the funding distribution. Removing false positives more thoroughly from one bloc than
 from the other biases the double gap, and the direction is knowable in advance: if the
@@ -306,10 +306,10 @@ against the same standard as the emerging-market set. Every call is recorded in
 
 | | Audited | False positives | Rate | 95% CI |
 |---|---:|---:|---:|---|
-| Emerging markets | 28 (census) | 6 | **21.4%** | 10.2–39.5 |
+| Emerging markets | 27 (census) | 6 | **22.2%** | 10.6–40.8 |
 | Advanced economies | 60 (random of 1,114) | 9 | **15.0%** | 8.1–26.1 |
 
-Two-proportion test: p = 0.455. Risk ratio 1.43 [0.56, 3.62]. **The two rates are not
+Two-proportion test: p = 0.409. Risk ratio 1.48 [0.59, 3.75]. **The two rates are not
 distinguishable at this sample size.** The differential-audit concern is real in
 principle and is not detectably biasing the result.
 
@@ -488,7 +488,7 @@ on both sides of the comparison.**
 
 The bias is very unlikely to be symmetric. Infrastructure-scale independent power
 producers are a far larger fraction of the emerging-market green set — on inspection,
-seven of the 28 emerging-market green companies are IPPs or utility-scale generation
+seven of the 27 emerging-market green companies are IPPs or utility-scale generation
 developers — than of the advanced-economy green set, where venture-stage hardware and
 software firms dominate. So the understatement of non-dilutive share should be **larger
 for emerging markets than for advanced economies.**
@@ -513,8 +513,8 @@ entrepreneurship, in both the sector dimension and the instrument dimension.**
 
 ### 12.1 The taxonomy cannot resolve green sub-domains in emerging markets
 
-91.2% of emerging-market green deals carry no green sub-domain more specific than
-"general". The mechanism is direct: **26 of the 28 emerging-market green companies carry
+88.2% of emerging-market green deals carry no green sub-domain more specific than
+"general". The mechanism is direct: **23 of the 27 emerging-market green companies carry
 no taxonomy tag more specific than "Clean Technology"**, with match text reading
 `|Clean Technology| | cleantech | | | Clean Technology` and nothing else. Only four carry
 specific evidence — Vital Renewable Energy (sugarcane ethanol), farmhopping, Keclon and
@@ -543,13 +543,13 @@ of the field.
 
 ## 13. The audit comparison is underdetermined, not reassuring
 
-§6 reports emerging-market and advanced-economy false-positive rates of 21.4%
-[10.2–39.5] and 15.0% [8.1–26.1], with p = 0.455.
+§6 reports emerging-market and advanced-economy false-positive rates of 22.2%
+[10.6–40.8] and 15.0% [8.1–26.1], with p = 0.409.
 
-**That is an absence of power, not a demonstration of equality.** With 28 and 60 companies
-audited, the study cannot detect a 6-percentage-point difference in false-positive rates;
+**That is an absence of power, not a demonstration of equality.** With 27 and 60 companies
+audited, the study cannot detect a 7-percentage-point difference in false-positive rates;
 the two intervals overlap across most of their range and the risk-ratio interval
-[0.56, 3.62] admits anything from the advanced-economy rate being nearly twice the
+[0.59, 3.75] admits anything from the advanced-economy rate being nearly twice the
 emerging-market rate to the reverse being more than threefold. The correct statement is
 that the differential-audit asymmetry **has not been ruled out**, and that the point
 estimate runs in the direction that would make the raw headline conservative.
@@ -714,7 +714,7 @@ rather than the appendix: countries with real energy-access deficits have too fe
 deals to enter the panel at all. H5's need limb was not tested and found null — it could
 not be tested.
 
-### 15.2 The other three defects
+### 15.2 The other four defects
 
 **The instrument field.** The first configuration normalised instruments from
 `funding_round_type`, a nine-value rollup that collapses `seed` into `angel` for 10,189
@@ -734,9 +734,27 @@ against its own ad-hoc join, bypassing the attrition ledger, so advanced-economy
 37,965 in one stage and 37,896 in another. Fixed structurally rather than by correcting
 instances: every deal-level number now reads the canonical post-ledger table.
 
+**A figure that disagreed with the sentence beside it.** The depth figure re-ran the H5
+bootstrap to label its own panel, using the generator the figure stage had already advanced
+building the screen variant. The two variants of that figure therefore drew *different*
+intervals, and the print variant — the one embedded in the report — showed
+`[0.3068, 0.8665]` on the same page as prose reading `[0.298, 0.866]`. The seed was fixed
+and every stage was deterministic in isolation; the defect was that a figure recomputed a
+published statistic instead of displaying it. Fixed by having the figure read the value
+from `findings.json` and the panel from the table the analysis stage wrote, so it cannot
+derive a second answer.
+
+This one was invisible to every check in place at the time, because figure text is composed
+in Python and rasterised into a PDF before the renderer ever runs. A gate now harvests every
+string drawn into each figure and applies the same number-membership rule the prose gate
+applies. Running it for the first time across all fourteen figures found this defect, two
+further statistics printed at a precision the report does not use, a p-value typeset as
+`1.5e-05` beside prose reading `1.5x10^-5`, and three quantities stated on figures that no
+finding held at all.
+
 ### 15.3 The error pattern is not directional
 
-Four defects were found and corrected after first being reported. **Two overclaimed a
+Five defects were found and corrected after first being reported. **Two overclaimed a
 refutation and one overclaimed support**, which is worth stating plainly because an error
 pattern that ran one way would indicate bias rather than mistakes:
 

@@ -14,7 +14,9 @@ import pytest
 from gcg.transform.deflate import DeflatorError, apply_deflator, build_deflator
 
 
-def _indicators(values: dict[int, float], *, code="NY.GDP.DEFL.ZS", country="USA") -> pd.DataFrame:
+def _indicators(
+    values: dict[int, float], *, code="NY.GDP.DEFL.ZS", country="USA"
+) -> pd.DataFrame:
     return pd.DataFrame(
         {
             "country_code": country,
@@ -119,9 +121,7 @@ def test_real_amounts_are_comparable_across_years(cfg, deflator_values):
     """The point of the exercise: equal real value must give equal real amounts."""
     m = build_deflator(cfg, _indicators(deflator_values))
     # $1m in 2004 and $1.230648m in 2015 are the same real quantity.
-    df = pd.DataFrame(
-        {"year": [2004, 2015], "amount_usd_nominal": [1_000_000.0, 1_230_648.0]}
-    )
+    df = pd.DataFrame({"year": [2004, 2015], "amount_usd_nominal": [1_000_000.0, 1_230_648.0]})
     out, _ = apply_deflator(df, m, cfg)
     a, b = out["amount_usd_real2015"]
     assert a == pytest.approx(b, rel=1e-5)

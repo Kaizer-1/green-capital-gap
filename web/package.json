@@ -1,0 +1,10 @@
+{
+  "name": "green-capital-gap-web",
+  "private": true,
+  "type": "module",
+  "description": "Test harness for the web edition. The page itself has no build step and no runtime dependencies beyond a pinned D3 CDN; this package exists only for Playwright.",
+  "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
+    "playwright": "^1.49.0"
+  }
+}

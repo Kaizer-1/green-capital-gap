@@ -72,7 +72,7 @@ def test_classification_carries_forward_but_never_backward(panel):
     Back-filling would invent a classification for years the World Bank never
     published one for.
     """
-    assert _bloc(panel, "POL", 2008) == "EM"   # last known before 2009 is upper-middle
+    assert _bloc(panel, "POL", 2008) == "EM"  # last known before 2009 is upper-middle
     assert _bloc(panel, "POL", 2009) == "AE"
     assert _bloc(panel, "IND", 2007) == "EM"
 

@@ -14,7 +14,7 @@ H5,Spearman green_usd_per_capita vs electricity_deficit_pct,0.06720705783688283,
 H5,Spearman green_usd_per_capita vs electricity_access_pct,0.06720705783688283,rho 0.3972,0.14475366303328607,False
 H5,OLS need after income: co2_per_capita,0.18374109650575665,coef 0.116147,0.3674821930115133,False
 H5,Spearman green_usd_per_gdp vs co2_per_capita,0.23990040725366882,rho 0.2614,0.4478140935401818,False
-Audit,EM vs AE false-positive rate,0.4550814298690131,RR 1.4286,0.7548789702118289,False
+Audit,EM vs AE false-positive rate,0.4093476972277439,RR 1.4815,0.7163584701485518,False
 H4,"graduation logit, seed to A",0.45831937477146756,OR 1.3,0.7548789702118289,False
 H5,Spearman green_share_of_deals vs renewable_energy_share_pct,0.493384628947119,rho 0.1542,0.7674872005844072,False
 H5,Spearman green_usd_per_capita vs renewable_energy_share_pct,0.5731558222741561,rho -0.127,0.844650685456651,False

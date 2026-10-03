@@ -8,7 +8,9 @@ and 300dpi PNG plus PDF under a deterministic filename.
 
 from __future__ import annotations
 
+import functools
 import json
+import pathlib
 
 import numpy as np
 import pandas as pd
@@ -20,7 +22,6 @@ from gcg.analysis import h2_cycle, h3_instrument, h5_allocation
 from gcg.analysis.h1_selection import (
     green_rate_by_bloc,
     green_rate_by_year,
-    two_proportion_test,
 )
 from gcg.config import Config, get_logger, load_config, seed_everything
 from gcg.io import read_parquet
@@ -31,6 +32,37 @@ from gcg.viz import theme
 from gcg.viz.theme import PALETTE as P
 
 LOG = get_logger("viz.figures")
+
+
+@functools.lru_cache(maxsize=1)
+def _findings(path: str) -> dict[str, str]:
+    """The same ``outputs/findings.json`` the prose and the captions resolve against.
+
+    A figure that needs a statistic computed by another analysis module quotes it
+    by key rather than restating it, so the number in the plot, the number in the
+    caption and the number in the sentence cannot drift apart. ``make figures``
+    already depends on this file, so the read is ordered.
+    """
+    return json.loads(pathlib.Path(path).read_text(encoding="utf-8"))
+
+
+def finding(cfg: Config, key: str) -> str:
+    """One finding, by the dotted key the report uses, typeset as the report sets it.
+
+    findings.json stores the raw form — "1.92x", not "1.92×" — and the report
+    normalises it on the way into the page. A figure reading the raw string drew
+    an ASCII x where the prose beside it drew a multiplication sign, which is how
+    this function reintroduced a typographic defect while removing a provenance
+    one. Normalising here means a figure cannot read a value and typeset it
+    differently from the sentence that quotes it.
+    """
+    from gcg.report.render import apply_typography
+
+    found = _findings(str(cfg.path("findings")))
+    if key not in found:
+        msg = f"no finding {key!r} in findings.json; run `make analysis` first"
+        raise KeyError(msg)
+    return apply_typography(found[key])
 
 
 def fig_01a_double_gap(deals: pd.DataFrame, cfg: Config) -> None:
@@ -44,14 +76,9 @@ def fig_01a_double_gap(deals: pd.DataFrame, cfg: Config) -> None:
     theme.apply_theme()
     by_bloc = green_rate_by_bloc(deals, cfg).set_index("bloc")
 
-    em, ae = deals.loc[deals["bloc"].eq("EM")], deals.loc[deals["bloc"].eq("AE")]
-    cn = deals.loc[deals["bloc"].eq("CHINA")]
-    test = two_proportion_test(
-        int(em["green"].sum()), len(em), int(ae["green"].sum()), len(ae)
-    )
-    china_test = two_proportion_test(
-        int(cn["green"].sum()), len(cn), int(ae["green"].sum()), len(ae)
-    )
+    # The tests this figure quotes are read from findings.json, not recomputed
+    # here. Recomputing them is how the depth figure came to print a different
+    # bootstrap interval from the sentence beside it.
     ub = deals.copy()
     ub["b"] = ub["bloc"].replace({"UNASSIGNED": "EM"})
     em_ub = ub.loc[ub["b"].eq("EM")]
@@ -91,7 +118,7 @@ def fig_01a_double_gap(deals: pd.DataFrame, cfg: Config) -> None:
         ax.text(
             r["green_rate_pct"] + 0.18,
             yi + 0.3,
-            rfmt(r["green_rate_pct"], 2, suffix="%"),
+            finding(cfg, f"h1.{bloc.lower()}_rate_pct") + "%",
             va="center",
             ha="left",
             fontsize=8.5,
@@ -123,31 +150,38 @@ def fig_01a_double_gap(deals: pd.DataFrame, cfg: Config) -> None:
 
     ae_y, cn_y = y[order.index("AE")], y[order.index("CHINA")]
     mid_y = (ae_y + em_y) / 2
-    bracket_x = 0.26
-    ax.plot([bracket_x] * 2, [em_y, ae_y], color=P.ink_muted, linewidth=0.8, zorder=2)
+    # The bracket marking which two rows the headline compares used to sit at
+    # x = 0.26 in data coordinates, which put it inside the plot on top of the
+    # gridlines. It now hangs just outside the right spine, where there is no
+    # ink to collide with, and carries only the pointer; the risk ratio itself
+    # is in the caption, which is where the reader looks for a statistic.
+    trans = ax.get_yaxis_transform()
+    bracket_x = 1.012
+    ax.plot(
+        [bracket_x] * 2,
+        [em_y, ae_y],
+        transform=trans,
+        color=P.ink_muted,
+        linewidth=0.8,
+        clip_on=False,
+        zorder=2,
+    )
     for yy in (em_y, ae_y):
         ax.plot(
-            [bracket_x, bracket_x + 0.13],
+            [bracket_x - 0.008, bracket_x],
             [yy, yy],
+            transform=trans,
             color=P.ink_muted,
             linewidth=0.8,
+            clip_on=False,
             zorder=2,
         )
-    ax.text(
-        bracket_x + 0.22,
-        mid_y,
-        f"EM vs AE\nrisk ratio {rfmt(test['risk_ratio'], 2)}\n{rci(test['risk_ratio_ci'], 2)}",
-        va="center",
-        ha="left",
-        fontsize=7.8,
-        color=P.ink,
-        linespacing=1.35,
-    )
+    theme.series_label(ax, mid_y, "EM vs AE", P.ink, fontsize=7.8, dx=0.022)
     theme.annotate(
         ax,
         "China indistinguishable from AE\n"
-        f"(risk ratio {rfmt(china_test['risk_ratio'], 2)}, "
-        f"p = {rfmt(china_test['p_value'], 2)})",
+        f"(risk ratio {finding(cfg, 'china.rr')}, "
+        f"p = {finding(cfg, 'china.p')})",
         xy=(rows.loc["CHINA", "green_rate_pct"], cn_y),
         xytext=(8.9, cn_y + 0.72),
         ha="right",
@@ -158,7 +192,7 @@ def fig_01a_double_gap(deals: pd.DataFrame, cfg: Config) -> None:
     ax.text(
         0.22,
         ldc_y - 0.34,
-        "0 of 13 deals: no usable interval",
+        f"0 of {int(rows.loc['LDC', 'deals']):,} deals: no usable interval",
         va="center",
         ha="left",
         fontsize=7.0,
@@ -189,8 +223,10 @@ def fig_01a_double_gap(deals: pd.DataFrame, cfg: Config) -> None:
         fig,
         cfg,
         f"n = {len(deals):,} deals, {int(deals['green'].sum()):,} green; bloc rows sum to "
-        "the total. Intervals are Wilson score. Headline is raw classifier output; "
-        "bias-corrected risk ratio 0.44, curated 0.40 (Appendix C).",
+        f"the total. Intervals are Wilson score. Headline is raw classifier output "
+        f"(EM vs AE risk ratio {finding(cfg, 'h1.rr')} "
+        f"{finding(cfg, 'h1.rr_ci')}); the bias-corrected and curated "
+        f"specifications are in Appendix C.",
         y=0.175,
         width=108,
     )
@@ -291,8 +327,8 @@ def fig_01b_sector_ladder(deals: pd.DataFrame, cfg: Config) -> None:
     )
     theme.annotate(
         ax,
-        "Biotech: 4.6x more under-represented\nthan cleantech, and below its own\nprediction "
-        "too",
+        f"Biotech: {finding(cfg, 'h1b.biotech_vs_cleantech')} more under-represented\n"
+        "than cleantech, and below its own\nprediction too",
         xy=(obs[bio], bio),
         xytext=(0.093, bio + 6.4),
         ha="left",
@@ -305,7 +341,7 @@ def fig_01b_sector_ladder(deals: pd.DataFrame, cfg: Config) -> None:
     ax.set_ylim(-0.9, len(s) - 0.1)
     ax.set_xticks([0.1, 0.25, 0.5, 1, 2, 4])
     ax.set_xticklabels(["0.1x", "0.25x", "0.5x", "1x", "2x", "4x"])
-    ax.set_xlabel("EM representation relative to AE (1x = proportionate), log scale")
+    ax.set_xlabel("EM representation relative to AE (1\u00d7 = proportionate), log scale")
     ax.spines["left"].set_visible(False)
     theme.style_axes(ax, xgrid=True)
     ax.grid(axis="y", visible=False)
@@ -395,7 +431,6 @@ def fig_m2_elasticity(deals: pd.DataFrame, cfg: Config) -> None:
         index={"<none>": "No sector tag"}
     )
     fitobj = panel["primary_fit"]
-    res = panel["cleantech_residual_primary"]
 
     fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_m2_elasticity"))
 
@@ -441,8 +476,8 @@ def fig_m2_elasticity(deals: pd.DataFrame, cfg: Config) -> None:
 
     theme.annotate(
         ax,
-        f"Cleantech sits {res['residual_ratio_scale']:.2f}x above the fit\n"
-        f"[{res['residual_ratio_ci'][0]:.2f}x, {res['residual_ratio_ci'][1]:.2f}x]: "
+        f"Cleantech sits {finding(cfg, 'h1b.cleantech_residual')} above the fit\n"
+        f"{finding(cfg, 'h1b.cleantech_residual_ci')}: "
         "capital intensity\nover-predicts the emerging-market green gap.",
         xy=(ct_x, (ct_y * float(fitted[is_ct][0])) ** 0.5),
         xytext=(10.2, 1.95),
@@ -470,10 +505,12 @@ def fig_m2_elasticity(deals: pd.DataFrame, cfg: Config) -> None:
     ax.text(
         0.015,
         0.028,
-        f"log(ratio) = {fitobj['intercept']:.2f} {fitobj['slope']:+.2f} "
-        "\u00b7 log(deal size)"
-        f"   \u00b7   R\u00b2 = {fitobj['r_squared']:.2f}"
-        f"   \u00b7   p = {fitobj['slope_p']:.1e}",
+        f"log(ratio) = {finding(cfg, 'h1b.intercept')} "
+        f"{finding(cfg, 'h1b.elasticity')} \u00b7 log(deal size)"
+        f"   \u00b7   R\u00b2 = {finding(cfg, 'h1b.r2')}"
+        # The report renders p-values as 1.5x10^-5; `:.1e` gave "1.5e-05" here,
+        # so the same quantity was typeset two ways in one document.
+        f"   \u00b7   p = {finding(cfg, 'h1b.p')}",
         transform=ax.transAxes,
         fontsize=7.5,
         color=P.alert,
@@ -482,8 +519,8 @@ def fig_m2_elasticity(deals: pd.DataFrame, cfg: Config) -> None:
     theme.finding_title(
         fig,
         "Emerging-market representation falls roughly in proportion to capital intensity",
-        f"{fitobj['n_sectors']} sectors, 2000\u20132012. Elasticity "
-        f"{fitobj['slope']:.2f} [{fitobj['slope_ci'][0]:.2f}, {fitobj['slope_ci'][1]:.2f}].",
+        f"{finding(cfg, 'h1b.n_sectors')} sectors, 2000\u20132012. Elasticity "
+        f"{finding(cfg, 'h1b.elasticity')} {finding(cfg, 'h1b.elasticity_ci')}.",
         y=0.935,
     )
     theme.source_footer(
@@ -495,7 +532,8 @@ def fig_m2_elasticity(deals: pd.DataFrame, cfg: Config) -> None:
         f"n = {len(deals):,} deals. The capital-intensity proxy uses advanced-economy deals "
         "only, so it cannot be contaminated by the emerging-market composition it explains. "
         "Ordinary least squares on logs; the line is the model's fitted values. The secondary "
-        "proxy, median cumulative funding per company, gives an elasticity of -0.96 with "
+        f"proxy, median cumulative funding per company, gives an elasticity of "
+        f"{finding(cfg, 'h1b.elasticity2')} with "
         "R-squared 0.69.",
         y=0.205,
         width=112,
@@ -534,40 +572,24 @@ def fig_02_coverage_gdp(deals: pd.DataFrame, cfg: Config) -> None:
     ax.plot(em["year"], em["deal_share_pct"], color=P.em, linewidth=1.8, zorder=3)
 
     last = em.iloc[-1]
-    ax.text(
-        last["year"] + 0.12,
-        last["gdp_share_pct"],
-        "share of\nworld GDP",
-        va="center",
-        ha="left",
-        fontsize=8,
-        color=P.ink,
-        linespacing=1.3,
-    )
-    ax.text(
-        last["year"] + 0.12,
-        last["deal_share_pct"],
-        "share of recorded\nventure deals",
-        va="center",
-        ha="left",
-        fontsize=8,
-        color=P.em,
-        linespacing=1.3,
-    )
+    theme.series_label(ax, last["gdp_share_pct"], "share of\nworld GDP", P.ink)
+    theme.series_label(ax, last["deal_share_pct"], "share of recorded\nventure deals", P.em)
 
     worst = em.loc[em["representation_ratio"].idxmin()]
     theme.annotate(
         ax,
         f"Widest in {int(worst['year'])}: {worst['gdp_share_pct']:.1f}% of world GDP,\n"
         f"{worst['deal_share_pct']:.1f}% of recorded deals "
-        f"\u2014 {1 / worst['representation_ratio']:.0f}x under-represented",
+        f"\u2014 {1 / worst['representation_ratio']:.0f}\u00d7 under-represented",
         xy=(worst["year"], (worst["gdp_share_pct"] + worst["deal_share_pct"]) / 2),
         xytext=(2004.6, 13.0),
         color=P.ink_muted,
         fontsize=7.6,
     )
 
-    ax.set_xlim(em["year"].min() - 0.3, em["year"].max() + 2.4)
+    # Stop at the last year with data: the labels now live outside the axes,
+    # so no room needs to be made for them inside it.
+    ax.set_xlim(em["year"].min() - 0.3, em["year"].max() + 0.3)
     ax.set_ylim(0, 25)
     ax.yaxis.set_major_formatter(theme.fmt_pct)
     ax.set_xlabel("Year the deal closed")
@@ -637,30 +659,15 @@ def fig_03_rate_by_year(deals: pd.DataFrame, cfg: Config) -> None:
             color=P.em,
         )
 
-    ax.text(
-        ae["year"].iloc[-1] + 0.12,
-        ae["green_rate_pct"].iloc[-1],
-        "Advanced economies",
-        va="center",
-        ha="left",
-        fontsize=8,
-        color=P.ae,
-    )
-    ax.text(
-        em["year"].iloc[-1] + 0.12,
-        em["green_rate_pct"].iloc[-1],
-        "Emerging markets",
-        va="center",
-        ha="left",
-        fontsize=8,
-        color=P.em,
-    )
+    theme.series_label(ax, ae["green_rate_pct"].iloc[-1], "Advanced\neconomies", P.ae)
+    theme.series_label(ax, em["green_rate_pct"].iloc[-1], "Emerging\nmarkets", P.em)
 
     y08_ae = float(ae.loc[ae["year"].eq(2008), "green_rate_pct"].iloc[0])
     y08_em = float(em.loc[em["year"].eq(2008), "green_rate_pct"].iloc[0])
     theme.annotate(
         ax,
-        f"2008: the rates converge\n({y08_em:.2f}% vs {y08_ae:.2f}%).\n"
+        f"2008: the rates converge\n({finding(cfg, 'h2.parity_em_rate_pct')}% vs "
+        f"{finding(cfg, 'h2.parity_ae_rate_pct')}%).\n"
         "The gap opens only after the crash.",
         xy=(2008, (y08_ae + y08_em) / 2),
         xytext=(2002.4, 8.6),
@@ -668,7 +675,7 @@ def fig_03_rate_by_year(deals: pd.DataFrame, cfg: Config) -> None:
         fontsize=7.6,
     )
 
-    ax.set_xlim(1999.7, 2014.6)
+    ax.set_xlim(1999.7, 2012.3)
     ax.set_ylim(0, 11.5)
     ax.yaxis.set_major_formatter(theme.fmt_pct)
     ax.set_xlabel(
@@ -687,8 +694,10 @@ def fig_03_rate_by_year(deals: pd.DataFrame, cfg: Config) -> None:
         fig,
         cfg,
         f"n = {len(deals):,} deals. NO emerging-market year-cell reaches the minimum cell "
-        f"size of {int(cfg.threshold('min_cell_n'))} green deals \u2014 the largest is 12, in "
-        "2008 \u2014 so no per-year test is reported and this figure is descriptive only. "
+        f"size of {int(cfg.threshold('min_cell_n'))} green deals \u2014 the largest is "
+        f"{int(em['green_deals'].max())}, in "
+        f"{int(em.loc[em['green_deals'].idxmax(), 'year'])} \u2014 so no per-year test is "
+        "reported and this figure is descriptive only. "
         "Counts are printed under each emerging-market point so the reader can see the "
         "precision available. Raw classifier output.",
         y=0.205,
@@ -749,7 +758,7 @@ def fig_04_subdomain(deals: pd.DataFrame, cfg: Config) -> None:
         ax.text(
             unspec[bloc] / 2,
             yi,
-            f"{unspec[bloc]:.1f}%",
+            finding(cfg, f"measure.{bloc.lower()}_unspecified_pct") + "%",
             va="center",
             ha="center",
             fontsize=8.2,
@@ -771,8 +780,9 @@ def fig_04_subdomain(deals: pd.DataFrame, cfg: Config) -> None:
 
     theme.annotate(
         ax,
-        "26 of the 28 emerging-market green companies carry\n"
-        'no tag more specific than "Clean Technology"',
+        f"{finding(cfg, 'measure.em_unspecified_companies')} of the "
+        f"{finding(cfg, 'measure.em_green_companies')} emerging-market green companies "
+        'carry\nno tag more specific than "Clean Technology"',
         xy=(unspec["EM"] * 0.72, y[order.index("EM")]),
         xytext=(21, y[order.index("EM")] - 0.62),
         color=P.ink,
@@ -877,7 +887,8 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
     )
     theme.annotate(
         ax1,
-        f"Deal count peaks at {int(peak['deals'])} in {int(peak['year'])}",
+        f"Deal count peaks at {finding(cfg, 'cycle.peak_deals')} "
+        f"in {finding(cfg, 'cycle.peak_deals_year')}",
         xy=(peak["year"], peak["deals"]),
         xytext=(2002.6, by_year["deals"].max() * 0.97),
         color=P.ink,
@@ -886,8 +897,9 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
     theme.annotate(
         ax2,
         f"Dollars peak in {int(dollar_peak['year'])}, a year BEFORE deals do.\n"
-        "Within named stages, green deal sizes fall 49pp more\n"
-        "than non-green over 2007-12 [CI -69 to -22]. The POOLED\n"
+        f"Within named stages, green deal sizes fall "
+        f"{finding(cfg, 'cheque.difference_pp').lstrip('−-')}pp more\n"
+        f"than non-green over 2007-12 {finding(cfg, 'cheque.ci')}. The POOLED\n"
         "median falls alike in both: that comparison is confounded.",
         xy=(dollar_peak["year"], dollar_peak["usd"] / 1e9),
         xytext=(2000.2, by_year["usd"].max() / 1e9 * 0.70),
@@ -910,15 +922,17 @@ def fig_05_cycle(deals: pd.DataFrame, cfg: Config) -> None:
         "because undisclosed-amount rates differ systematically by instrument and bloc; "
         "panel (b) covers only the disclosed subsample. Constant 2015 USD via the US GDP "
         "deflator. The cheque-size claim is the WITHIN-STAGE comparison: the pooled median "
-        "falls about 72% for green and 73% for non-green, but that is composition-"
-        "confounded for both, since holding the 2007 stage mix fixed leaves non-green at "
-        "-11%. Bootstrapped over 10,000 draws on clean stage codes, excluding the "
-        "venture_unspecified catch-all: green -50.4% against non-green -1.1%, difference "
-        "-49.3pp [-69.3, -22.4]. All five start-end pairs running to the window close are "
-        "negative (-69.9 to -21.5pp) and -49.3 is their median, so the direction is robust "
-        "to the start year; pairs stopping before the decline completes can turn positive, "
-        "so it is sensitive to the end year. This is a size pattern, not an investor "
-        "motive. Raw classifier output.",
+        "falls alike for green and non-green, but that is composition-confounded for both. "
+        f"Bootstrapped over {finding(cfg, 'repro.bootstrap_draws')} draws on clean stage "
+        "codes, excluding the venture_unspecified catch-all: green "
+        f"{finding(cfg, 'cheque.green_pct')}% against non-green "
+        f"{finding(cfg, 'cheque.nongreen_pct')}%, difference "
+        f"{finding(cfg, 'cheque.difference_pp')}pp {finding(cfg, 'cheque.ci')}. All "
+        f"{finding(cfg, 'cheque.pairs_to_close')} start-end pairs running to the window "
+        f"close are negative ({finding(cfg, 'cheque.range_to_close')}pp), so the direction "
+        "is robust to the start year; pairs stopping before the decline completes can turn "
+        "positive, so it is sensitive to the end year. This is a size pattern, not an "
+        "investor motive. Raw classifier output.",
         y=0.072,
         width=118,
     )
@@ -998,26 +1012,8 @@ def fig_06_share_crossover(deals: pd.DataFrame, cfg: Config) -> None:
     )
 
     last = by_year.iloc[-1]
-    ax.text(
-        last["year"] + 0.12,
-        last["dollar_share"],
-        "share of green\ndollars",
-        va="center",
-        ha="left",
-        fontsize=8,
-        color=P.accent_green,
-        linespacing=1.3,
-    )
-    ax.text(
-        last["year"] + 0.12,
-        last["count_share"] - 0.4,
-        "share of green\ndeals",
-        va="center",
-        ha="left",
-        fontsize=8,
-        color=P.ink,
-        linespacing=1.3,
-    )
+    theme.series_label(ax, last["dollar_share"], "share of green\ndollars", P.accent_green)
+    theme.series_label(ax, last["count_share"], "share of green\ndeals", P.ink)
 
     peak = by_year.loc[by_year["dollar_share"].idxmax()]
     theme.annotate(
@@ -1032,9 +1028,9 @@ def fig_06_share_crossover(deals: pd.DataFrame, cfg: Config) -> None:
     )
     theme.annotate(
         ax,
-        f"Peak: {peak['dollar_share']:.1f}% of all venture\n"
-        f"dollars in {int(peak['year'])}, against a "
-        f"{float(by_year.loc[by_year['year'].eq(peak['year']), 'count_share'].iloc[0]):.1f}%\n"
+        f"Peak: {finding(cfg, 'cycle.peak_dollar_share_pct')}% of all venture\n"
+        f"dollars in {finding(cfg, 'cycle.peak_dollar_share_year')}, against a "
+        f"{finding(cfg, 'cycle.count_share_at_peak_pct')}%\n"
         "share of deals",
         xy=(peak["year"], peak["dollar_share"]),
         xytext=(peak["year"] + 0.6, peak["dollar_share"] + 1.9),
@@ -1042,7 +1038,7 @@ def fig_06_share_crossover(deals: pd.DataFrame, cfg: Config) -> None:
         fontsize=7.6,
     )
 
-    ax.set_xlim(1999.7, 2014.8)
+    ax.set_xlim(1999.7, 2012.3)
     ax.set_ylim(0, 25)
     ax.yaxis.set_major_formatter(theme.fmt_pct)
     ax.set_xlabel("Year the deal closed")
@@ -1169,7 +1165,8 @@ def fig_11_continuity(deals: pd.DataFrame, cfg: Config) -> None:
         cfg,
         "Left: Crunchbase 2013 Snapshot, emerging markets excluding China and LDCs, "
         f"{int(em['green'].sum())} green deals. Right: the Indian startup funding scrape, "
-        "3,036 dated deals of which 54 are green under the SAME lexicon, $502m nominal. "
+        f"{finding(cfg, 'india.deals')} dated deals of which "
+        f"{finding(cfg, 'india.green')} are green under the SAME lexicon. "
         "The two are never pooled: taxonomies and amount conventions are not compatible, no "
         "category_code exists in the Indian data so Tier A cannot fire, and the scrape's "
         "coverage rules are unknown. 2020 is a partial year and is excluded.",
@@ -1189,6 +1186,11 @@ def fig_m1_censoring(cfg: Config) -> None:
     """
     theme.apply_theme()
     tab = pd.read_csv(cfg.path("tables") / "diag_censoring_monthly_counts.csv", index_col=0)
+    # December's share of its own year, and the mean of the two uncensored years
+    # it is being judged against. Read off the plotted table so the annotation
+    # cannot disagree with the line drawn above it.
+    dec_2013 = float(tab["share_pct_2013"].iloc[-1])
+    dec_baseline = float(sum(tab[f"share_pct_{yr}"].iloc[-1] for yr in (2011, 2012)) / 2)
 
     fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_m1_censoring"))
     months = tab.index.to_numpy()
@@ -1218,7 +1220,8 @@ def fig_m1_censoring(cfg: Config) -> None:
 
     theme.annotate(
         ax,
-        "December 2013 holds 3.8% of its year\nagainst a 7.5% baseline. The snapshot\n"
+        f"December 2013 holds {rfmt(dec_2013, 1)}% of its year\nagainst a "
+        f"{rfmt(dec_baseline, 1)}% baseline. The snapshot\n"
         "was taken mid-December; only this month\nis incomplete, not the year.",
         xy=(12, tab["share_pct_2013"].iloc[-1]),
         xytext=(4.6, 4.3),
@@ -1253,8 +1256,9 @@ def fig_m1_censoring(cfg: Config) -> None:
         cfg,
         "Deal counts before the analysis window is applied. Expressing each month as a share "
         "of its own year removes the level difference between years so the shapes are "
-        "comparable. The disclosed-amount rate is flat across these years (88.99 / 88.61 / "
-        "88.44%), and November and December 2013 are among the highest monthly rates in the "
+        "comparable. The disclosed-amount rate is flat across these years "
+        f"({finding(cfg, 'censor.disclosed_by_year')}%), and November and December 2013 are "
+        "among the highest monthly rates in the "
         "series, so dollars are not differentially censored either. The window still closes "
         "at 2012-12-31, on the coverage-growth argument rather than this one.",
         y=0.22,
@@ -1303,25 +1307,16 @@ def fig_07_crisis(deals: pd.DataFrame, cfg: Config) -> None:
             sub["year"], sub["indexed"], color=colour, linestyle=ls, linewidth=lw, zorder=3
         )
         last = sub.iloc[-1]
-        ax.text(
-            last["year"] + 0.15,
-            last["indexed"],
-            name.replace("-", " "),
-            va="center",
-            ha="left",
-            fontsize=8,
-            color=colour,
-        )
+        theme.series_label(ax, last["indexed"], name.replace("-", " "), colour)
 
     ax.axhline(100, color=P.ink_muted, linewidth=0.8, linestyle=(0, (4, 3)), zorder=0)
     ax.axvline(2008, color=P.rule, linewidth=1.0, zorder=0)
 
-    cd = res["crisis_drawdown"]
     theme.annotate(
         ax,
-        f"Across 2008-09 advanced-economy green contracted\n"
-        f"{cd['AE-green']['contraction_pct']:.1f}% while non-green GREW "
-        f"{cd['AE-non-green']['contraction_pct']:+.1f}%.",
+        f"Across 2008\u201309 advanced-economy green contracted\n"
+        f"{finding(cfg, 'h2.crisis_ae_green_pct')}% while non-green GREW "
+        f"{finding(cfg, 'h2.crisis_ae_non_green_pct')}%.",
         xy=(
             2009,
             float(
@@ -1355,7 +1350,7 @@ def fig_07_crisis(deals: pd.DataFrame, cfg: Config) -> None:
         linespacing=1.35,
     )
 
-    ax.set_xlim(1999.7, 2014.4)
+    ax.set_xlim(1999.7, 2012.3)
     ax.set_ylim(0, 420)
     ax.set_xlabel("Year the deal closed")
     ax.set_ylabel(f"Deal volume, {base} = 100")
@@ -1372,8 +1367,8 @@ def fig_07_crisis(deals: pd.DataFrame, cfg: Config) -> None:
         f"n = {len(deals):,} deals. The emerging-market green series is not drawn: its "
         "2007 base year holds one deal, so indexing it is meaningless. No "
         "difference-in-differences coefficient is shown: green volume was already growing "
-        f"{res['pre_trend']['differential_trend_per_year']:+.3f} log-points per year faster "
-        f"than non-green before the event window (p = {res['pre_trend']['p_value']:.4f}), so "
+        f"{finding(cfg, 'h2.pretrend_coef')} log-points per year faster "
+        f"than non-green before the event window (p = {finding(cfg, 'h2.pretrend_p')}), so "
         "parallel trends fail and the design does not identify a causal effect. Raw "
         "classifier output.",
         y=0.195,
@@ -1393,7 +1388,7 @@ def fig_08_instruments(deals: pd.DataFrame, cfg: Config) -> None:
     shares = shares.loc[shares["bloc"].isin(["AE", "EM"])]
 
     fig, ax = plt.subplots(figsize=theme.figsize(cfg, "single", "fig_08_instruments"))
-    labels, values, colours, notes = [], [], [], []
+    labels, values, colours, notes, shown = [], [], [], [], []
     for bloc in ("AE", "EM"):
         for green in (True, False):
             r = shares.loc[shares["bloc"].eq(bloc) & shares["green"].eq(green)]
@@ -1403,15 +1398,17 @@ def fig_08_instruments(deals: pd.DataFrame, cfg: Config) -> None:
             labels.append(f"{bloc}\n{'green' if green else 'non-green'}")
             values.append(r["non_dilutive_pct"])
             colours.append(P.accent_green if green else P.accent_grey)
-            notes.append(f"n = {int(r['deals']):,}")
+            suffix = "green" if green else "nongreen"
+            notes.append(f"n = {finding(cfg, f'pop.{bloc.lower()}_{suffix}_deals')}")
+            shown.append(finding(cfg, f"h3.{bloc.lower()}_{suffix}_nondilutive_pct") + "%")
 
     y = np.arange(len(labels))[::-1]
     ax.barh(y, values, color=colours, height=0.56, zorder=3)
-    for yi, v, note in zip(y, values, notes, strict=False):
+    for yi, v, note, label in zip(y, values, notes, shown, strict=False):
         ax.text(
             v + 0.22,
             yi,
-            f"{v:.2f}%",
+            label,
             va="center",
             ha="left",
             fontsize=8.4,
@@ -1423,9 +1420,9 @@ def fig_08_instruments(deals: pd.DataFrame, cfg: Config) -> None:
     foc = res["focused_non_dilutive_test_ae"]
     theme.annotate(
         ax,
-        f"Within advanced economies, green is {foc['risk_ratio']:.2f}x\n"
+        f"Within advanced economies, green is {finding(cfg, 'h3.rr')} times\n"
         f"more likely to use non-dilutive capital "
-        f"{foc['risk_ratio_ci']}",
+        f"{finding(cfg, 'h3.rr_ci')}",
         xy=(values[0], y[0]),
         xytext=(4.6, y[0] - 0.46),
         color=P.accent_green,
@@ -1461,12 +1458,14 @@ def fig_08_instruments(deals: pd.DataFrame, cfg: Config) -> None:
         fig,
         cfg,
         "Non-dilutive instruments are grants, debt financing and post-IPO debt. "
-        f"Advanced-economy comparison: risk ratio {foc['risk_ratio']:.3f} "
-        f"{foc['risk_ratio_ci']}, p = {foc['p_value']:.2e}. Project finance that is debt or "
+        f"Advanced-economy comparison: risk ratio {rfmt(foc['risk_ratio'], 3)} "
+        f"{rci(foc['risk_ratio_ci'], 3)}, p = {finding(cfg, 'h3.p')}. Project finance that "
+        "is debt or "
         "concessional in substance but coded as an equity round understates the "
         "non-dilutive share on both sides, and more so for emerging markets where "
-        "independent power producers are seven of 28 green companies; that bias direction "
-        "was stated before these numbers were computed. Raw classifier output.",
+        f"utility-scale generation accounts for {finding(cfg, 'audit.utility_scale')} of "
+        f"{finding(cfg, 'audit.em_census_n')} green companies; that bias direction was "
+        "stated before these numbers were computed. Raw classifier output.",
         y=0.195,
         width=108,
     )
@@ -1530,7 +1529,14 @@ def fig_09_power_wall(
             analysis["h4"]["power"]["ae_green_a_to_b_pool"],
             "missing-middle transition",
         ),
-        ("H5  countries with any energy deficit", 2, "need-indicator regression"),
+        (
+            "H5  countries with any energy deficit",
+            # Counted, not typed: this is the variance the falsifier had to run on.
+            analysis["h5"]["falsifier_stress_tests"]["electricity_deficit_pct"][
+                "non_trivial_values"
+            ],
+            "need-indicator regression",
+        ),
     ]
     labels = [r[0] for r in rows]
     values = [r[1] for r in rows]
@@ -1598,10 +1604,13 @@ def fig_09_power_wall(
         f"The minimum cell size of {min_n} was fixed in config before any hypothesis was "
         "tested, and no bar clears it. These are five distinct failures rather than one "
         "repeated: a difference-in-differences with no usable time series; an "
-        "instrument-mix comparison resting on 3 non-dilutive deals, drawn from an "
-        "emerging-market green sample of 34 which does itself clear the threshold; a "
-        "graduation model with no entrants at all; a missing-middle transition holding 13 "
-        "companies even in the best-covered bloc; and a need regressor on which 20 of 22 "
+        f"instrument-mix comparison resting on {finding(cfg, 'h3.em_nondilutive_n')} "
+        f"non-dilutive deals, drawn from an emerging-market green sample of "
+        f"{finding(cfg, 'h3.em_green_deals')} which does itself clear the threshold; a "
+        f"graduation model with no entrants at all; a missing-middle transition holding "
+        f"{finding(cfg, 'h4.ae_ab_pool')} companies even in the best-covered bloc; and a "
+        "need regressor on which "
+        f"{finding(cfg, 'h5.depth_zero_countries')} of {finding(cfg, 'h5.depth_n')} "
         "countries record exactly zero. Three figures that would have plotted these "
         "quantities as estimates were cut rather than drawn.",
         y=0.195,
@@ -1630,9 +1639,14 @@ def fig_10_depth_need(deals: pd.DataFrame, cfg: Config, rng) -> None:
     measured.
     """
     theme.apply_theme()
+    # The panel is read from the table the analysis stage wrote, and the depth
+    # statistics from findings.json. This figure used to re-run h5_allocation
+    # with the shared generator, which had already been advanced by the screen
+    # pass: the two variants of this figure drew DIFFERENT bootstrap intervals,
+    # and the one embedded in report.pdf disagreed with the prose beside it.
+    # A figure displays the pipeline's number; it does not compute its own.
+    panel = pd.read_csv(cfg.path("tables") / "h5_country_panel.csv")
     res = h5_allocation.run(deals, cfg, rng)
-    panel = res["_tables"]["h5_country_panel"]
-    depth = res["correlations"]["green_usd_per_capita"]["gdp_per_capita_usd"]
 
     fig, (ax1, ax2) = plt.subplots(
         1,
@@ -1669,7 +1683,7 @@ def fig_10_depth_need(deals: pd.DataFrame, cfg: Config, rng) -> None:
     ax1.set_yticklabels(["$0.1", "$1", "$10", "$100"])
     ax1.set_ylabel("Green funding per capita,\nconstant 2015 USD (log)")
     ax1.set_title(
-        f"(a)  Depth: rho {depth['rho']:+.3f} {depth['ci']}",
+        f"(a)  Depth: rho +{finding(cfg, 'h5.depth_rho')} {finding(cfg, 'h5.depth_ci')}",
         fontsize=9.0,
         fontfamily=theme.title_font(),
         color=P.ink,
@@ -1712,9 +1726,11 @@ def fig_10_depth_need(deals: pd.DataFrame, cfg: Config, rng) -> None:
         fig,
         cfg,
         f"Spearman rank correlation with a bootstrap interval over "
-        f"{cfg.pipeline['bootstrap_resamples']:,} draws; n = {depth['n']} countries. The "
+        f"{finding(cfg, 'repro.bootstrap_draws')} draws; n = {finding(cfg, 'h5.depth_n')} "
+        "countries. The "
         "planned small-multiple of need indicators is not drawn: panel (b) shows why. A "
-        "scatter against a regressor on which 20 of 22 countries record exactly zero "
+        f"scatter against a regressor on which {n_zero} of {len(deficit)} countries record "
+        "exactly zero "
         "would read as a relationship and is not one. Green funding is highly "
         f"concentrated, with a Gini of {res['concentration']['gini']:.3f} and the top five "
         f"countries holding {res['concentration']['top5_share_pct']:.1f}% of green dollars.",
@@ -1772,6 +1788,8 @@ def main() -> None:
         theme.set_mode(mode)
         seed_everything(cfg)
         _build_all(deals, cfg, rng)
+    theme.write_slack_report(cfg)
+    theme.write_text_report(cfg)
     theme.set_mode("screen")
 
 

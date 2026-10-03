@@ -31,7 +31,7 @@ import numpy as np
 import pandas as pd
 
 from gcg.analysis.cheque_size import _CLEAN_STAGES, _composite, _pct_change
-from gcg.analysis.h1_selection import two_proportion_test
+from gcg.analysis.h1_selection import bias_corrected_gap, two_proportion_test
 from gcg.classify import blocs as blocs_mod
 from gcg.config import Config, get_logger, load_config, seed_everything
 from gcg.io import read_parquet
@@ -367,6 +367,45 @@ def run(cfg: Config | None = None) -> dict[str, Any]:
     endpoints = cheque_endpoint_sensitivity(deals, cfg)
     grid = endpoints.pop("_grid", None)
     perm = permutation_double_gap(deals, cfg, rng)
+
+    # The three curation specifications side by side. This table was referenced by
+    # the appendix before anything wrote it: it survived in outputs/ from a manual
+    # run and vanished on the first `make clean`, which is what surfaced it. It is
+    # computed here rather than read back from analysis_findings.json, because
+    # this module runs as part of the analysis stage that writes that file.
+    em = deals.loc[deals["bloc"].eq("EM")]
+    ae = deals.loc[deals["bloc"].eq("AE")]
+    raw = two_proportion_test(int(em["green"].sum()), len(em), int(ae["green"].sum()), len(ae))
+    corrected = bias_corrected_gap(deals, cfg, rng)
+    curated = next(
+        r for r in green_tab.to_dict("records") if r["specification"].startswith("curated")
+    )
+    specs = pd.DataFrame(
+        [
+            {
+                "spec": "raw (headline)",
+                "em_rate_pct": 100 * raw["rate_group1"],
+                "ae_rate_pct": 100 * raw["rate_group2"],
+                "risk_ratio": raw["risk_ratio"],
+                "rr_ci": str(raw["risk_ratio_ci"]),
+            },
+            {
+                "spec": "bias-corrected",
+                "em_rate_pct": corrected["em_rate_pct"],
+                "ae_rate_pct": corrected["ae_rate_pct"],
+                "risk_ratio": corrected["risk_ratio"],
+                "rr_ci": str(corrected["risk_ratio_ci"]),
+            },
+            {
+                "spec": "partially curated",
+                "em_rate_pct": curated["em_rate_pct"],
+                "ae_rate_pct": curated["ae_rate_pct"],
+                "risk_ratio": curated["risk_ratio"],
+                "rr_ci": f"[{curated['rr_lo']}, {curated['rr_hi']}]",
+            },
+        ]
+    )
+    specs.to_csv(cfg.path("tables") / "appendix_c_three_specifications.csv", index=False)
 
     green_tab.to_csv(cfg.path("tables") / "appendix_c_green_definitions.csv", index=False)
     bloc_tab.to_csv(cfg.path("tables") / "appendix_c_bloc_schemes.csv", index=False)

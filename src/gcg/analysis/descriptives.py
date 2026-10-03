@@ -163,6 +163,20 @@ def subdomain_mix(cfg: Config, deals: pd.DataFrame) -> dict[str, Any]:
         )
         unspec[str(bloc)] = round(n / total, 4) if total else 0.0
 
+    # The deal-level table above double-counts a company that raised twice. The
+    # Figure 4 annotation is a claim about companies, so count them separately
+    # rather than letting the reader infer one from the other.
+    per_company = green.drop_duplicates(subset=["permalink_norm"])
+    companies = {}
+    for bloc, grp in per_company.groupby("bloc", observed=True):
+        total = int(len(grp))
+        if not total:
+            continue
+        companies[str(bloc)] = {
+            "green_companies": total,
+            "unspecified": int(grp["green_subdomain"].eq("general_unspecified").sum()),
+        }
+
     threshold = float(cfg.tripwire("general_unspecified_em_share_max"))
     em_share = unspec.get("EM", 0.0)
     findings = {
@@ -172,6 +186,7 @@ def subdomain_mix(cfg: Config, deals: pd.DataFrame) -> dict[str, Any]:
         "tripwire_crossed": bool(em_share > threshold),
         "figure5_needs_reframing": bool(em_share > threshold),
         "counts_by_bloc": table.to_dict(),
+        "companies_by_bloc": companies,
     }
     LOG.info(
         "sub-domain mix: general_unspecified share by bloc %s; EM %.1f%% vs %.0f%% "
@@ -432,6 +447,82 @@ def tier_b_only_audit(cfg: Config, labels: pd.DataFrame, deals: pd.DataFrame) ->
     return out
 
 
+def thin_cells(deals: pd.DataFrame) -> dict[str, Any]:
+    """Cell counts that two captions have to quote in order to be honest.
+
+    Figure 6's dollar- and count-share series cross, and the ordering reverses
+    before 2005 on cells of one to eleven deals. Figure 7 cannot draw the
+    emerging-market green series at all, because its 2007 base year holds a
+    single deal and the index would therefore leave the canvas. In both cases
+    the caption's job is to give the reader the denominator, so the denominators
+    are computed here rather than read off a chart.
+    """
+    green = deals.loc[deals["green"]]
+    pre = green.loc[green["year"] < 2005].groupby("year").size()
+    em = green.loc[green["bloc"].eq("EM")]
+    base = int(em["year"].eq(2007).sum())
+    post = int(em["year"].eq(2008).sum())
+    findings = {
+        "pre_2005_green_counts": {int(y): int(n) for y, n in pre.items() if n},
+        "em_green_2007_base_deals": base,
+        "em_green_2008_deals": post,
+        "em_green_2008_index_2007_base": round(100 * post / base, 0) if base else None,
+    }
+    LOG.info(
+        "thin cells: pre-2005 green counts %s; EM green 2007 base = %d deal(s), "
+        "so the 2008 index would be %s",
+        findings["pre_2005_green_counts"],
+        base,
+        findings["em_green_2008_index_2007_base"],
+    )
+    return findings
+
+
+def green_cycle(cfg: Config, deals: pd.DataFrame) -> dict[str, Any]:
+    """Where green deal counts and green dollars peak.
+
+    The cycle figure labels both peaks. They were computed inside the figure and
+    drawn with no key behind them, which put two numbers in the document that no
+    gate could check.
+    """
+    amount = cfg.pipeline["deflate"]["real_column"]
+    green = deals.loc[deals["green"]]
+    by_year = green.groupby("year").agg(
+        deals=("id", "size"), usd=(amount, lambda s: float(s.sum()))
+    )
+    peak_deals = by_year["deals"].idxmax()
+    peak_usd = by_year["usd"].idxmax()
+    # Green's share of all deals and of all disclosed dollars, by year: the
+    # crossover Figure 6 draws, and the peak it annotates.
+    totals = deals.groupby("year").agg(
+        all_deals=("id", "size"), all_usd=(amount, lambda s: float(s.sum()))
+    )
+    shares = pd.DataFrame(
+        {
+            "count_share": 100 * by_year["deals"] / totals["all_deals"],
+            "dollar_share": 100 * by_year["usd"] / totals["all_usd"].clip(lower=1e-9),
+        }
+    )
+    peak_share = shares["dollar_share"].idxmax()
+
+    findings = {
+        "peak_dollar_share_pct": round(float(shares.loc[peak_share, "dollar_share"]), 4),
+        "peak_dollar_share_year": int(peak_share),
+        "count_share_at_peak_pct": round(float(shares.loc[peak_share, "count_share"]), 4),
+        "peak_deals": int(by_year.loc[peak_deals, "deals"]),
+        "peak_deals_year": int(peak_deals),
+        "peak_usd_year": int(peak_usd),
+        "dollars_peak_before_deals": bool(peak_usd < peak_deals),
+    }
+    LOG.info(
+        "green cycle: deals peak at %d in %d; dollars peak in %d",
+        findings["peak_deals"],
+        findings["peak_deals_year"],
+        findings["peak_usd_year"],
+    )
+    return findings
+
+
 def run(cfg: Config | None = None) -> dict[str, Any]:
     """Run every deal-level descriptive against the canonical deal table."""
     cfg = cfg or load_config()
@@ -452,6 +543,9 @@ def run(cfg: Config | None = None) -> dict[str, Any]:
             "green_raw": int(deals["green"].sum()),
             "green_curated": int(deals["green_curated"].sum()),
             "green_strict": int(deals["green_strict_tier_a"].fillna(False).sum()),
+            "green_with_amount": int(
+                (deals["green"] & deals["amount_usd_real2015"].notna()).sum()
+            ),
             "source": "data/processed/deals.parquet (post-attrition-ledger)",
         },
         "gated_dependence": gated_pattern_dependence(cfg, deals),
@@ -459,6 +553,8 @@ def run(cfg: Config | None = None) -> dict[str, Any]:
         "subdomain_mix": subdomain_mix(cfg, deals),
         "taxonomy_richness": taxonomy_richness(cfg, deals, labels),
         "coverage_bias": coverage_bias(cfg, deals),
+        "thin_cells": thin_cells(deals),
+        "green_cycle": green_cycle(cfg, deals),
     }
     tier_b_only_audit(cfg, labels, deals)
 

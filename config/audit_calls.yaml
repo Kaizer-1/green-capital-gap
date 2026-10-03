@@ -86,5 +86,46 @@ ae_random_audit:
 # The emerging-market census, for the comparison. Six of 28 companies were
 # excluded on ratification (Quippo, SEDEMAC, Wifinity, GATe, Aventones, KSK).
 em_census:
-  companies: 28
-  excluded: 6
+  # The denominator is NOT written here. It was, as 28, and it went stale: the
+  # Algenol Biofuel country correction (blocs.yaml) moved that company to the
+  # advanced-economy bloc, leaving 27. A census claim is a claim about the whole
+  # population, so the population has to be counted from the data every run.
+  # audit_symmetry.py counts it and fails the build if the named companies below
+  # are not all present in it.
+  excluded_companies:
+    - quippo-infrastructure
+    - sedemac-mechatronics
+    - wifinity-technology
+    - gate-technology
+    - aventones
+    - ksk-power-venture
+
+  # Companies that left the census denominator for a reason other than exclusion.
+  # Recorded so the count reconciles against the original audit of 28.
+  reclassified:
+    - permalink: algenol-biofuel
+      reason: >
+        Audited as emerging-market and judged correctly green. The country
+        correction then moved it to the advanced-economy bloc, so it leaves the
+        emerging-market denominator without being a false positive.
+
+  # Utility-scale generation and independent power producers among the census.
+  # The instrument-mix bias argument (METHODOLOGY.md §11) turns on how many of
+  # these there are, because project finance for generation is debt or
+  # concessional in substance while the round is coded as equity. Named here so
+  # the count in the report is counted rather than asserted.
+  utility_scale:
+    - permalink: ksk-power-venture
+      reason: "Independent power producer; thermal-heavy generation portfolio."
+    - permalink: azure-power
+      reason: "Utility-scale solar independent power producer."
+    - permalink: isagen
+      reason: "Utility-scale generation company, predominantly hydro."
+    - permalink: sunborne-energy
+      reason: "Utility-scale solar project developer."
+    - permalink: akenerji-elektrik-uretim
+      reason: "Electricity generation utility."
+    - permalink: greenko-group
+      reason: "Renewable independent power producer."
+    - permalink: auro-mira-energy
+      reason: "Renewable independent power producer."

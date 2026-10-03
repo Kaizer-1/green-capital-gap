@@ -40,6 +40,82 @@
   placement: auto,
 )
 
+// An appendix table, read straight from the CSV the pipeline wrote. The report
+// never transcribes a table: if the number changed, the appendix changed with
+// it, because this reads outputs/tables at compile time.
+//
+// `cols` selects and orders columns by header name; `head` is the display name
+// for each, so a machine-readable header like `rr_lo` can print as "CI low"
+// without renaming it in the CSV. `digits` rounds a numeric column for display
+// only. `max_rows` truncates with a stated count rather than silently.
+#let csvtable(
+  file,
+  cols: none,
+  head: none,
+  align-right: (),
+  digits: (:),
+  pvals: (),
+  thousands: (),
+  max_rows: none,
+  size: 7.6pt,
+) = {
+  let raw = csv("/outputs/tables/" + file)
+  let header = raw.at(0)
+  let body = raw.slice(1)
+  let idx = if cols == none {
+    range(header.len())
+  } else {
+    cols.map(c => header.position(h => h == c))
+  }
+  let names = if head != none { head } else { idx.map(i => header.at(i)) }
+
+  // Display formatting only. The CSVs stay machine-readable at full precision;
+  // what changes here is what the page shows, so an appendix never prints
+  // "7.541695780988178e-06" where "7.5e-06" is what the reader needs.
+  let show-cell(name, raw) = {
+    if name in pvals {
+      let v = float(raw)
+      if v == 0 { [0] } else if v < 0.0001 {
+        let e = calc.floor(calc.log(v))
+        [#calc.round(v / calc.pow(10.0, e), digits: 1)×10#super[#e]]
+      } else { [#calc.round(v, digits: 4)] }
+    } else if name in digits.keys() {
+      [#calc.round(float(raw), digits: digits.at(name))]
+    } else if name in thousands {
+      // Group an integer so the table reads the same way the prose does; the
+      // two sat side by side on one page as "10189" and "10,189".
+      let d = raw.clusters()
+      let out = ()
+      for (i, c) in d.rev().enumerate() {
+        if i > 0 and calc.rem(i, 3) == 0 { out.push(",") }
+        out.push(c)
+      }
+      [#out.rev().join()]
+    } else { [#raw] }
+  }
+  let shown = if max_rows != none and body.len() > max_rows {
+    body.slice(0, max_rows)
+  } else {
+    body
+  }
+  set text(size: size)
+  table(
+    columns: idx.len(),
+    align: (col, _) => if names.at(col) in align-right { right } else { left },
+    inset: (x: 5pt, y: 3.4pt),
+    ..names.map(n => [#n]),
+    ..shown
+      .map(row => idx.enumerate().map(((j, i)) => show-cell(names.at(j), row.at(i))))
+      .flatten(),
+  )
+  if max_rows != none and body.len() > max_rows {
+    text(size: 7.4pt, fill: ink-muted)[
+      Showing #max_rows of #body.len() rows. The full table is
+      `outputs/tables/#file`.
+    ]
+  }
+}
+
 #let conf(
   title: none,
   subtitle: none,

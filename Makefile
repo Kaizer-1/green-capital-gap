@@ -21,6 +21,8 @@ SRC_ANALYSIS:= $(wildcard src/gcg/analysis/*.py)
 SRC_VIZ     := $(wildcard src/gcg/viz/*.py)
 SRC_REPORT  := $(wildcard src/gcg/report/*.py)
 
+PREDIAG     := data/interim/preanalysis_diagnostics.json
+LABELS      := data/interim/green_labels.parquet
 DEALS       := data/processed/deals.parquet
 FINDINGS    := outputs/findings.json
 REPORT_PDF  := report/report.pdf
@@ -36,6 +38,7 @@ help:
 	@echo "  make analysis   H1-H5 + robustness -> outputs/tables, $(FINDINGS)"
 	@echo "  make figures    render every figure -> outputs/figures"
 	@echo "  make report     substitute placeholders, render -> $(REPORT_PDF)"
+	@echo "  make web        export series, run checks + screenshot capture"
 	@echo "  make test       pytest"
 	@echo "  make lint       ruff check"
 	@echo "  make all        data features analysis figures report"
@@ -61,7 +64,20 @@ $(STAMPS)/data: $(CONFIGS) $(SRC_CORE) $(SRC_INGEST)
 
 # ---------------------------------------------------------------------------
 features: $(DEALS)
-$(DEALS): $(STAMPS)/data $(CONFIGS) $(SRC_CLASS) $(SRC_TRANS) | test-classifier
+
+# The classifier runs as its own target. It used to be left implicit, so a warm
+# tree built and a clean one did not: `make clean && make all` failed looking
+# for green_labels.parquet, which nothing in the graph produced.
+# Pre-analysis diagnostics (sentinel sweep, censoring, FX, mirror vintage) run
+# against the ingested tables and are consumed by findings.py. Same defect as
+# the classifier: implicit in a warm tree, absent from a clean one.
+$(PREDIAG): $(STAMPS)/data $(CONFIGS) $(SRC_INGEST)
+	$(PY) -m gcg.ingest.diagnostics
+
+$(LABELS): $(STAMPS)/data $(CONFIGS) $(SRC_CLASS) | test-classifier
+	$(PY) -m gcg.classify.run
+
+$(DEALS): $(LABELS) $(CONFIGS) $(SRC_CLASS) $(SRC_TRANS)
 	$(PY) -m gcg.transform.deals
 
 # The classifier must pass its tests before anything downstream runs
@@ -72,7 +88,7 @@ test-classifier:
 
 # ---------------------------------------------------------------------------
 analysis: $(FINDINGS)
-$(FINDINGS): $(DEALS) $(CONFIGS) $(SRC_ANALYSIS) $(SRC_REPORT)
+$(FINDINGS): $(DEALS) $(PREDIAG) $(CONFIGS) $(SRC_ANALYSIS) $(SRC_REPORT)
 	$(PY) -m gcg.analysis.descriptives
 	$(PY) -m gcg.analysis.run
 	$(PY) -m gcg.analysis.robustness
@@ -85,6 +101,24 @@ figures: $(STAMPS)/figures
 $(STAMPS)/figures: $(FINDINGS) $(SRC_VIZ) $(CONFIGS)
 	$(PY) -m gcg.viz.figures
 	@mkdir -p $(STAMPS) && touch $@
+
+# ---------------------------------------------------------------------------
+# web — the portfolio edition. Reads the same findings.json the report reads, so
+# the two cannot disagree about a number. report.pdf does not depend on any of
+# this, and `make all` does not build it.
+WEB_DATA := web/data/series.json
+SRC_WEB  := $(wildcard src/gcg/web/*.py)
+
+.PHONY: web web-data web-test
+web-data: $(WEB_DATA)
+$(WEB_DATA): $(FINDINGS) $(DEALS) $(SRC_WEB) $(CONFIGS) web/index.html
+	$(PY) -m gcg.web.export_series
+	$(PY) -m gcg.web.inject
+
+web-test: $(WEB_DATA)
+	cd web && node test/checks.mjs && node test/capture.mjs
+
+web: web-data web-test
 
 # ---------------------------------------------------------------------------
 # report — fails loudly on any unresolved {{placeholder}} (CLAUDE.md §2.2).

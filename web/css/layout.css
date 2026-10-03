@@ -1,0 +1,1173 @@
+/* layout.css — everything that is not a token.
+ *
+ * One column of prose at --measure, figures breaking out to --measure-wide but
+ * sharing the prose's LEFT edge. The shared edge is load-bearing: it is what
+ * makes a long scrolling document read as one artefact.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--t-base);
+  line-height: var(--leading-body);
+  /* The web hyphenates badly and justification opens rivers at this measure. */
+  text-align: left;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- the measure ----------------------------------------------------- */
+/* Everything sits in a grid whose first column is the prose measure. A figure
+   widens by spanning into the second column; it never re-centres. */
+
+/* One column, capped at the wide measure and centred. Children cap at the prose
+   measure, so they are left-aligned inside it and share one edge; .wide releases
+   to the full column.
+
+   This replaces a four-track grid whose `1fr` gutters competed with the content
+   columns. At 390px the two content tracks were scaled down proportionally and
+   the prose got about 170px — a 22-character measure. A single capped column
+   behaves predictably at every width. */
+.wrap {
+  display: grid;
+  /* A DEFINITE track. `minmax(0, 54rem)` sized itself to its content instead:
+     the prose children cap at 34rem, so the column settled at 34rem and .wide
+     had nothing to expand into. `min()` gives a definite width at every
+     viewport. */
+  /* Sized to --measure-wide, which is the widest thing that routinely uses the
+     track. At --measure-extra the surplus 8rem all landed on the right, because
+     prose is left-aligned in it: 288px of margin on the left against 608px on
+     the right at a 1440 viewport. The one element that genuinely needs more
+     breaks out of the track below rather than widening it for everything. */
+  grid-template-columns: min(100%, var(--measure-wide));
+  justify-content: center;
+  padding-inline: var(--gutter);
+}
+
+/* The grid item is the SECTION, which spans the full column. Capping the
+   section itself put a 34rem ceiling on everything inside it, so .wide on a
+   figure could never break out. The cap belongs on the section's children. */
+.wrap > * {
+  min-width: 0;
+}
+
+.masthead > *,
+.section > * {
+  max-width: var(--measure);
+}
+
+.masthead > .wide,
+.section > .wide {
+  max-width: var(--measure-wide);
+}
+
+/* The one element that needs more than the track: the 23-row sector ladder's
+   data table, which cannot be read at 46rem. It breaks out symmetrically rather
+   than widening the track, so it does not cost every prose section an uneven
+   right margin. */
+.masthead > .extra-wide,
+.section > .extra-wide {
+  max-width: none;
+  width: min(100vw - var(--gutter) * 2, var(--measure-extra));
+  margin-inline: calc(
+    (
+        var(--measure-wide) -
+          min(100vw - var(--gutter) * 2, var(--measure-extra))
+      ) /
+      2
+  );
+}
+
+/* ---- the progress rail ----------------------------------------------- */
+/* 2px, no circles, no labels. It answers "how much is left" and nothing else. */
+
+.rail {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100vh;
+  background: var(--rule);
+  z-index: 10;
+}
+
+.rail__fill {
+  width: 100%;
+  height: 0;
+  background: var(--ink);
+  transform-origin: top;
+}
+
+@media (max-width: 68.75rem) {
+  .rail {
+    display: none;
+  }
+}
+
+/* ---- masthead -------------------------------------------------------- */
+
+.masthead {
+  padding-top: var(--s7);
+  padding-bottom: var(--s6);
+}
+
+.masthead__title {
+  font-size: var(--t-xl);
+  line-height: var(--leading-tight);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin: 0 0 var(--s2);
+  /* The title is the one place a longer measure reads better than 34rem. */
+  max-width: 18ch;
+}
+
+.masthead__subtitle {
+  font-size: var(--t-md);
+  line-height: 1.35;
+  color: var(--ink-muted);
+  font-style: italic;
+  margin: 0 0 var(--s5);
+}
+
+.masthead__standfirst {
+  margin: 0 0 var(--s5);
+}
+
+.masthead__rule {
+  border: 0;
+  border-top: 1px solid var(--ink);
+  width: 6rem;
+  margin: 0 0 var(--s4);
+}
+
+.byline {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  margin: 0 0 var(--s4);
+}
+
+.byline__authors {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0.25rem var(--s2);
+  justify-content: start;
+  margin: 0 0 var(--s3);
+}
+
+.byline__authors dt {
+  color: var(--ink);
+}
+
+.byline__authors dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.byline__line {
+  text-wrap: balance;
+}
+
+.byline__line + .byline__line {
+  margin-top: 0.25rem;
+}
+
+/* ---- links ------------------------------------------------------------ */
+
+a {
+  color: inherit;
+  /* --rule at 1px is invisible against the canvas; both masthead links read as
+     plain text. --ink-muted is still quiet but legible as a link. */
+  text-decoration-color: var(--ink-muted);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-color var(--dur-fast) var(--ease);
+}
+
+a:hover {
+  text-decoration-color: var(--ink);
+}
+
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+.links {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* ---- sections --------------------------------------------------------- */
+
+.section {
+  padding-block: var(--s7);
+  border-top: 1px solid var(--rule);
+}
+
+.section__number {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  display: block;
+  margin-bottom: var(--s1);
+}
+
+.section__title {
+  font-size: var(--t-md);
+  line-height: 1.3;
+  font-weight: 600;
+  margin: 0 0 var(--s4);
+  max-width: 28ch;
+}
+
+p {
+  margin: 0 0 var(--s3);
+  /* Avoid a single word alone on the last line. */
+  text-wrap: pretty;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+strong {
+  font-weight: 600;
+}
+
+/* ---- the three headline statistics ------------------------------------ */
+/* Large type with the interval beneath, set in the sans so the numerals are
+   tabular and the three line up. */
+
+/* Three columns, three explicit rows. `.stat` is display:contents so its
+   children become items of this grid directly: that makes the values align
+   across the three regardless of how many lines each label runs to. Reading
+   order stays label-then-value in the DOM, which is what a screen reader needs;
+   the visual order is set by the rows. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: auto auto auto;
+  column-gap: var(--s4);
+  row-gap: var(--s1);
+  margin: var(--s5) 0;
+  padding: 0;
+}
+
+.stat {
+  display: contents;
+}
+
+.stat__value {
+  grid-row: 1;
+  margin: 0;
+  border-top: 1px solid var(--ink);
+  padding-top: var(--s2);
+  font-family: var(--sans);
+  font-size: var(--t-lg);
+  line-height: 1.1;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* A p-value broken after its "=" reads as two numbers. */
+.nowrap {
+  white-space: nowrap;
+}
+
+.stat__interval {
+  grid-row: 2;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-muted);
+}
+
+.stat__label {
+  text-wrap: balance;
+  grid-row: 3;
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  line-height: 1.4;
+  color: var(--ink-muted);
+  margin-top: var(--s1);
+}
+
+@media (max-width: 48rem) {
+  /* One column at mobile: each stat becomes its own three-row block, so the
+     rows have to flow rather than being pinned. */
+  .stats {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+    row-gap: 0;
+  }
+
+  /* Flex with explicit order, so the reading order at mobile is the same as at
+     desktop — value, interval, label — while the DOM keeps label first for
+     assistive technology. */
+  .stat {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: var(--s3);
+  }
+
+  .stat__value {
+    order: 1;
+    grid-row: auto;
+  }
+
+  .stat__interval {
+    order: 2;
+    grid-row: auto;
+  }
+
+  .stat__label {
+    text-wrap: balance;
+    order: 3;
+    grid-row: auto;
+  }
+}
+
+/* ---- figures ---------------------------------------------------------- */
+
+/* Figure numbers come from document order, not from the markup. The web and the
+   PDF order their figures differently, and a hand-assigned number drifts the
+   first time a section moves. A counter also works without a script. */
+.wrap {
+  counter-reset: figure section;
+}
+
+/* Section numbers come from document order, like the figure numbers. Written
+   into the markup they drift: the page read 01, 02, 03, 05 while the
+   scrollytelling section that will be 04 was still unbuilt, which looks broken
+   to a reader who does not know what is coming. A counter renumbers itself when
+   that section lands, and works without a script. */
+.section {
+  counter-increment: section;
+}
+
+.section__number::before {
+  content: counter(section, decimal-leading-zero);
+}
+
+.figure {
+  margin: var(--s6) 0;
+  counter-increment: figure;
+}
+
+.figure__caption b::before {
+  content: "Figure " counter(figure) ". ";
+}
+
+.figure__frame {
+  /* Reserved before the SVG exists, so nothing shifts on render. */
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+
+.figure__frame svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.figure__caption {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  margin-top: var(--s3);
+  max-width: var(--measure);
+}
+
+.figure__caption b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.figure__source {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  margin-top: var(--s2);
+  max-width: var(--measure);
+}
+
+/* The compact chart layout renders at about 1:1, so its type is set here rather
+   than inheriting the desktop scale, which arrived at 12.3px after scaling. */
+.figure__frame svg.compact text {
+  font-size: 16px;
+}
+
+/* Chart primitives, shared by every figure. */
+.axis-label {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  fill: var(--ink-muted);
+}
+
+.tick-label {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  fill: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.mark-label {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.mark-note {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  fill: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.gridline {
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+
+.axis-line {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+/* ---- the no-JS path ---------------------------------------------------- */
+/* An inline script in <head> sets data-js before first paint, so these never
+   flash. Without JS the statistic-bearing blocks are removed rather than left
+   empty: a sentence reading "still leaves % against %" asserts something it does
+   not say, which is worse than not showing it. */
+
+html:not(.js) .needs-js {
+  display: none;
+}
+
+/* Without a script the chart cannot draw, so its reserved box would be an empty
+   hole. Collapse it and show the data table that is otherwise the
+   screen-reader path. The table is injected at build time, so it is there
+   either way; the only question is whether it is visible. */
+html:not(.js) .figure__frame {
+  display: none;
+}
+
+html.js .figure__table {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.figure__table table {
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-variant-numeric: tabular-nums;
+  margin-top: var(--s2);
+}
+
+.figure__table caption {
+  text-align: left;
+  color: var(--ink-muted);
+  padding-bottom: var(--s1);
+}
+
+.figure__table th,
+.figure__table td {
+  text-align: left;
+  padding: 0.3rem var(--s2) 0.3rem 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.figure__table th {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.figure__table td {
+  color: var(--ink-muted);
+}
+
+/* ---- the screen-reader data table -------------------------------------- */
+/* Also the no-JS path, so it is a real table, not a summary. */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Information, not a failure. --alert marks thresholds and defects; telling a
+   reader which parts of the page need a script is neither. */
+.noscript {
+  border-left: 2px solid var(--rule);
+  padding: var(--s1) 0 var(--s1) var(--s3);
+  margin: var(--s4) 0;
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+}
+
+/* ---- a chart that cannot render --------------------------------------- */
+/* Loud and visible. Never a plausible-looking stand-in. */
+
+.figure__error {
+  border: 1px solid var(--alert);
+  color: var(--alert);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  padding: var(--s3);
+}
+
+/* ---- the tooltip -------------------------------------------------------- */
+/* No shadow, no arrow, no entrance animation. It has to feel instant: a
+   tooltip that fades in is a tooltip that lags the cursor. */
+
+.tooltip {
+  position: fixed;
+  z-index: 20;
+  pointer-events: none;
+  background: var(--canvas);
+  border: 1px solid var(--rule);
+  padding: var(--s1) var(--s2);
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--ink);
+  max-width: 20rem;
+}
+
+.tooltip[hidden] {
+  display: none;
+}
+
+.tooltip__title {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.tooltip__row {
+  display: grid;
+  grid-template-columns: 9px 1fr auto;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.tooltip__swatch {
+  width: 9px;
+  height: 9px;
+  align-self: center;
+}
+
+.tooltip__label {
+  color: var(--ink-muted);
+}
+
+.tooltip__value {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* The hover rule sits behind the marks it reads. */
+.hover-rule {
+  pointer-events: none;
+}
+
+/* ---- figure toggles ----------------------------------------------------- */
+/* Two buttons, not a styled select. The pressed state is carried by
+   aria-pressed and shown by weight and rule, never by a hue outside the
+   palette. */
+
+.toggle {
+  display: flex;
+  gap: var(--s2);
+  margin-top: var(--s2);
+}
+
+.toggle button {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-muted);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  padding: 0.25rem 0;
+  cursor: pointer;
+}
+
+.toggle button[aria-pressed="true"] {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--ink);
+}
+
+.toggle button:hover {
+  color: var(--ink);
+}
+
+/* ---- the one pinned sequence -------------------------------------------- */
+/* Two layouts. Which one is live is decided in JavaScript and written to
+   data-layout, so the stylesheet and the script cannot disagree about it. */
+
+/* Steps left, graphic right. The steps come first in the DOM so the reading
+   order is text then graphic; the grid places them side by side. */
+.scrolly__layout {
+  display: grid;
+  /* Weighted toward the graphic. At 1fr/1.05fr the pinned chart came out 352px
+     wide on a 1440 viewport — the smallest figure on the page, carrying its
+     central argument. The caption column stays wide enough for a readable
+     measure and no wider. */
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.25fr);
+  gap: var(--s5);
+  align-items: start;
+  margin: var(--s5) 0 var(--s4);
+}
+
+.scrolly__graphic {
+  position: sticky;
+  /* Centred in the viewport, so the graphic sits beside the step a reader is
+     actually reading rather than above or below it. */
+  top: calc(50vh - 240px);
+}
+
+.scrolly__steps {
+  display: grid;
+  /* Enough that one caption settles before the next arrives, not so much that
+     the column is empty for half a screen between them. */
+  gap: 42vh;
+  padding-block: 26vh;
+}
+
+/* Inactive steps are dimmed by COLOUR, not by opacity. At 0.35 opacity the
+   three inactive captions sat at 1.49:1 — below any threshold — and those four
+   captions carry the whole capital-intensity argument, so a reader wanting to
+   read ahead or back could not. Muted ink keeps the distinction visible and
+   both states legible. */
+.scrolly__step {
+  transition:
+    color var(--dur-mid) var(--ease),
+    border-color var(--dur-mid) var(--ease);
+}
+
+/* The dim/live distinction belongs to the PINNED layout only. Stacked, every
+   step is equally current — buildStack marks all four active — so the rule
+   painted the full height of the section beside the graphics as well as the
+   captions, and a marker that means "you are here" marked everywhere. */
+.scrolly[data-layout="pinned"] .scrolly__step {
+  color: var(--ink-dim);
+  border-left: 2px solid transparent;
+  padding-left: var(--s3);
+}
+
+/* Which step is live is marked twice: by ink and by a rule. Contrast alone is
+   a weak signal for it, and the rule survives both a dim display and a reader
+   who cannot separate the two ink tones. */
+.scrolly[data-layout="pinned"] .scrolly__step[data-active="true"] {
+  color: var(--ink);
+  border-left-color: var(--cleantech);
+}
+
+.scrolly__step b {
+  color: inherit;
+}
+
+.scrolly__step p {
+  margin: 0;
+}
+
+.scrolly__step-graphic {
+  display: none;
+}
+
+/* Stacked: four static states, each above its own caption, in order. No
+   pinning — a sticky graphic at phone widths fails by sticking or jumping,
+   which is worse than never pinning. */
+.scrolly[data-layout="stacked"] .scrolly__layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__graphic {
+  display: none;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__steps {
+  gap: var(--s6);
+  padding-block: 0;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__step {
+  opacity: 1;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__step-graphic {
+  display: block;
+  margin-bottom: var(--s3);
+}
+
+@media (max-width: 47.5rem) {
+  .scrolly__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.section__sub {
+  font-family: var(--serif);
+  font-size: var(--t-base);
+  font-weight: 600;
+  margin: var(--s5) 0 var(--s2);
+}
+
+/* ---- the pipeline diagram ----------------------------------------------- */
+/* Hand-authored SVG, not a chart. It has no data in it, so it is written into
+   the markup and needs no script. Six stages and the gates that sit between
+   them — nothing else. A diagram someone has to study has failed at the one
+   job it has in a section people skim. */
+
+.pipeline {
+  width: 100%;
+  height: auto;
+  margin: var(--s4) 0 var(--s2);
+}
+
+.pipeline__box {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+.pipeline__stage {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--ink);
+}
+
+.pipeline__detail {
+  font-family: var(--sans);
+  font-size: 12px;
+  fill: var(--ink-muted);
+}
+
+.pipeline__gate {
+  font-family: var(--sans);
+  font-size: 12px;
+  fill: var(--alert);
+}
+
+.pipeline__arrow {
+  stroke: var(--ink-muted);
+  stroke-width: 1;
+  fill: none;
+}
+
+.pipeline__tick {
+  stroke: var(--alert);
+  stroke-width: 1;
+}
+
+/* ---- the hypothesis table ----------------------------------------------- */
+
+.verdicts {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  margin: var(--s4) 0;
+}
+
+.verdicts th,
+.verdicts td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--s2) var(--s2) var(--s2) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.verdicts th {
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--ink);
+}
+
+.verdicts td:first-child {
+  white-space: nowrap;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.verdicts .verdicts__falsifier {
+  color: var(--ink-muted);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+}
+
+/* The chip. A 4px square, filled for supported, outlined for partial, outlined
+   in --alert for unresolved. No ticks, no crosses, no traffic lights: three of
+   five are unresolved and that is the finding, not a failure. */
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  /* The text wraps; only the square is kept from wrapping away from it.
+     nowrap here pushed a long verdict past a 390px viewport. */
+  white-space: normal;
+}
+
+.chip::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  transform: translateY(-1px);
+}
+
+.chip--supported::before {
+  background: var(--ink);
+}
+
+.chip--partial::before {
+  border: 1px solid var(--ink-muted);
+}
+
+.chip--unresolved::before {
+  border: 1px solid var(--alert);
+}
+
+/* ---- the defect list ---------------------------------------------------- */
+
+/* The two groups in §8 are separated by which artefact was at risk. Set a step
+   below .section__sub so the grouping reads without competing with it. */
+.defects__group {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: var(--s5) 0 var(--s2);
+}
+
+/* The two groups in §8 are separated by which artefact was at risk. Set a step
+   below .section__sub so the grouping reads without competing with it. */
+.defects__group {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: var(--s5) 0 var(--s2);
+}
+
+/* The two groups in §8 are separated by which artefact was at risk. Set a step
+   below .section__sub so the grouping reads without competing with it. */
+.defects__group {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink);
+  margin: var(--s5) 0 var(--s2);
+}
+
+.defects {
+  margin: var(--s3) 0 var(--s5);
+  padding: 0;
+  list-style: none;
+}
+
+.defects li {
+  border-top: 1px solid var(--rule);
+  padding: var(--s2) 0;
+}
+
+/* A value this project used to produce, quoted to describe a defect. Set in
+   the muted tone so it reads as a past state rather than a current claim. */
+.was {
+  color: var(--ink-muted);
+}
+
+.defects b {
+  font-weight: 600;
+}
+
+/* The "how it was caught" sentence is the substance of this section, not a
+   gloss on it, so it keeps full contrast. It is set apart by a rule and an
+   indent rather than by dimming — the same choice as the scrollytelling steps,
+   for the same reason: role is geometry's job, not contrast's. */
+.defects__how {
+  color: var(--ink);
+  display: block;
+  margin-top: var(--s2);
+  padding-left: var(--s3);
+  border-left: 2px solid var(--rule);
+}
+
+/* Running prose, so full contrast. It is apparatus by role but body copy by
+   function — a reader reads it sentence by sentence — and 283-character
+   paragraphs in the muted tone are body copy that drifted. The quieter feel
+   comes from the smaller size and its position, not from the ink. */
+.colophon {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.colophon dd {
+  color: var(--ink-muted);
+}
+
+.colophon dl {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem var(--s3);
+  margin: var(--s3) 0 0;
+}
+
+.colophon dt {
+  color: var(--ink);
+}
+
+.colophon dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A table does not shrink below its content, so at narrow widths the rows
+   become blocks. The header is dropped and each cell carries its own label,
+   because a three-column header has nothing to align to once the columns are
+   gone. */
+@media (max-width: 48rem) {
+  .verdicts,
+  .verdicts tbody,
+  .verdicts tr,
+  .verdicts td {
+    display: block;
+    width: 100%;
+  }
+
+  .verdicts thead {
+    display: none;
+  }
+
+  .verdicts tr {
+    border-top: 1px solid var(--rule);
+    padding: var(--s2) 0;
+  }
+
+  .verdicts td {
+    border: 0;
+    padding: 0 0 0.3rem;
+  }
+
+  .verdicts td:first-child {
+    white-space: normal;
+  }
+
+  .verdicts .verdicts__falsifier::before {
+    content: "Registered to fail if: ";
+    color: var(--ink);
+  }
+}
+
+/* The diagram clips to its own box: a stray glyph past the viewBox edge would
+   otherwise widen the document. */
+.pipeline {
+  overflow: hidden;
+}
+
+/* ---- the one pinned sequence -------------------------------------------- */
+/* Two layouts. Which one is live is decided in JavaScript and written to
+   data-layout, so the stylesheet and the script cannot disagree about it. */
+
+.scrolly__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: var(--s5);
+  align-items: start;
+  margin: var(--s5) 0 var(--s4);
+}
+
+.scrolly__graphic {
+  position: sticky;
+  /* Centred in the viewport, so the graphic sits beside the step a reader is
+     actually reading rather than above or below it. */
+  top: calc(50vh - 240px);
+}
+
+.scrolly__steps {
+  display: grid;
+  gap: 60vh;
+  padding-block: 30vh;
+}
+
+.scrolly__step {
+  opacity: 0.35;
+  transition: opacity var(--dur-mid) var(--ease);
+}
+
+.scrolly__step[data-active="true"] {
+  opacity: 1;
+}
+
+.scrolly__step p {
+  margin: 0;
+}
+
+.scrolly__step-graphic {
+  display: none;
+}
+
+/* Stacked: four static states, each above its own caption, in order. No
+   pinning — a sticky graphic at phone widths fails by sticking or jumping,
+   which is worse than never pinning. */
+.scrolly[data-layout="stacked"] .scrolly__layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__graphic {
+  display: none;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__steps {
+  gap: var(--s6);
+  padding-block: 0;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__step {
+  opacity: 1;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__step-graphic {
+  display: block;
+  margin-bottom: var(--s3);
+}
+
+@media (max-width: 47.5rem) {
+  .scrolly__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---- the one pinned sequence -------------------------------------------- */
+/* Two layouts. Which one is live is decided in JavaScript and written to
+   data-layout, so the stylesheet and the script cannot disagree about it. */
+
+.scrolly__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: var(--s5);
+  align-items: start;
+  margin: var(--s5) 0 var(--s4);
+}
+
+.scrolly__graphic {
+  position: sticky;
+  /* Centred in the viewport, so the graphic sits beside the step a reader is
+     actually reading rather than above or below it. */
+  top: calc(50vh - 240px);
+}
+
+.scrolly__steps {
+  display: grid;
+  gap: 60vh;
+  padding-block: 30vh;
+}
+
+.scrolly__step {
+  opacity: 0.35;
+  transition: opacity var(--dur-mid) var(--ease);
+}
+
+.scrolly__step[data-active="true"] {
+  opacity: 1;
+}
+
+.scrolly__step p {
+  margin: 0;
+}
+
+.scrolly__step-graphic {
+  display: none;
+}
+
+/* Stacked: four static states, each above its own caption, in order. No
+   pinning — a sticky graphic at phone widths fails by sticking or jumping,
+   which is worse than never pinning. */
+.scrolly[data-layout="stacked"] .scrolly__layout {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__graphic {
+  display: none;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__steps {
+  gap: var(--s6);
+  padding-block: 0;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__step {
+  opacity: 1;
+}
+
+.scrolly[data-layout="stacked"] .scrolly__step-graphic {
+  display: block;
+  margin-bottom: var(--s3);
+}
+
+@media (max-width: 47.5rem) {
+  .scrolly__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

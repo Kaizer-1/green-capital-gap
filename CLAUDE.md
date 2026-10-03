@@ -452,7 +452,14 @@ chart that failed.
 
 ## 10. Writing standards for the report
 
-Target 3,500–4,500 words plus figures, tables, references and appendices.
+Target 4,500–5,000 words excluding figures, tables, references and appendices.
+
+Revised from 3,500–4,500 at build step 11. The old range contradicted
+`docs/RESEARCH_BRIEF.md` §7, whose per-section outline sums to roughly 7,000 words, so
+every section written to the brief overshot the cap by construction. The report is counted
+by `count_words` in `src/gcg/report/render.py`, which excludes figure blocks, tables,
+headings, appendices and references, and the count is injected into the title page from
+there rather than typed.
 
 **Voice:** plain academic English. Short declarative sentences. Active voice. The reader
 is a competent examiner who is bored of padding.

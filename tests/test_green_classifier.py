@@ -218,7 +218,9 @@ def test_recorded_patterns_actually_match_the_text(classified):
         text = row["match_text"]
         for rx in str(row["green_matched_patterns"]).split(" ;; "):
             if rx:
-                assert re.search(rx, text, re.I), f"{row['permalink_norm']}: {rx!r} does not match"
+                assert re.search(rx, text, re.I), (
+                    f"{row['permalink_norm']}: {rx!r} does not match"
+                )
 
 
 def test_vetoed_rows_record_a_reason(classified):

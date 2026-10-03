@@ -218,6 +218,35 @@ def build(cfg: Config | None = None) -> tuple[pd.DataFrame, dict[str, Any]]:
         "attrition_summary": ledger.summary(),
         "country_corrections": corrections,
         "country_code_stats": code_stats,
+        # Country recovery measured on DEALS, not on companies. The company-level
+        # figures (196,553 companies, 108,563 blank) were being quoted in the
+        # report as deal counts, which is impossible: there are only 52,928
+        # rounds in the source. Both scopes are now carried, named by scope.
+        "country_recovery_deals": {
+            "deals": int(len(df)),
+            "by_route": {
+                str(k): int(v)
+                for k, v in df["country_recovery_route"].value_counts(dropna=False).items()
+            },
+            "recovered": int(
+                df["country_recovery_route"].isin(["flat_mirror", "cctld"]).sum()
+            ),
+            "recovered_by_bloc": {
+                str(k): int(v)
+                for k, v in df.loc[
+                    df["country_recovery_route"].isin(["flat_mirror", "cctld"]), "bloc"
+                ]
+                .value_counts()
+                .items()
+            },
+            "unassigned": int(df["bloc"].eq("UNASSIGNED").sum()),
+            "unassigned_no_country": int(
+                (df["bloc"].eq("UNASSIGNED") & df["country_code"].isna()).sum()
+            ),
+            "unassigned_unmappable_code": int(
+                (df["bloc"].eq("UNASSIGNED") & df["country_code"].notna()).sum()
+            ),
+        },
         "bloc_stats": bloc_stats,
         "deflate": deflate_stats,
         "venture_stage_by_bloc": vs_split.to_dict("records"),

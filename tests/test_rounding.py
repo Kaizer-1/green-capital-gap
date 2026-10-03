@@ -34,9 +34,9 @@ def test_the_old_double_rounding_path_gave_a_different_answer():
     while the report formatted the raw value and got 5.43.
     """
     raw = 5.4254
-    assert f"{round(raw, 3):.2f}" == "5.42"   # what the figure printed
-    assert f"{raw:.2f}" == "5.43"             # what the report printed
-    assert fmt(raw, 2) == "5.43"              # what both print now
+    assert f"{round(raw, 3):.2f}" == "5.42"  # what the figure printed
+    assert f"{raw:.2f}" == "5.43"  # what the report printed
+    assert fmt(raw, 2) == "5.43"  # what both print now
 
 
 def test_helper_is_stable_under_an_accidental_second_rounding():

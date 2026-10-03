@@ -6,7 +6,7 @@ Every file below was downloaded by the pipeline and is cached in `data/raw/`
 (gitignored). Checksums are recorded in `data/raw/_checksums.json` and verified
 on every re-run; a mismatch fails the build.
 
-Fetched: 2026-10-02 07:49 UTC
+Fetched: 2026-10-03 13:17 UTC
 
 | Source | File | Rows | Size | Licence | SHA256 (first 16) |
 |---|---|---:|---:|---|---|
@@ -31,7 +31,7 @@ Fetched: 2026-10-02 07:49 UTC
 - **`cb_relational`** — Kaggle dataset `justinas/startup-investments` (Crunchbase 2013 Snapshot)
   - Relational Crunchbase 2013 Snapshot. funding_rounds.csv is deal-level (funded_at, raised_amount_usd, funding_round_type, funding_round_code). objects.csv carries permalink, category_code, tag_list, country_code, founded_at, status, short_description.
 - **`india`** — Kaggle dataset `sudalairajkumar/indian-startup-funding`
-  - Continuity probe only (report §7). Never pooled with Crunchbase. Continuity probe only (report §7). Never pooled with Crunchbase: the taxonomies and amount conventions are not compatible.
+  - Continuity probe only (report §7). Never pooled with Crunchbase: the taxonomies and amount conventions are not compatible.
 - **`owid_co2`** — https://raw.githubusercontent.com/owid/co2-data/master/owid-co2-data.csv
   - CO2 per capita for the H5 need indicators.
 - **`wb_country_meta`** — https://api.worldbank.org/v2/country?format=json&per_page=400

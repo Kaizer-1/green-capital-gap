@@ -12,6 +12,7 @@ preference list, so a missing font never crashes a build or emits tofu boxes.
 
 from __future__ import annotations
 
+import json
 import textwrap
 from dataclasses import dataclass
 from pathlib import Path
@@ -67,6 +68,21 @@ _resolved: dict[str, str] = {}
 # their chrome; print variants carry axes, data and annotations only, because
 # the title, subtitle and source note become caption text set by the document.
 _MODE = "screen"
+
+# Annotations longer than this are moved to the caption in print variants. Short
+# pointer labels ("n = 34", "2008") stay in-plot; a sentence does not, because at
+# print size it has nowhere to sit that is not over data.
+PRINT_ANNOTATION_MAX_CHARS = 40
+
+# Slack measured on each print variant, written out for the render gate.
+_SLACK: dict[str, dict[str, float]] = {}
+_INK: dict[str, dict[str, float]] = {}
+
+# Every authored string rendered into a figure, keyed by figure slug. Harvested
+# in save() while the figure still exists, because figure text never reaches the
+# report's prose gate: it is baked into a PDF before the renderer ever sees it.
+# That is how a hand-typed 2 reached a published figure past five gates.
+_TEXTS: dict[str, list[str]] = {}
 
 
 def set_mode(mode: str) -> None:
@@ -245,12 +261,21 @@ def annotate(
     color: str | None = None,
     fontsize: float = 8.0,
     ha: str = "left",
+    keep_in_print: bool = False,
 ) -> None:
     """Inline callout with a thin leader line.
 
     CLAUDE.md §8 requires an annotation layer: a chart that makes the reader find
     the story is a chart that failed.
+
+    In print variants an annotation longer than
+    ``PRINT_ANNOTATION_MAX_CHARS`` is dropped and belongs in the caption
+    instead. At 6.22in a sentence has nowhere to sit that is not over data, and
+    the caption is set in the document's own type where it reads better anyway.
+    Pass ``keep_in_print`` for a long label that genuinely has clear space.
     """
+    if is_print() and not keep_in_print and len(text) > PRINT_ANNOTATION_MAX_CHARS:
+        return
     ax.annotate(
         text,
         xy=xy,
@@ -303,8 +328,197 @@ def layout(
         fig.subplots_adjust(left=left, right=right, top=top, bottom=bottom, **kwargs)
 
 
-def save(fig: plt.Figure, cfg: Config, stem: str) -> list[Path]:
+def series_label(
+    ax: plt.Axes,
+    y_value: float,
+    text: str,
+    colour: str,
+    *,
+    fontsize: float = 8.0,
+    dx: float = 0.015,
+) -> None:
+    """Label a series in the gutter to the right of the axes, not inside it.
+
+    Direct labelling beats a legend, but placing the label inside the axes
+    forces the x-limit past the data to make room: four figures ran to a 2014
+    tick with nothing under it because the labels sat at 2013. Placing the label
+    in axes coordinates just outside the right spine, with clipping off, lets
+    the x-limit stop at the last year that has data. ``flush_fit`` then sizes
+    the gutter to exactly what the labels need, since they count as ink.
+    """
+    ax.text(
+        1.0 + dx,
+        y_value,
+        text,
+        transform=ax.get_yaxis_transform(),
+        va="center",
+        ha="left",
+        fontsize=fontsize,
+        color=colour,
+        clip_on=False,
+        linespacing=1.3,
+    )
+
+
+# Measurement dpi for the raster pass. High enough that one pixel is well under
+# the tolerance we care about (1/600in = 0.0017in), low enough to be cheap.
+_RASTER_DPI = 600
+
+
+def _ink_box(fig: plt.Figure, dpi: int = _RASTER_DPI) -> dict[str, float] | None:
+    """True ink edges, in inches from each canvas edge, measured off a raster.
+
+    ``get_tightbbox`` is what ``flush_fit`` uses, and for most artists it is
+    exact. For *rotated* text it is not: a vertical y-axis label reports a box
+    wider than the glyphs inside it, so a figure whose leftmost artist is the
+    y-label ends up sitting a couple of points further right than one whose
+    leftmost artist is a horizontal tick label, even though both report flush.
+    Measured on a contact sheet that was the whole residual: the line and
+    scatter figures clustered 4px left of the bar figures at 150dpi.
+
+    Rendering the figure and finding the first non-white row and column removes
+    the discrepancy, because it measures what the reader actually sees.
+    """
+    import numpy as np
+
+    prev = fig.get_dpi()
+    try:
+        fig.set_dpi(dpi)
+        fig.canvas.draw()
+        buf = np.asarray(fig.canvas.buffer_rgba())
+    except Exception:  # noqa: BLE001 - a measurement failure must not fail a build
+        LOG.warning("raster ink measurement failed; keeping the tightbbox fit")
+        return None
+    finally:
+        fig.set_dpi(prev)
+
+    # Composite onto white, then treat anything off-white as ink.
+    alpha = buf[..., 3:4].astype("float32") / 255.0
+    grey = (buf[..., :3].astype("float32") * alpha + 255.0 * (1.0 - alpha)).mean(axis=2)
+    ink = grey < 250.0
+    if not ink.any():
+        return None
+    rows = np.where(ink.any(axis=1))[0]
+    cols = np.where(ink.any(axis=0))[0]
+    height, width = ink.shape
+    return {
+        "left": float(cols[0]) / dpi,
+        "right": float(width - 1 - cols[-1]) / dpi,
+        # Raster rows run top-down; subplot fractions run bottom-up.
+        "top": float(rows[0]) / dpi,
+        "bottom": float(height - 1 - rows[-1]) / dpi,
+    }
+
+
+def _flush_raster(
+    fig: plt.Figure,
+    *,
+    pad_in: float = 0.01,
+    edges: dict[str, bool] | None = None,
+    passes: int = 2,
+) -> None:
+    """Correct the subplot margins against raster-measured ink.
+
+    Runs after ``flush_fit``, which gets within a few thousandths of an inch on
+    everything and within about two points on figures with a rotated y-label.
+    This closes the remainder so that every figure in the document shares one
+    left edge rather than two clusters of one.
+    """
+    on = {"left": True, "right": True, "bottom": True, "top": True} | (edges or {})
+    width_in, height_in = fig.get_size_inches()
+    for _ in range(passes):
+        box = _ink_box(fig)
+        if box is None:
+            return
+        sp = fig.subplotpars
+        new = {"left": sp.left, "right": sp.right, "bottom": sp.bottom, "top": sp.top}
+        if on["left"]:
+            new["left"] = sp.left - (box["left"] - pad_in) / width_in
+        if on["right"]:
+            new["right"] = sp.right + (box["right"] - pad_in) / width_in
+        if on["bottom"]:
+            new["bottom"] = sp.bottom - (box["bottom"] - pad_in) / height_in
+        if on["top"]:
+            new["top"] = sp.top + (box["top"] - pad_in) / height_in
+        if new["left"] >= new["right"] or new["bottom"] >= new["top"]:
+            LOG.warning("raster flush would invert the axes; leaving the tightbbox fit")
+            return
+        fig.subplots_adjust(**new)
+
+
+def harvest_text(fig: plt.Figure) -> list[str]:
+    """Every authored string drawn on a figure, tick labels excluded.
+
+    Walks the artist tree rather than intercepting the drawing calls, so it sees
+    text whatever produced it — ``ax.text``, ``ax.annotate``, ``fig.text``, a
+    title, an axis label, or one of this module's own helpers.
+
+    Tick labels are excluded deliberately. They are generated by a formatter
+    from the axis domain, so their numbers are properties of the data's range
+    rather than claims an author made, and including them would bury the
+    authored strings in axis scales.
+    """
+    import matplotlib.text as mtext
+
+    # Draw first: before a draw, an axis may not have materialised the Text
+    # objects it will actually render, so identities collected now would not
+    # match the ones findobj returns and every tick label would leak through as
+    # an authored string.
+    fig.canvas.draw()
+
+    # Each tick owns TWO Text objects, label1 and label2 (bottom/top, left/right),
+    # and get_ticklabels returns only one of them. Collecting just that one left
+    # the other in the harvest, so every axis scale leaked through as authored
+    # text. Walk the ticks and take both.
+    ticks: set[int] = set()
+    for ax in fig.axes:
+        for axis in (ax.xaxis, ax.yaxis):
+            for tick in (*axis.get_major_ticks(), *axis.get_minor_ticks()):
+                ticks.add(id(tick.label1))
+                ticks.add(id(tick.label2))
+            ticks.add(id(axis.get_offset_text()))
+
+    out = []
+    for artist in fig.findobj(mtext.Text):
+        if id(artist) in ticks:
+            continue
+        text = artist.get_text()
+        if text and text.strip():
+            out.append(text)
+    return out
+
+
+def save(
+    fig: plt.Figure,
+    cfg: Config,
+    stem: str,
+    *,
+    flush: bool = True,
+    flush_edges: dict[str, bool] | None = None,
+) -> list[Path]:
     """Save at 300 dpi as both PNG and PDF with a deterministic filename."""
+    # Expand the axes until the ink meets the canvas, so every figure in the
+    # document shares one left edge instead of each having its own hand-chosen
+    # margin. Canvas size is untouched, so a 6.22in figure stays 6.22in.
+    if flush:
+        from gcg.viz.flush_fit import flush_fit, measure_slack
+
+        flush_fit(fig, **(flush_edges or {}))
+        if is_print():
+            # flush_fit leaves rotated y-labels a couple of points shy; the raster
+            # pass closes that so the print variants share one edge exactly.
+            _flush_raster(fig, edges=flush_edges)
+            _SLACK[stem] = {k: round(v, 4) for k, v in measure_slack(fig).items()}
+            ink = _ink_box(fig)
+            if ink:
+                _INK[stem] = {k: round(v, 4) for k, v in ink.items()}
+
+    # Harvested before the figure is saved and closed. Print and screen variants
+    # draw different text (print sheds its chrome), so both passes contribute and
+    # the gate sees the union.
+    _TEXTS.setdefault(stem, [])
+    _TEXTS[stem].extend(harvest_text(fig))
+
     spec = cfg.pipeline["figures"]
     out: list[Path] = []
     if is_print():
@@ -326,6 +540,50 @@ def save(fig: plt.Figure, cfg: Config, stem: str) -> list[Path]:
         LOG.info("saved %s (%s)", stem, ", ".join(spec["formats"]))
     plt.close(fig)
     return out
+
+
+def write_slack_report(cfg: Config) -> Path:
+    """Persist the measured slack for every print variant.
+
+    The render gate reads this rather than re-rendering, and a missing entry is
+    itself a failure: it means a figure was added without being flushed.
+    """
+    path = cfg.path("figures") / "print" / "_slack.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # The four edge values are the RASTER-measured ink, because that is what the
+    # reader sees lined up against the caption. The tightbbox figures flush_fit
+    # itself works to are kept beside them, so a disagreement between the two is
+    # visible rather than hidden.
+    report = {
+        slug: {**(_INK.get(slug) or _SLACK[slug]), "tightbbox": _SLACK[slug]}
+        for slug in sorted(_SLACK)
+    }
+    path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    LOG.info("wrote %s for %d print variants", path.name, len(_SLACK))
+    return path
+
+
+def write_text_report(cfg: Config) -> Path:
+    """Write every authored string drawn into a figure, for the render gate.
+
+    The report's bare-number gate reads the prose. Figure text is composed in
+    Python and rasterised into a PDF long before the renderer runs, so no gate
+    has ever seen it. This file is what lets one check both.
+    """
+    path = cfg.path("figures") / "_text_audit.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    report = {
+        slug: sorted({" ".join(t.split()) for t in texts})
+        for slug, texts in sorted(_TEXTS.items())
+    }
+    path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    LOG.info(
+        "wrote %s: %d strings across %d figures",
+        path.name,
+        sum(len(v) for v in report.values()),
+        len(report),
+    )
+    return path
 
 
 def figsize(cfg: Config, kind: str = "single", slug: str | None = None) -> tuple[float, float]:
