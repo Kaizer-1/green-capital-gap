@@ -48,6 +48,11 @@ function buildStack(section, spec, steps, findings) {
     // Rendered in its final state, not animated into it. Step 4 therefore has
     // to read as emphasis on arrival rather than as the end of a movement.
     ladder.setStep(i + 1, { animate: false });
+    // NOTE: data-active means something different in each layout. Pinned, it
+    // marks the ONE step a reader is on. Stacked, every step is equally
+    // current, so all four carry it. Anything that styles or counts on
+    // data-active must therefore be scoped to a layout — a rule that assumed
+    // "exactly one" painted its active marker down the whole section here.
     stepEl.dataset.active = "true";
     return ladder;
   });

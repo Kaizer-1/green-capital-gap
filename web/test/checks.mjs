@@ -430,6 +430,16 @@ async function behaviour(browser, base) {
       stackedStates: document.querySelectorAll(".scrolly__step-graphic svg")
         .length,
       captions: document.querySelectorAll(".scrolly__step p").length,
+      // data-active carries a different meaning per layout, so the invariant
+      // that matters is the RENDERED one: stacked, no step may be singled out.
+      // Checking the attribute instead would pass for the defect that prompted
+      // this, because all four stacked steps are legitimately "true".
+      distinctStepStyles: new Set(
+        [...document.querySelectorAll(".scrolly__step")].map((el) => {
+          const c = getComputedStyle(el);
+          return [c.color, c.borderLeftColor, c.opacity].join("|");
+        })
+      ).size,
     };
   });
   check(
@@ -438,6 +448,11 @@ async function behaviour(browser, base) {
     JSON.stringify(mobile),
   );
   check("the pinned graphic is not rendered at 390", !mobile.graphicVisible);
+  check(
+    "stacked: no step is singled out as active",
+    mobile.distinctStepStyles === 1,
+    `${mobile.distinctStepStyles} distinct step styles; stacked steps are all current`,
+  );
   check(
     "390 gets four static states",
     mobile.stackedStates === 4,
