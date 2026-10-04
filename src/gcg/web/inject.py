@@ -49,6 +49,10 @@ class TypographyError(RuntimeError):
     """The page carries punctuation the report would have rejected."""
 
 
+class SlotOverreachError(RuntimeError):
+    """A data-key slot matched past its own closing tag."""
+
+
 class StaleNumberError(RuntimeError):
     """The page states a number that no finding supports."""
 
@@ -111,12 +115,26 @@ def _flatten_series(node: object, prefix: str = "") -> dict[str, str]:
 # An element carrying data-key, with optional data-prefix / data-suffix. The
 # content group is non-greedy and the pattern does not nest, which is fine
 # because an injected element holds text and nothing else.
+# The closing tag tolerates whitespace before its ">", and the body may not
+# contain another tag of the same name.
+#
+# Both guards exist because of a real deletion. A formatter run rewrote
+# `</span>` as `</span` + newline + `>`, which this pattern did not recognise as
+# a close; `.*?` therefore ran on to the NEXT literal `</span>` several elements
+# away, and the substitution replaced everything in between with one statistic.
+# It silently removed a table cell, a table row and two statistics, and reported
+# success. The gates could not see it: every key still resolved, every number
+# still came from findings.json, and the page still parsed.
 _SLOT = re.compile(
     r"(<(?P<tag>span|dd|dt|p|li|td|th|b|strong|em)\b(?P<attrs>[^>]*\bdata-key=\"(?P<key>[^\"]+)\"[^>]*)>)"
-    r"(?P<body>.*?)"
-    r"(</(?P=tag)>)",
+    r"(?P<body>(?:(?!<(?P=tag)\b).)*?)"
+    r"(</(?P=tag)\s*>)",
     re.S,
 )
+
+# No slot's body legitimately spans this much. A match longer than this means
+# the pattern has run past its own element, as it did above.
+_MAX_SLOT_BODY = 400
 
 _ATTR = re.compile(r'\bdata-(prefix|suffix)="([^"]*)"')
 
@@ -130,6 +148,14 @@ def inject(html: str, findings: dict[str, str]) -> tuple[str, list[str]]:
         if key not in findings:
             missing.append(key)
             return match.group(0)
+        body = match.group("body")
+        if len(body) > _MAX_SLOT_BODY:
+            raise SlotOverreachError(
+                f"the slot for {key!r} matched {len(body)} characters of page, which is "
+                f"more than any statistic replaces. The closing tag it found is not its "
+                f"own, so this substitution would delete the markup in between. "
+                f"Body begins: {body[:120]!r}"
+            )
         affix = dict(_ATTR.findall(match.group("attrs")))
         value = f"{affix.get('prefix', '')}{findings[key]}{affix.get('suffix', '')}"
         # The same normalisation the report applies, from the same function: the

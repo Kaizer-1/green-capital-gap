@@ -81,13 +81,15 @@ body {
 .masthead > .extra-wide,
 .section > .extra-wide {
   max-width: none;
+  /* Both sides of the calc clamp to the viewport. Using the bare
+     --measure-wide for the track assumed the track is always 46rem; below
+     that width the track IS the viewport, so the negative margin overshot and
+     the page scrolled sideways at 390px. Written this way the offset reaches
+     zero exactly when the track stops being wider than the viewport. */
   width: min(100vw - var(--gutter) * 2, var(--measure-extra));
   margin-inline: calc(
-    (
-        var(--measure-wide) -
-          min(100vw - var(--gutter) * 2, var(--measure-extra))
-      ) /
-      2
+    (min(100vw - var(--gutter) * 2, var(--measure-wide)) -
+      min(100vw - var(--gutter) * 2, var(--measure-extra))) / 2
   );
 }
 
@@ -893,30 +895,6 @@ html.js .figure__table {
   margin: var(--s5) 0 var(--s2);
 }
 
-/* The two groups in §8 are separated by which artefact was at risk. Set a step
-   below .section__sub so the grouping reads without competing with it. */
-.defects__group {
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink);
-  margin: var(--s5) 0 var(--s2);
-}
-
-/* The two groups in §8 are separated by which artefact was at risk. Set a step
-   below .section__sub so the grouping reads without competing with it. */
-.defects__group {
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink);
-  margin: var(--s5) 0 var(--s2);
-}
-
 .defects {
   margin: var(--s3) 0 var(--s5);
   padding: 0;
@@ -1022,152 +1000,4 @@ html.js .figure__table {
    otherwise widen the document. */
 .pipeline {
   overflow: hidden;
-}
-
-/* ---- the one pinned sequence -------------------------------------------- */
-/* Two layouts. Which one is live is decided in JavaScript and written to
-   data-layout, so the stylesheet and the script cannot disagree about it. */
-
-.scrolly__layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: var(--s5);
-  align-items: start;
-  margin: var(--s5) 0 var(--s4);
-}
-
-.scrolly__graphic {
-  position: sticky;
-  /* Centred in the viewport, so the graphic sits beside the step a reader is
-     actually reading rather than above or below it. */
-  top: calc(50vh - 240px);
-}
-
-.scrolly__steps {
-  display: grid;
-  gap: 60vh;
-  padding-block: 30vh;
-}
-
-.scrolly__step {
-  opacity: 0.35;
-  transition: opacity var(--dur-mid) var(--ease);
-}
-
-.scrolly__step[data-active="true"] {
-  opacity: 1;
-}
-
-.scrolly__step p {
-  margin: 0;
-}
-
-.scrolly__step-graphic {
-  display: none;
-}
-
-/* Stacked: four static states, each above its own caption, in order. No
-   pinning — a sticky graphic at phone widths fails by sticking or jumping,
-   which is worse than never pinning. */
-.scrolly[data-layout="stacked"] .scrolly__layout {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
-}
-
-.scrolly[data-layout="stacked"] .scrolly__graphic {
-  display: none;
-}
-
-.scrolly[data-layout="stacked"] .scrolly__steps {
-  gap: var(--s6);
-  padding-block: 0;
-}
-
-.scrolly[data-layout="stacked"] .scrolly__step {
-  opacity: 1;
-}
-
-.scrolly[data-layout="stacked"] .scrolly__step-graphic {
-  display: block;
-  margin-bottom: var(--s3);
-}
-
-@media (max-width: 47.5rem) {
-  .scrolly__layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-/* ---- the one pinned sequence -------------------------------------------- */
-/* Two layouts. Which one is live is decided in JavaScript and written to
-   data-layout, so the stylesheet and the script cannot disagree about it. */
-
-.scrolly__layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-  gap: var(--s5);
-  align-items: start;
-  margin: var(--s5) 0 var(--s4);
-}
-
-.scrolly__graphic {
-  position: sticky;
-  /* Centred in the viewport, so the graphic sits beside the step a reader is
-     actually reading rather than above or below it. */
-  top: calc(50vh - 240px);
-}
-
-.scrolly__steps {
-  display: grid;
-  gap: 60vh;
-  padding-block: 30vh;
-}
-
-.scrolly__step {
-  opacity: 0.35;
-  transition: opacity var(--dur-mid) var(--ease);
-}
-
-.scrolly__step[data-active="true"] {
-  opacity: 1;
-}
-
-.scrolly__step p {
-  margin: 0;
-}
-
-.scrolly__step-graphic {
-  display: none;
-}
-
-/* Stacked: four static states, each above its own caption, in order. No
-   pinning — a sticky graphic at phone widths fails by sticking or jumping,
-   which is worse than never pinning. */
-.scrolly[data-layout="stacked"] .scrolly__layout {
-  grid-template-columns: minmax(0, 1fr);
-  gap: 0;
-}
-
-.scrolly[data-layout="stacked"] .scrolly__graphic {
-  display: none;
-}
-
-.scrolly[data-layout="stacked"] .scrolly__steps {
-  gap: var(--s6);
-  padding-block: 0;
-}
-
-.scrolly[data-layout="stacked"] .scrolly__step {
-  opacity: 1;
-}
-
-.scrolly[data-layout="stacked"] .scrolly__step-graphic {
-  display: block;
-  margin-bottom: var(--s3);
-}
-
-@media (max-width: 47.5rem) {
-  .scrolly__layout {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
