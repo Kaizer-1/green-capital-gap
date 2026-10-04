@@ -77,7 +77,21 @@ function draw(container, opts, animate) {
   const yMax = axis.y?.domain?.[1] ?? Math.ceil(Math.max(...yValues) * 1.18);
   const yMin = axis.y?.domain?.[0] ?? 0;
 
-  const leftPad = 42;
+  // Sized from the widest y tick label, the same way the right gutter is sized
+  // from the widest terminus label. A constant worked at desktop and failed at
+  // 390: the labels are right-anchored to the axis, so "25%" reaches 2.5px
+  // further left than "5%" and spilled past the page's left edge — the one
+  // alignment this layout is built on.
+  const yUnit = axis.y?.unit ?? "";
+  const yTickValues = ticks([yMin, yMax], 5);
+  // At the stated size, not a nominal one: the compact layout raises every
+  // string inside the SVG to 16px, so measuring at 13 under-reserved the margin
+  // and the widest label still spilled.
+  const tickPx = compact ? 16 : 13;
+  const widestTick = Math.max(
+    ...yTickValues.map((t) => labelWidth(`${t}${yUnit}`, tickPx, "tick-label"))
+  );
+  const leftPad = Math.max(42, Math.ceil(widestTick) + 8);
   // Room above the plot for the y-axis label.
   const height = compact ? 330 : 300;
   const plot = {
@@ -94,8 +108,7 @@ function draw(container, opts, animate) {
 
   const x = scaleLinear(axis.x.domain, [plot.left, plot.right]);
   const y = scaleLinear([yMin, yMax], [plot.bottom, plot.top]);
-  const unit = axis.y?.unit ?? "";
-  const fmt = (v) => `${v}${unit}`;
+  const fmt = (v) => `${v}${yUnit}`;
 
   axes(root, {
     x,
@@ -104,7 +117,7 @@ function draw(container, opts, animate) {
     xTicks: ticks(axis.x.domain, compact ? 4 : 7).filter(
       (t) => t >= axis.x.domain[0] && t <= axis.x.domain[1],
     ),
-    yTicks: ticks([yMin, yMax], 5),
+    yTicks: yTickValues,
     xFormat,
     yFormat: fmt,
     yLabel: axis.y?.label,

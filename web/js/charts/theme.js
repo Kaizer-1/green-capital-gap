@@ -231,8 +231,40 @@ export function layoutFor(container) {
  * estimates from character count. Generous by design: over-reserving costs a
  * few units of plot, under-reserving clips a label.
  */
-export function labelWidth(text, size = 13) {
-  return text.length * size * 0.55;
+let _measureNode = null;
+
+/**
+ * The rendered width of a label, measured on a real node rather than estimated.
+ *
+ * This returned `text.length * size * 0.55`, which is wrong in both directions
+ * for a proportional face: it read "25%" at 16px as 26.4px where the browser
+ * draws 36.5. The y-axis margin computed from it under-reserved and the widest
+ * tick spilled past the page's left edge at 390 — the one alignment this layout
+ * is built on. Canvas was closer but still short, because `.tick-label` sets
+ * `font-variant-numeric: tabular-nums` and canvas has no way to apply it.
+ *
+ * So the measurement happens on an offscreen SVG text node carrying the same
+ * class as the label being measured, which picks up every rule that will apply
+ * to the real one — family, size, feature settings and all.
+ */
+export function labelWidth(text, size = 13, className = "mark-label") {
+  if (_measureNode === null) {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("aria-hidden", "true");
+    svg.style.cssText =
+      "position:absolute;width:0;height:0;overflow:hidden;visibility:hidden";
+    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+    svg.appendChild(text);
+    document.body.appendChild(svg);
+    _measureNode = text;
+  }
+  if (!_measureNode || !_measureNode.getComputedTextLength) {
+    return text.length * size * 0.55;
+  }
+  _measureNode.setAttribute("class", className);
+  _measureNode.style.fontSize = `${size}px`;
+  _measureNode.textContent = text;
+  return _measureNode.getComputedTextLength();
 }
 
 /**
