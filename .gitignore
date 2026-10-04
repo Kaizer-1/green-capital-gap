@@ -40,3 +40,4 @@ web/test/screens/
 
 # Build staging for the published site; reproduced by `make web-deploy`.
 build/
+web/test/screens-live/

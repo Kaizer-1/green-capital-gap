@@ -17,7 +17,8 @@ import { extname, join, normalize } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
-const OUT = join(ROOT, "test", "screens");
+const OUT_SUFFIX = process.env.GCG_BASE_URL ? "-live" : "";
+const OUT = join(ROOT, "test", `screens${OUT_SUFFIX}`);
 
 export const VIEWPORTS = [
   { name: "1440", width: 1440, height: 900 },
@@ -124,9 +125,14 @@ async function main() {
   await rm(OUT, { recursive: true, force: true });
   await mkdir(OUT, { recursive: true });
 
-  const { server, port } = await serve();
+  // Against a deployed URL when one is given, so the published site is captured
+  // by the same harness that captures the local build and the two are
+  // comparable rather than merely similar. Screenshots land in a separate
+  // directory so a live run cannot overwrite the local reference set.
+  const external = baseURL();
+  const { server, port } = external ? { server: null, port: 0 } : await serve();
   const browser = await chromium.launch();
-  const base = `http://127.0.0.1:${port}/index.html`;
+  const base = external ? `${external}index.html` : `http://127.0.0.1:${port}/index.html`;
   const problems = [];
 
   for (const vp of VIEWPORTS) {
@@ -302,7 +308,7 @@ async function main() {
   await nojs.close();
 
   await browser.close();
-  server.close();
+  server?.close();
 
   if (problems.length) {
     console.error(`\n${problems.length} problem(s) during capture:`);
