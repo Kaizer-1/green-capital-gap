@@ -41,3 +41,7 @@ web/test/screens/
 # Build staging for the published site; reproduced by `make web-deploy`.
 build/
 web/test/screens-live/
+
+# Build copy of the report, placed beside the page so one relative link works
+# both locally and deployed. `make web` regenerates it.
+web/report.pdf
