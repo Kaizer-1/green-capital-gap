@@ -160,7 +160,7 @@ web-deploy: web
 	@# none today; .nojekyll means it never has to.
 	touch $(SITE)/.nojekyll
 	$(PY) -m gcg.web.deploy_check $(SITE)
-	@echo "$(SITE) built — `make web-publish` pushes it to gh-pages"
+	@echo '$(SITE) built — run "make web-publish" to push it to gh-pages'
 
 # Serves the built tree under a sub-path, the way Pages serves /<repo>/, and
 # runs the full check suite against it. This catches the two things that break
