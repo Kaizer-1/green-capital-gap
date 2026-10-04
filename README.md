@@ -10,6 +10,12 @@ that file rather than restating it.
 
 The deliverable is **[`report/report.pdf`](report/report.pdf)**, built by `make all`.
 
+There is also a web edition of the argument, with the figures drawn in the browser and
+every statistic injected from the same `findings.json` the report reads:
+**<https://kaizer-1.github.io/green-capital-gap/>**. It is built by `make web` and
+published by `make web-publish`; if it ever disagrees with the PDF on a number, the build
+is broken. Its source is in [`web/`](web/).
+
 ---
 
 ## What it found

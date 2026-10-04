@@ -270,7 +270,7 @@ files carry recorded SHA256 checksums, verified each run, so a changed upstream 
 the build rather than silently changing a result. Every statistic here is injected from
 `outputs/findings.json` and the renderer fails on an unresolved placeholder, so no number
 in this report was typed by hand — including the numbers in the figure captions. Commit
-87c48f9, Python 3.11.9, seed 20251001.
+6b91017, Python 3.11.9, seed 20251001.
 
 ---
 

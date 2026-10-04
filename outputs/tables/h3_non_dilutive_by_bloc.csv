@@ -1,7 +1,7 @@
-,bloc,green,deals,non_dilutive,non_dilutive_pct,grant,debt
-0,AE,False,35840,2603,7.263,424,2176
-1,AE,True,2056,214,10.409,53,161
-2,CHINA,False,341,6,1.76,2,4
-3,CHINA,True,20,1,5.0,0,1
-4,EM,False,1275,34,2.667,23,11
-5,EM,True,34,3,8.824,1,2
+bloc,green,deals,non_dilutive,non_dilutive_pct,grant,debt
+AE,False,35840,2603,7.263,424,2176
+AE,True,2056,214,10.409,53,161
+CHINA,False,341,6,1.76,2,4
+CHINA,True,20,1,5.0,0,1
+EM,False,1275,34,2.667,23,11
+EM,True,34,3,8.824,1,2

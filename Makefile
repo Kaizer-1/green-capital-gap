@@ -129,37 +129,60 @@ web-test: $(WEB_DATA) web/report.pdf
 web: web-data web-test
 
 # ---------------------------------------------------------------------------
-# deploy — GitHub Pages, served from docs/ on main.
+# deploy — GitHub Pages, from a gh-pages branch.
 #
-# docs/ rather than a gh-pages branch: Pages serves it with no branch to keep in
-# step, the deployed files are reviewable in the same history as the code that
-# produced them, and an examiner opening the repo can see exactly what is
-# published. The cost is build output in main, which for a deliverable is a
-# feature.
+# NOT docs/ on main, which was the first choice and was wrong: docs/ already
+# holds METHODOLOGY.md, LIMITATIONS.md, DATA_SOURCES.md and RESEARCH_BRIEF.md,
+# and a deploy target that begins `rm -rf docs` deleted all four. Pages serves
+# only from a branch root or that one directory name, so the collision cannot be
+# avoided by choosing a third path; it is avoided by using a branch.
 #
-# Nothing here is copied by hand. A deploy step outside the Makefile drifts from
-# the build, and this one is reproduced by `make web-deploy` from a clean tree.
-DOCS := docs
+# The staging tree lives under build/, which this Makefile owns entirely and
+# which is gitignored, and the clean step refuses to delete a directory that is
+# not marked as build output. Nothing is copied by hand: `make web-publish`
+# reproduces the published site from a clean tree.
+SITE := build/site
+
+.PHONY: web-deploy web-deploy-check web-publish
 
 web-deploy: web
-	rm -rf $(DOCS)
-	mkdir -p $(DOCS)
-	# Everything the page needs, and nothing it does not: no test harness, no
-	# node_modules, no screenshots.
-	cd web && tar cf - index.html report.pdf css js data | (cd ../$(DOCS) && tar xf -)
-	# Jekyll silently drops any path beginning with an underscore. The page has
-	# none today; .nojekyll means it never has to.
-	touch $(DOCS)/.nojekyll
-	$(PY) -m gcg.web.deploy_check $(DOCS)
-	@echo "docs/ built — commit it and set Pages to 'main /docs'"
+	@# Refuse to wipe anything this build did not create. The first version of
+	@# this target destroyed four documentation files because it trusted a path.
+	@if [ -e "$(SITE)" ] && [ ! -e "$(SITE)/.gcg-build" ]; then \
+		echo "refusing to delete $(SITE): no .gcg-build marker, so it is not ours"; \
+		exit 1; \
+	fi
+	rm -rf $(SITE)
+	mkdir -p $(SITE)
+	touch $(SITE)/.gcg-build
+	cd web && tar cf - index.html report.pdf css js data | (cd ../$(SITE) && tar xf -)
+	@# Jekyll silently drops any path beginning with an underscore. The site has
+	@# none today; .nojekyll means it never has to.
+	touch $(SITE)/.nojekyll
+	$(PY) -m gcg.web.deploy_check $(SITE)
+	@echo "$(SITE) built — `make web-publish` pushes it to gh-pages"
 
-# Serves docs/ under a sub-path, the way Pages serves /<repo>/, and runs the
-# full check suite against it. This is the test that catches the two things
-# that break on Pages and never locally: a path that resolves at the server
-# root but not under a prefix, and a filename whose case differs from what is
-# on disk (Pages is case-sensitive, macOS is not).
+# Serves the built tree under a sub-path, the way Pages serves /<repo>/, and
+# runs the full check suite against it. This catches the two things that break
+# on Pages and never locally: a path that resolves at the server root but not
+# under a prefix, and a filename whose case differs from what is on disk
+# (Pages is case-sensitive, macOS is not).
 web-deploy-check: web-deploy
-	cd web && node test/deployed.mjs ../$(DOCS)
+	cd web && node test/deployed.mjs ../$(SITE)
+
+# Publishes through a worktree, so main never carries build output and the
+# branch is rebuilt from the verified staging tree rather than edited in place.
+web-publish: web-deploy-check
+	git worktree remove --force build/gh-pages 2>/dev/null || true
+	git worktree add --force -B gh-pages build/gh-pages
+	find build/gh-pages -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+	cd $(SITE) && tar cf - . | (cd ../../build/gh-pages && tar xf -)
+	rm -f build/gh-pages/.gcg-build
+	cd build/gh-pages && git add -A && \
+		git commit -q -m "Publish $(shell git rev-parse --short HEAD)" || true
+	cd build/gh-pages && git push -u origin gh-pages
+	git worktree remove --force build/gh-pages
+	@echo "published — set Pages to the gh-pages branch, root"
 
 # ---------------------------------------------------------------------------
 # report — fails loudly on any unresolved {{placeholder}} (CLAUDE.md §2.2).
