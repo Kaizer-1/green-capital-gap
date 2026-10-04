@@ -53,6 +53,15 @@
   --sans:
     "Inter", "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
 
+  /* The third family, declared because it is used. Fifteen <code> elements name
+     dataset fields and quote literal values, and they were falling through to
+     the browser's bare `monospace` keyword — Menlo here, Courier New on
+     Windows, something else again on Linux. An undeclared face is a face nobody
+     chose, and this stylesheet does not allow that for colour either. */
+  --mono:
+    ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas,
+    monospace;
+
   /* Six sizes, nothing between them. A seventh size is a design failure,
      not a special case. */
   --t-xs: 0.8125rem; /* 13px — figure annotations, table cells */

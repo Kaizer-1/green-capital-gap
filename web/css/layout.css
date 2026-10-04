@@ -81,15 +81,20 @@ body {
 .masthead > .extra-wide,
 .section > .extra-wide {
   max-width: none;
-  /* Both sides of the calc clamp to the viewport. Using the bare
-     --measure-wide for the track assumed the track is always 46rem; below
-     that width the track IS the viewport, so the negative margin overshot and
-     the page scrolled sideways at 390px. Written this way the offset reaches
-     zero exactly when the track stops being wider than the viewport. */
-  width: min(100vw - var(--gutter) * 2, var(--measure-extra));
-  margin-inline: calc(
-    (min(100vw - var(--gutter) * 2, var(--measure-wide)) -
-      min(100vw - var(--gutter) * 2, var(--measure-extra))) / 2
+  /* Breaks out to the RIGHT only, by exactly the space there is. Centring it
+     put its left edge at 288px while every other element on the page — prose,
+     captions, source lines and the leftmost ink of all thirteen charts — starts
+     at 352px, and the shared left edge is this page's strongest alignment.
+     The margin is the lesser of what it wants (54rem - 46rem) and what the
+     viewport leaves between the track's right edge and the gutter; computing
+     it from 100vw alone ignored the track's own centring offset and overran by
+     a pixel at 834. */
+  margin-inline-end: calc(
+    -1 *
+      min(
+        var(--measure-extra) - var(--measure-wide),
+        max(0px, (100vw - var(--gutter) * 2 - var(--measure-wide)) / 2)
+      )
   );
 }
 
@@ -180,8 +185,15 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+/* The guidance line names the supervising academic and is the one an examiner
+   looks for; set in full ink so the block has two tiers rather than three
+   identical lines. Department and date stay secondary. */
 .byline__line {
   text-wrap: balance;
+}
+
+.byline__line[data-meta="guide"] {
+  color: var(--ink);
 }
 
 .byline__line + .byline__line {
@@ -354,6 +366,13 @@ strong {
     order: 3;
     grid-row: auto;
   }
+}
+
+/* Monospace runs optically larger than the body face at the same em, so it is
+   set down a touch to keep the line colour even. */
+code {
+  font-family: var(--mono);
+  font-size: 0.92em;
 }
 
 /* ---- figures ---------------------------------------------------------- */
