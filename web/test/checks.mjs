@@ -574,7 +574,13 @@ async function accessibility(browser, base) {
   await scrollThrough(page);
 
   // --- contrast, every rendered text node -------------------------------
-  const contrast = await page.evaluate(
+  // Hoisted so the sweep can run at every viewport. A defect that was fixed
+  // and then silently came back — a leaked replay reinstated opacity 0.35 on
+  // the step captions after step 9 had removed it — needs a check, not a
+  // memory, and it has to read COMPUTED style on rendered output rather than
+  // the stylesheet, because the stylesheet looked correct the whole time.
+  const contrastAt = (pg) =>
+    pg.evaluate(
     ({ body, exempt, proseChars, proseExempt }) => {
       const lum = (css) => {
         const m = (css.match(/[\d.]+/g) || []).map(Number);
@@ -662,7 +668,9 @@ async function accessibility(browser, base) {
       proseChars: PROSE_CHARS,
       proseExempt: PROSE_EXEMPT,
     },
-  );
+    );
+
+  const contrast = await contrastAt(page);
 
   const short = contrast.filter((r) => r.ratio < r.required);
   check(
@@ -682,6 +690,30 @@ async function accessibility(browser, base) {
     `body ${contrast.filter((r) => r.tier === "body").length}, ` +
       `secondary ${contrast.filter((r) => r.tier === "secondary").length}`,
   );
+
+  // The same sweep at every viewport. The stylesheet changes with width — the
+  // compact layouts raise type sizes and the sequence switches layout entirely —
+  // so a floor met at 1440 is not a floor met at 390.
+  for (const vp of VIEWPORTS) {
+    if (vp.width === 1440) continue; // already swept above
+    const ctx = await browser.newContext({
+      viewport: { width: vp.width, height: vp.height },
+    });
+    const pg = await ctx.newPage();
+    await pg.goto(base, { waitUntil: "networkidle" });
+    await scrollThrough(pg);
+    const rows = await contrastAt(pg);
+    const bad = rows.filter((r) => r.ratio < r.required);
+    check(
+      `${vp.name}: every text node meets its tier's contrast bar`,
+      rows.length > 0 && bad.length === 0,
+      bad
+        .slice(0, 6)
+        .map((r) => `${r.selector} — ${r.ratio}:1, ${r.tier} needs ${r.required}:1`)
+        .join("\n      "),
+    );
+    await ctx.close();
+  }
 
   // Text drawn inside the figures. CLAUDE.md §8 requires direct labelling at
   // the series terminus rather than a legend, which makes the palette's hues
@@ -1041,6 +1073,92 @@ async function accessibility(browser, base) {
 }
 
 // ---------------------------------------------------------------------------
+// Stylesheet integrity
+//
+// A leaked replay once appended a second copy of the pinned-sequence block to
+// layout.css. The later copy won, silently reinstating a value an earlier fix
+// had removed, and nothing failed. Same selector twice is legitimate — this
+// stylesheet deliberately sets .wrap's grid in one place and its counters in
+// another — so what is checked is narrower and exact: the same PROPERTY set
+// twice for the same selector in two different blocks, where one quietly
+// overrides the other.
+
+async function stylesheets() {
+  const files = ["css/tokens.css", "css/layout.css"];
+  const clashes = [];
+  const repeats = [];
+  for (const f of files) {
+    const css = await readFile(join(ROOT, f), "utf8");
+    const flat = css.replace(/\/\*[\s\S]*?\*\//g, "");
+
+    // Drop at-rule bodies before looking for clashes. Re-declaring a property
+    // inside @media is the entire point of a media query, so only declarations
+    // at the top level can quietly override one another.
+    let top = "";
+    for (let i = 0; i < flat.length; i += 1) {
+      if (flat.startsWith("@", i)) {
+        const open = flat.indexOf("{", i);
+        if (open === -1) break;
+        let depth = 0;
+        let j = open;
+        for (; j < flat.length; j += 1) {
+          if (flat[j] === "{") depth += 1;
+          else if (flat[j] === "}" && --depth === 0) break;
+        }
+        i = j;
+        continue;
+      }
+      top += flat[i];
+    }
+
+    const seen = new Map();
+    let block = 0;
+    for (const m of top.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const sel = m[1].trim().replace(/\s+/g, " ");
+      if (!sel) continue;
+      block += 1;
+      const props = seen.get(sel) ?? new Map();
+      for (const decl of m[2].split(";")) {
+        const name = decl.split(":")[0]?.trim();
+        if (!name || name.startsWith("--")) continue;
+        props.set(name, (props.get(name) ?? 0) + 1);
+      }
+      seen.set(sel, props);
+    }
+    for (const [sel, props] of seen) {
+      for (const [name, n] of props) {
+        if (n > 1) clashes.push(`${f}: ${sel} sets ${name} ${n} times`);
+      }
+    }
+
+    // And an exact repeat of a whole rule anywhere, at-rules included. This is
+    // what the leak produced: a verbatim second copy of a block, several
+    // hundred lines later, that silently won.
+    const bodies = new Map();
+    for (const m of flat.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const sel = m[1].trim().replace(/\s+/g, " ");
+      const body = m[2].replace(/\s+/g, " ").trim();
+      if (!sel || !body) continue;
+      const k = `${sel}{${body}}`;
+      bodies.set(k, (bodies.get(k) ?? 0) + 1);
+    }
+    for (const [k, n] of bodies) {
+      if (n > 1) repeats.push(`${f}: ${k.slice(0, 70)}… appears ${n} times`);
+    }
+  }
+  check(
+    "no stylesheet property is set twice for one selector outside a media query",
+    clashes.length === 0,
+    clashes.slice(0, 8).join("\n      "),
+  );
+  check(
+    "no stylesheet rule is a verbatim repeat of another",
+    repeats.length === 0,
+    repeats.slice(0, 8).join("\n      "),
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Performance
 //
 // WEB.md §10.1: under 1.5MB, LCP under 2.5s on a throttled connection, CLS
@@ -1218,6 +1336,7 @@ async function main() {
   await rendering(browser, base);
   await behaviour(browser, base);
   await accessibility(browser, base);
+  await stylesheets();
   await performance_(browser, base);
 
   // Motion. A chart that re-animates every time it re-enters the viewport is
