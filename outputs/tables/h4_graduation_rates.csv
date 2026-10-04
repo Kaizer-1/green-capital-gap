@@ -1,5 +1,0 @@
-,transition,green,entrants,graduated,rate_pct,ci_lo_pct,ci_hi_pct
-0,seed -> A,False,1678,423,25.209,23.189,27.341
-1,A -> B,False,423,163,38.534,34.019,43.256
-2,seed -> A,True,40,13,32.5,20.085,47.982
-3,A -> B,True,13,7,53.846,29.144,76.794

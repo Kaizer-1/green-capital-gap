@@ -1,6 +1,0 @@
-source,basis,green,deals,rate_pct,ci_lo_pct,ci_hi_pct
-Crunchbase AE,headline (A or B),2056,37896,5.425,5.202,5.658
-Crunchbase AE,Tier B only,2039,37896,5.381,5.158,5.612
-Crunchbase EM,headline (A or B),34,1309,2.597,1.865,3.608
-Crunchbase EM,Tier B only,34,1309,2.597,1.865,3.608
-India scrape,Tier B only (forced: no category_code),54,3036,1.779,1.366,2.313
