@@ -59,8 +59,16 @@ def _git_hash(cfg: Config) -> str:
         return "unknown"
 
 
+# Paths this build writes. A build cannot observe itself as clean while counting
+# its own products as changes: regenerating findings.json makes the tree dirty
+# before the check runs, so `dirty` read true on every run including this one.
+# What the statement means to a reader is whether the SOURCE that produced these
+# numbers was committed, so that is what is measured.
+_GENERATED = ("outputs/", "web/data/", "web/index.html", "web/report.pdf", "docs/", "report/report.pdf")
+
+
 def _dirty(cfg: Config) -> bool:
-    """Whether the working tree has uncommitted changes."""
+    """Whether any source the build reads has uncommitted changes."""
     try:
         out = subprocess.run(  # noqa: S603
             ["git", "-C", str(cfg.root), "status", "--porcelain"],  # noqa: S607
@@ -69,9 +77,13 @@ def _dirty(cfg: Config) -> bool:
             timeout=10,
             check=False,
         )
-        return bool(out.stdout.strip())
     except OSError:
         return False
+    for line in out.stdout.splitlines():
+        path = line[3:].strip().strip('"')
+        if path and not path.startswith(_GENERATED):
+            return True
+    return False
 
 
 def build(cfg: Config | None = None) -> dict[str, Any]:

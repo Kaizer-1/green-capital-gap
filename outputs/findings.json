@@ -190,7 +190,7 @@
   "pop.unassigned_green": "64",
   "power.min_cell": "30",
   "repro.bootstrap_draws": "10,000",
-  "repro.commit": "16fe7bd",
+  "repro.commit": "1ae56b7",
   "repro.dirty": "yes",
   "repro.generated": "2026-10-04 11:03 UTC",
   "repro.python": "3.11.9",
