@@ -1,0 +1,133 @@
+/* tokens.css — the design system.
+ *
+ * Inherited from src/gcg/viz/theme.py so the web edition and report.pdf read as
+ * one project. Every colour below is the same hex the matplotlib palette uses;
+ * --cleantech is theme.py's `focus`.
+ *
+ * This file is the whole palette. A colour that is not declared here does not
+ * appear on the page. Hover states change opacity or stroke width, never hue.
+ */
+
+:root {
+  /* ---- colour ------------------------------------------------------- */
+  --ink: #141413;
+  --ink-muted: #6e6e68;
+  /* A de-emphasised BODY tone. --ink-muted is 5.13:1, which clears the 4.5:1
+     bar for apparatus but not the 7:1 bar this project holds body copy to, and
+     the scrollytelling step captions are body copy however they are styled.
+     7.18:1. */
+  --ink-dim: #58584f;
+  --rule: #e3e1da;
+  --canvas: #ffffff;
+  --canvas-alt: #fafaf7;
+
+  --em: #0e7c7b;
+  --ae: #b5651d;
+  --china: #4a4a52;
+  --ldc: #9c7b9b;
+  --green: #3f7d3f;
+  --nongreen: #a8a69e;
+  --cleantech: #5b4b8a;
+  --alert: #b03a2e;
+
+  /* Label-text tones. CLAUDE.md §8 fixes the palette above and requires direct
+     labelling at the series terminus instead of a legend — which makes those
+     hues TEXT, and three of them fail 4.5:1 against white as text: --ae at
+     4.34, --ldc at 3.67, --nongreen at 2.44. The palette itself cannot move;
+     it is shared with report.pdf and declared in the build spec. So label text
+     uses a darkened variant of the same hue, scaled toward black until it
+     clears 4.5:1 — 97%, 88% and 71% of the original respectively. The data ink
+     keeps the canonical colour, so the label still names its series by hue. */
+  --ae-label: #b0621c;
+  --ldc-label: #896c88;
+  --nongreen-label: #777670;
+
+  /* The subordinate series as a drawn line, at 3.04:1. --nongreen at 2.44 is
+     below WCAG 1.4.11's 3:1 for a graphical object the reader needs, and the
+     non-green comparison series is needed to read every green/non-green
+     chart. Darkened the minimum that clears it, so it stays subordinate. */
+  --nongreen-stroke: #96948d;
+
+  /* ---- type --------------------------------------------------------- */
+  --serif: "Charter", "Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:
+    "Inter", "Source Sans 3", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  /* The third family, declared because it is used. Fifteen <code> elements name
+     dataset fields and quote literal values, and they were falling through to
+     the browser's bare `monospace` keyword — Menlo here, Courier New on
+     Windows, something else again on Linux. An undeclared face is a face nobody
+     chose, and this stylesheet does not allow that for colour either. */
+  --mono:
+    ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas,
+    monospace;
+
+  /* Six sizes, nothing between them. A seventh size is a design failure,
+     not a special case. */
+  --t-xs: 0.8125rem; /* 13px — figure annotations, table cells */
+  --t-sm: 0.9375rem; /* 15px — captions, metadata, UI */
+  --t-base: 1.125rem; /* 18px — body */
+  --t-md: 1.375rem; /* 22px — section headings, pull quotes */
+  --t-lg: 1.75rem; /* 28px — the three headline statistics */
+  --t-xl: 2.5rem; /* 40px — the title */
+
+  --leading-tight: 1.2;
+  --leading-body: 1.6;
+
+  /* ---- space -------------------------------------------------------- */
+  /* An 8px base. Every vertical gap on the page is one of these. */
+  --s1: 0.5rem; /* 8  */
+  --s2: 1rem; /* 16 */
+  --s3: 1.5rem; /* 24 */
+  --s4: 2rem; /* 32 */
+  --s5: 3rem; /* 48 */
+  --s6: 4rem; /* 64 */
+  --s7: 6rem; /* 96 — section spacing at desktop */
+
+  /* ---- measure ------------------------------------------------------ */
+  /* Prose caps at 34rem, which lands between 60 and 70 characters at 18px.
+     Figures break out but keep the same LEFT edge: the shared edge is what
+     makes the page read as composed rather than assembled. */
+  --measure: 34rem;
+  /* 46rem, not 54. At 54 every paragraph carried a 20rem gutter to its right
+     that nothing ever occupied, and an unused 20rem reads as void rather than
+     as margin. 12rem reads as a margin. The sector ladder is the one figure
+     that genuinely needs more, and it opts in with .extra-wide. */
+  --measure-wide: 46rem;
+  --measure-extra: 54rem;
+  --gutter: 1.5rem;
+
+  /* ---- motion ------------------------------------------------------- */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --dur-fast: 400ms;
+  --dur-mid: 600ms;
+  --dur-slow: 900ms;
+}
+
+@media (max-width: 48rem) {
+  :root {
+    --t-base: 1.0625rem; /* 17px */
+    --t-xl: 2rem;
+    --t-lg: 1.5rem;
+    --s7: 3.5rem; /* 56px section spacing at mobile */
+  }
+}
+
+/* Reduced motion is an accessibility requirement, not a nicety. Zero, not
+   "faster": a 50ms animation still moves. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-mid: 0ms;
+    --dur-slow: 0ms;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -910,6 +910,10 @@ def masthead(cfg: Config) -> dict[str, Any]:
         "institution": meta["institution"],
         "course": meta["course"],
         "date": meta["date"],
+        # The page links to its own source; the README links to the page. Both
+        # read from metadata.yaml so neither restates a URL that then drifts.
+        "repo": meta.get("repo", "UNSET"),
+        "site": meta.get("site", "UNSET"),
     }
 
 

@@ -1,6 +1,6 @@
 {
  "schema_version": 1,
- "generated_from_commit": "1fd28ff",
+ "generated_from_commit": "d2978de",
  "window": {
   "start": 2000,
   "end": 2012
@@ -29,7 +29,9 @@
   "guide": "Prof. ChandraKumar R",
   "institution": "Department of Information Science & Engineering, RV College of Engineering",
   "course": "Final Year Chapter Deliverable",
-  "date": "October 2026"
+  "date": "October 2026",
+  "repo": "https://github.com/Kaizer-1/green-capital-gap",
+  "site": "https://kaizer-1.github.io/green-capital-gap/"
  },
  "fig01_coverage": {
   "marks": [

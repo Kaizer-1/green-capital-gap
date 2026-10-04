@@ -16,6 +16,12 @@ authors:
   - usn: "1RV23IS134"
     name: "Vansh Bharadwaj"
 
+# Where the deployed page and its source live. The page links to the repo and
+# the README links to the page, so both read from here rather than restating a
+# URL that then drifts. UNSET fails the build loudly.
+repo: "https://github.com/Kaizer-1/green-capital-gap"
+site: "https://kaizer-1.github.io/green-capital-gap/"
+
 guide: "Prof. ChandraKumar R"
 institution: "Department of Information Science & Engineering, RV College of Engineering"
 course: "Final Year Chapter Deliverable"

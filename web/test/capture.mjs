@@ -37,6 +37,19 @@ const TYPES = {
 };
 
 /** A static file server rooted at web/, with ../report reachable for the PDF link. */
+/**
+ * The base URL the harness should test.
+ *
+ * Normally it starts its own server at the site root. When GCG_BASE_URL is set
+ * — by `make web-deploy-check` — it tests the already-running server instead,
+ * which serves the built tree under a `/<repo>/` prefix the way Pages does. The
+ * same checks then run against both, so a deploy-only defect fails in the same
+ * suite rather than needing a second one.
+ */
+export function baseURL() {
+  return process.env.GCG_BASE_URL ?? null;
+}
+
 export function serve(root = ROOT) {
   const server = createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost");

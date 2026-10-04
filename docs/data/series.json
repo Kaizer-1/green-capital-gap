@@ -1,0 +1,2126 @@
+{
+ "schema_version": 1,
+ "generated_from_commit": "d2978de",
+ "window": {
+  "start": 2000,
+  "end": 2012
+ },
+ "meta": {
+  "title": "The Green Capital Gap",
+  "subtitle": "A deal-level analysis of cleantech venture funding in emerging economies, 2000\u20132012",
+  "authors": [
+   {
+    "name": "Kaizer Dewaswala",
+    "usn": "1RV23IS058"
+   },
+   {
+    "name": "Md Asif Ali",
+    "usn": "1RV23IS069"
+   },
+   {
+    "name": "Shaswat Kumar",
+    "usn": "1RV23IS110"
+   },
+   {
+    "name": "Vansh Bharadwaj",
+    "usn": "1RV23IS134"
+   }
+  ],
+  "guide": "Prof. ChandraKumar R",
+  "institution": "Department of Information Science & Engineering, RV College of Engineering",
+  "course": "Final Year Chapter Deliverable",
+  "date": "October 2026",
+  "repo": "https://github.com/Kaizer-1/green-capital-gap",
+  "site": "https://kaizer-1.github.io/green-capital-gap/"
+ },
+ "fig01_coverage": {
+  "marks": [
+   {
+    "year": 2000,
+    "gdp_share": 17.71,
+    "deal_share": 6.4,
+    "gap_pp": 11.31,
+    "representation_ratio": 0.361,
+    "green_deals": 0
+   },
+   {
+    "year": 2001,
+    "gdp_share": 15.89,
+    "deal_share": 3.23,
+    "gap_pp": 12.67,
+    "representation_ratio": 0.203,
+    "green_deals": 0
+   },
+   {
+    "year": 2002,
+    "gdp_share": 15.32,
+    "deal_share": 1.74,
+    "gap_pp": 13.58,
+    "representation_ratio": 0.114,
+    "green_deals": 0
+   },
+   {
+    "year": 2003,
+    "gdp_share": 15.39,
+    "deal_share": 1.95,
+    "gap_pp": 13.44,
+    "representation_ratio": 0.127,
+    "green_deals": 0
+   },
+   {
+    "year": 2004,
+    "gdp_share": 15.72,
+    "deal_share": 2.45,
+    "gap_pp": 13.28,
+    "representation_ratio": 0.156,
+    "green_deals": 0
+   },
+   {
+    "year": 2005,
+    "gdp_share": 17.36,
+    "deal_share": 2.04,
+    "gap_pp": 15.32,
+    "representation_ratio": 0.117,
+    "green_deals": 0
+   },
+   {
+    "year": 2006,
+    "gdp_share": 18.57,
+    "deal_share": 2.37,
+    "gap_pp": 16.2,
+    "representation_ratio": 0.128,
+    "green_deals": 0
+   },
+   {
+    "year": 2007,
+    "gdp_share": 19.68,
+    "deal_share": 2.43,
+    "gap_pp": 17.25,
+    "representation_ratio": 0.123,
+    "green_deals": 1
+   },
+   {
+    "year": 2008,
+    "gdp_share": 20.77,
+    "deal_share": 3.19,
+    "gap_pp": 17.58,
+    "representation_ratio": 0.154,
+    "green_deals": 12
+   },
+   {
+    "year": 2009,
+    "gdp_share": 19.4,
+    "deal_share": 2.8,
+    "gap_pp": 16.6,
+    "representation_ratio": 0.144,
+    "green_deals": 4
+   },
+   {
+    "year": 2010,
+    "gdp_share": 21.8,
+    "deal_share": 3.24,
+    "gap_pp": 18.56,
+    "representation_ratio": 0.148,
+    "green_deals": 4
+   },
+   {
+    "year": 2011,
+    "gdp_share": 22.74,
+    "deal_share": 3.67,
+    "gap_pp": 19.07,
+    "representation_ratio": 0.161,
+    "green_deals": 7
+   },
+   {
+    "year": 2012,
+    "gdp_share": 19.75,
+    "deal_share": 3.51,
+    "gap_pp": 16.23,
+    "representation_ratio": 0.178,
+    "green_deals": 6
+   }
+  ],
+  "series": [
+   {
+    "id": "gdp_share",
+    "label": "Share of world GDP",
+    "colour_role": "muted"
+   },
+   {
+    "id": "deal_share",
+    "label": "Share of recorded venture deals",
+    "colour_role": "em"
+   }
+  ],
+  "annotations": [
+   {
+    "id": "widest",
+    "year": 2011,
+    "text_key": "measure.under_rep_range",
+    "prefix": "Under-representation of "
+   }
+  ],
+  "axis": {
+   "x": {
+    "domain": [
+     2000,
+     2012
+    ]
+   },
+   "y": {
+    "domain": [
+     0,
+     25
+    ],
+    "unit": "%",
+    "label": "Share of the world total"
+   }
+  }
+ },
+ "fig02_double_gap": {
+  "marks": [
+   {
+    "bloc": "AE",
+    "label": "Advanced economies",
+    "rate": 5.43,
+    "ci": [
+     5.2,
+     5.66
+    ],
+    "n": 37896,
+    "green": 2056,
+    "below_min_cell": false,
+    "draw_interval": true,
+    "note": null,
+    "colour_role": "ae"
+   },
+   {
+    "bloc": "CHINA",
+    "label": "China",
+    "rate": 5.54,
+    "ci": [
+     3.61,
+     8.4
+    ],
+    "n": 361,
+    "green": 20,
+    "below_min_cell": true,
+    "draw_interval": true,
+    "note": null,
+    "colour_role": "china"
+   },
+   {
+    "bloc": "UNASSIGNED",
+    "label": "No country recorded",
+    "rate": 4.19,
+    "ci": [
+     3.3,
+     5.32
+    ],
+    "n": 1526,
+    "green": 64,
+    "below_min_cell": false,
+    "draw_interval": true,
+    "note": null,
+    "colour_role": "muted"
+   },
+   {
+    "bloc": "EM",
+    "label": "Emerging markets",
+    "rate": 2.6,
+    "ci": [
+     1.86,
+     3.61
+    ],
+    "n": 1309,
+    "green": 34,
+    "below_min_cell": false,
+    "draw_interval": true,
+    "note": null,
+    "colour_role": "em"
+   },
+   {
+    "bloc": "LDC",
+    "label": "Least developed",
+    "rate": 0.0,
+    "ci": [
+     0.0,
+     22.81
+    ],
+    "n": 13,
+    "green": 0,
+    "below_min_cell": true,
+    "draw_interval": false,
+    "note": "0 of 13 deals: no usable interval",
+    "colour_role": "ldc"
+   }
+  ],
+  "upper_bound": {
+   "bloc": "EM",
+   "rate": 3.46,
+   "label": "Every unattributable deal counted as emerging-market"
+  },
+  "bracket": {
+   "from": "AE",
+   "to": "EM",
+   "label": "EM vs AE"
+  },
+  "annotations": [
+   {
+    "id": "risk_ratio",
+    "text_key": "h1.rr",
+    "prefix": "Risk ratio "
+   },
+   {
+    "id": "china",
+    "text_key": "china.rr",
+    "prefix": "China risk ratio "
+   }
+  ],
+  "test": {
+   "risk_ratio": 0.479,
+   "risk_ratio_ci": [
+    0.343,
+    0.669
+   ]
+  },
+  "axis": {
+   "x": {
+    "domain": [
+     0,
+     9
+    ],
+    "unit": "%",
+    "label": "Green share of the bloc's recorded deals"
+   }
+  }
+ },
+ "fig03_rate_by_year": {
+  "series": [
+   {
+    "id": "AE",
+    "label": "Advanced economies",
+    "colour_role": "ae",
+    "dash": null,
+    "points": [
+     {
+      "year": 2000,
+      "rate": 0.0,
+      "deals": 106,
+      "green": 0,
+      "below_min_cell": true
+     },
+     {
+      "year": 2001,
+      "rate": 1.2,
+      "deals": 83,
+      "green": 1,
+      "below_min_cell": true
+     },
+     {
+      "year": 2002,
+      "rate": 3.85,
+      "deals": 104,
+      "green": 4,
+      "below_min_cell": true
+     },
+     {
+      "year": 2003,
+      "rate": 2.88,
+      "deals": 139,
+      "green": 4,
+      "below_min_cell": true
+     },
+     {
+      "year": 2004,
+      "rate": 4.18,
+      "deals": 263,
+      "green": 11,
+      "below_min_cell": true
+     },
+     {
+      "year": 2005,
+      "rate": 1.76,
+      "deals": 1531,
+      "green": 27,
+      "below_min_cell": true
+     },
+     {
+      "year": 2006,
+      "rate": 2.59,
+      "deals": 2240,
+      "green": 58,
+      "below_min_cell": false
+     },
+     {
+      "year": 2007,
+      "rate": 4.17,
+      "deals": 3020,
+      "green": 126,
+      "below_min_cell": false
+     },
+     {
+      "year": 2008,
+      "rate": 10.26,
+      "deals": 3383,
+      "green": 347,
+      "below_min_cell": false
+     },
+     {
+      "year": 2009,
+      "rate": 6.89,
+      "deals": 3702,
+      "green": 255,
+      "below_min_cell": false
+     },
+     {
+      "year": 2010,
+      "rate": 6.01,
+      "deals": 5654,
+      "green": 340,
+      "below_min_cell": false
+     },
+     {
+      "year": 2011,
+      "rate": 5.48,
+      "deals": 8462,
+      "green": 464,
+      "below_min_cell": false
+     },
+     {
+      "year": 2012,
+      "rate": 4.55,
+      "deals": 9209,
+      "green": 419,
+      "below_min_cell": false
+     }
+    ]
+   },
+   {
+    "id": "EM",
+    "label": "Emerging markets",
+    "colour_role": "em",
+    "dash": "4 3",
+    "points": [
+     {
+      "year": 2000,
+      "rate": 0.0,
+      "deals": 8,
+      "green": 0,
+      "below_min_cell": true
+     },
+     {
+      "year": 2001,
+      "rate": 0.0,
+      "deals": 3,
+      "green": 0,
+      "below_min_cell": true
+     },
+     {
+      "year": 2002,
+      "rate": 0.0,
+      "deals": 2,
+      "green": 0,
+      "below_min_cell": true
+     },
+     {
+      "year": 2003,
+      "rate": 0.0,
+      "deals": 3,
+      "green": 0,
+      "below_min_cell": true
+     },
+     {
+      "year": 2004,
+      "rate": 0.0,
+      "deals": 7,
+      "green": 0,
+      "below_min_cell": true
+     },
+     {
+      "year": 2005,
+      "rate": 0.0,
+      "deals": 33,
+      "green": 0,
+      "below_min_cell": true
+     },
+     {
+      "year": 2006,
+      "rate": 0.0,
+      "deals": 57,
+      "green": 0,
+      "below_min_cell": true
+     },
+     {
+      "year": 2007,
+      "rate": 1.28,
+      "deals": 78,
+      "green": 1,
+      "below_min_cell": true
+     },
+     {
+      "year": 2008,
+      "rate": 10.08,
+      "deals": 119,
+      "green": 12,
+      "below_min_cell": true
+     },
+     {
+      "year": 2009,
+      "rate": 3.48,
+      "deals": 115,
+      "green": 4,
+      "below_min_cell": true
+     },
+     {
+      "year": 2010,
+      "rate": 2.0,
+      "deals": 200,
+      "green": 4,
+      "below_min_cell": true
+     },
+     {
+      "year": 2011,
+      "rate": 2.09,
+      "deals": 335,
+      "green": 7,
+      "below_min_cell": true
+     },
+     {
+      "year": 2012,
+      "rate": 1.72,
+      "deals": 349,
+      "green": 6,
+      "below_min_cell": true
+     }
+    ]
+   }
+  ],
+  "min_cell": 30,
+  "annotations": [
+   {
+    "id": "parity_2008",
+    "year": 2008,
+    "text": "The rates converge at the peak of Cleantech 1.0"
+   },
+   {
+    "id": "largest_cell",
+    "year": 2008,
+    "text": "largest emerging-market cell: 12 green deals"
+   }
+  ],
+  "axis": {
+   "x": {
+    "domain": [
+     2000,
+     2012
+    ]
+   },
+   "y": {
+    "unit": "%",
+    "label": "Green share of recorded deals"
+   }
+  }
+ },
+ "fig04_ladder": {
+  "marks": [
+   {
+    "sector": "biotech",
+    "observed": 0.117,
+    "predicted": 0.506,
+    "residual_log": -1.467,
+    "capital_intensity_usd": 4590306.0,
+    "em_deals": 18,
+    "ae_deals": 4471,
+    "studentised": -2.81,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "hardware",
+    "observed": 0.335,
+    "predicted": 0.762,
+    "residual_log": -0.821,
+    "capital_intensity_usd": 3257185.0,
+    "em_deals": 15,
+    "ae_deals": 1295,
+    "studentised": -1.52,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "enterprise",
+    "observed": 0.363,
+    "predicted": 0.705,
+    "residual_log": -0.665,
+    "capital_intensity_usd": 3474331.0,
+    "em_deals": 31,
+    "ae_deals": 2475,
+    "studentised": -1.24,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "cleantech",
+    "observed": 0.54,
+    "predicted": 0.282,
+    "residual_log": 0.65,
+    "capital_intensity_usd": 7488748.0,
+    "em_deals": 29,
+    "ae_deals": 1556,
+    "studentised": 1.35,
+    "colour_role": "cleantech",
+    "is_focus": true,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "network_hosting",
+    "observed": 0.594,
+    "predicted": 0.396,
+    "residual_log": 0.406,
+    "capital_intensity_usd": 5635023.0,
+    "em_deals": 15,
+    "ae_deals": 731,
+    "studentised": 0.8,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "<none>",
+    "observed": 0.745,
+    "predicted": 1.156,
+    "residual_log": -0.44,
+    "capital_intensity_usd": 2297535.0,
+    "em_deals": 23,
+    "ae_deals": 894,
+    "studentised": -0.81,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "software",
+    "observed": 0.793,
+    "predicted": 0.851,
+    "residual_log": -0.071,
+    "capital_intensity_usd": 2968530.0,
+    "em_deals": 156,
+    "ae_deals": 5695,
+    "studentised": -0.13,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "analytics",
+    "observed": 0.819,
+    "predicted": 1.248,
+    "residual_log": -0.422,
+    "capital_intensity_usd": 2155194.0,
+    "em_deals": 27,
+    "ae_deals": 955,
+    "studentised": -0.77,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "advertising",
+    "observed": 0.991,
+    "predicted": 0.781,
+    "residual_log": 0.238,
+    "capital_intensity_usd": 3191344.0,
+    "em_deals": 62,
+    "ae_deals": 1812,
+    "studentised": 0.44,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "public_relations",
+    "observed": 1.175,
+    "predicted": 0.689,
+    "residual_log": 0.533,
+    "capital_intensity_usd": 3542067.0,
+    "em_deals": 17,
+    "ae_deals": 419,
+    "studentised": 1.0,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "games_video",
+    "observed": 1.267,
+    "predicted": 1.21,
+    "residual_log": 0.046,
+    "capital_intensity_usd": 2211402.0,
+    "em_deals": 69,
+    "ae_deals": 1577,
+    "studentised": 0.08,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "mobile",
+    "observed": 1.339,
+    "predicted": 1.295,
+    "residual_log": 0.033,
+    "capital_intensity_usd": 2088668.0,
+    "em_deals": 119,
+    "ae_deals": 2573,
+    "studentised": 0.06,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "web",
+    "observed": 1.394,
+    "predicted": 2.178,
+    "residual_log": -0.446,
+    "capital_intensity_usd": 1352406.0,
+    "em_deals": 151,
+    "ae_deals": 3136,
+    "studentised": -0.84,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "finance",
+    "observed": 1.683,
+    "predicted": 1.085,
+    "residual_log": 0.439,
+    "capital_intensity_usd": 2422853.0,
+    "em_deals": 35,
+    "ae_deals": 602,
+    "studentised": 0.81,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "consulting",
+    "observed": 1.692,
+    "predicted": 0.934,
+    "residual_log": 0.595,
+    "capital_intensity_usd": 2747308.0,
+    "em_deals": 18,
+    "ae_deals": 308,
+    "studentised": 1.1,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "search",
+    "observed": 1.828,
+    "predicted": 1.981,
+    "residual_log": -0.08,
+    "capital_intensity_usd": 1463779.0,
+    "em_deals": 24,
+    "ae_deals": 380,
+    "studentised": -0.15,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "other",
+    "observed": 2.032,
+    "predicted": 1.765,
+    "residual_log": 0.141,
+    "capital_intensity_usd": 1612132.0,
+    "em_deals": 36,
+    "ae_deals": 513,
+    "studentised": 0.26,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "education",
+    "observed": 2.418,
+    "predicted": 2.589,
+    "residual_log": -0.068,
+    "capital_intensity_usd": 1170159.0,
+    "em_deals": 38,
+    "ae_deals": 455,
+    "studentised": -0.13,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "fashion",
+    "observed": 2.702,
+    "predicted": 1.281,
+    "residual_log": 0.746,
+    "capital_intensity_usd": 2108115.0,
+    "em_deals": 21,
+    "ae_deals": 225,
+    "studentised": 1.37,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "social",
+    "observed": 2.808,
+    "predicted": 4.091,
+    "residual_log": -0.376,
+    "capital_intensity_usd": 797836.0,
+    "em_deals": 61,
+    "ae_deals": 629,
+    "studentised": -0.76,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "under"
+   },
+   {
+    "sector": "hospitality",
+    "observed": 2.99,
+    "predicted": 2.608,
+    "residual_log": 0.137,
+    "capital_intensity_usd": 1162717.0,
+    "em_deals": 22,
+    "ae_deals": 213,
+    "studentised": 0.26,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "ecommerce",
+    "observed": 3.666,
+    "predicted": 2.041,
+    "residual_log": 0.585,
+    "capital_intensity_usd": 1427501.0,
+    "em_deals": 186,
+    "ae_deals": 1469,
+    "studentised": 1.09,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   },
+   {
+    "sector": "travel",
+    "observed": 3.844,
+    "predicted": 2.831,
+    "residual_log": 0.306,
+    "capital_intensity_usd": 1085728.0,
+    "em_deals": 32,
+    "ae_deals": 241,
+    "studentised": 0.59,
+    "colour_role": "muted",
+    "is_focus": false,
+    "residual_sign": "over"
+   }
+  ],
+  "fit": {
+   "slope": -1.19,
+   "intercept": 17.65,
+   "r_squared": 0.6,
+   "n_sectors": 23,
+   "line": [
+    {
+     "x": 797836.0,
+     "y": 4.0919
+    },
+    {
+     "x": 7488748.0,
+     "y": 0.2818
+    }
+   ]
+  },
+  "focus": {
+   "residual_display": "1.92\u00d7",
+   "residual_ci_display": "[0.75\u00d7, 4.91\u00d7]",
+   "sector": "cleantech",
+   "residual_ratio": 1.92,
+   "residual_ci": [
+    0.75,
+    4.91
+   ],
+   "ci_excludes_zero": false
+  },
+  "steps": [
+   {
+    "id": "observed",
+    "caption_key": null,
+    "caption": "Twenty-three sectors, at their observed emerging-market representation."
+   },
+   {
+    "id": "pattern",
+    "caption_key": "h1b.elasticity",
+    "caption_prefix": "Re-scaled against capital intensity. The relationship is an elasticity of "
+   },
+   {
+    "id": "prediction",
+    "caption_key": null,
+    "caption": "Predicted positions, and the residual each sector carries."
+   },
+   {
+    "id": "exception",
+    "caption_key": "h1b.cleantech_residual",
+    "caption_prefix": "Cleantech sits above its prediction, at "
+   }
+  ],
+  "axis": {
+   "x": {
+    "log": true,
+    "unit": "USD",
+    "label": "Median advanced-economy deal size, constant 2015 USD"
+   },
+   "y": {
+    "log": true,
+    "label": "EM representation relative to AE",
+    "reference": 1.0
+   }
+  }
+ },
+ "fig05_share_crossover": {
+  "marks": [
+   {
+    "year": 2000,
+    "count_share": 0.0,
+    "dollar_share": 0.0,
+    "deals": 125,
+    "green": 0
+   },
+   {
+    "year": 2001,
+    "count_share": 1.08,
+    "dollar_share": 0.54,
+    "deals": 93,
+    "green": 1
+   },
+   {
+    "year": 2002,
+    "count_share": 3.48,
+    "dollar_share": 0.72,
+    "deals": 115,
+    "green": 4
+   },
+   {
+    "year": 2003,
+    "count_share": 3.25,
+    "dollar_share": 1.27,
+    "deals": 154,
+    "green": 5
+   },
+   {
+    "year": 2004,
+    "count_share": 3.85,
+    "dollar_share": 2.56,
+    "deals": 286,
+    "green": 11
+   },
+   {
+    "year": 2005,
+    "count_share": 1.73,
+    "dollar_share": 1.76,
+    "deals": 1621,
+    "green": 28
+   },
+   {
+    "year": 2006,
+    "count_share": 2.58,
+    "dollar_share": 3.41,
+    "deals": 2404,
+    "green": 62
+   },
+   {
+    "year": 2007,
+    "count_share": 4.04,
+    "dollar_share": 8.88,
+    "deals": 3214,
+    "green": 130
+   },
+   {
+    "year": 2008,
+    "count_share": 10.35,
+    "dollar_share": 19.42,
+    "deals": 3729,
+    "green": 386
+   },
+   {
+    "year": 2009,
+    "count_share": 6.63,
+    "dollar_share": 14.32,
+    "deals": 4104,
+    "green": 272
+   },
+   {
+    "year": 2010,
+    "count_share": 5.79,
+    "dollar_share": 16.31,
+    "deals": 6182,
+    "green": 358
+   },
+   {
+    "year": 2011,
+    "count_share": 5.25,
+    "dollar_share": 11.05,
+    "deals": 9140,
+    "green": 480
+   },
+   {
+    "year": 2012,
+    "count_share": 4.4,
+    "dollar_share": 9.65,
+    "deals": 9938,
+    "green": 437
+   }
+  ],
+  "series": [
+   {
+    "id": "count_share",
+    "label": "Share of green deals",
+    "colour_role": "muted"
+   },
+   {
+    "id": "dollar_share",
+    "label": "Share of green dollars",
+    "colour_role": "green"
+   }
+  ],
+  "thin_cells": [
+   {
+    "year": 2001,
+    "green": 1
+   },
+   {
+    "year": 2002,
+    "green": 4
+   },
+   {
+    "year": 2003,
+    "green": 5
+   },
+   {
+    "year": 2004,
+    "green": 11
+   }
+  ],
+  "annotations": [
+   {
+    "id": "crossover",
+    "year": 2005,
+    "text": "The series cross: from here a green deal is larger than the average deal"
+   }
+  ],
+  "axis": {
+   "x": {
+    "domain": [
+     2000,
+     2012
+    ]
+   },
+   "y": {
+    "unit": "%",
+    "label": "Share of all recorded activity"
+   }
+  }
+ },
+ "fig06_subdomain": {
+  "marks": [
+   {
+    "bloc": "AE",
+    "label": "Advanced economies",
+    "specific_pct": 32.1,
+    "unspecified_pct": 67.9,
+    "n": 2056,
+    "colour_role": "ae"
+   },
+   {
+    "bloc": "CHINA",
+    "label": "China",
+    "specific_pct": 10.0,
+    "unspecified_pct": 90.0,
+    "n": 20,
+    "colour_role": "china"
+   },
+   {
+    "bloc": "EM",
+    "label": "Emerging markets",
+    "specific_pct": 11.8,
+    "unspecified_pct": 88.2,
+    "n": 34,
+    "colour_role": "em"
+   }
+  ],
+  "segments": [
+   {
+    "id": "specific_pct",
+    "label": "Resolved to a sub-domain",
+    "colour_role": "green"
+   },
+   {
+    "id": "unspecified_pct",
+    "label": "\u201cClean Technology\u201d and nothing more",
+    "colour_role": "nongreen"
+   }
+  ],
+  "annotations": [
+   {
+    "id": "em_companies",
+    "text_key": "measure.em_unspecified_companies",
+    "suffix_key": "measure.em_green_companies",
+    "template": "{a} of {b} emerging-market green companies carry no more specific tag"
+   }
+  ],
+  "axis": {
+   "x": {
+    "domain": [
+     0,
+     100
+    ],
+    "unit": "%",
+    "label": "Share of the bloc's green deals"
+   }
+  }
+ },
+ "fig07_cycle": {
+  "marks": [
+   {
+    "year": 2001,
+    "deals": 1,
+    "usd_bn": 0.006,
+    "disclosed": 1,
+    "median_usd_m": 5.89
+   },
+   {
+    "year": 2002,
+    "deals": 4,
+    "usd_bn": 0.008,
+    "disclosed": 4,
+    "median_usd_m": 0.97
+   },
+   {
+    "year": 2003,
+    "deals": 5,
+    "usd_bn": 0.015,
+    "disclosed": 3,
+    "median_usd_m": 6.32
+   },
+   {
+    "year": 2004,
+    "deals": 11,
+    "usd_bn": 0.069,
+    "disclosed": 10,
+    "median_usd_m": 4.31
+   },
+   {
+    "year": 2005,
+    "deals": 28,
+    "usd_bn": 0.313,
+    "disclosed": 25,
+    "median_usd_m": 9.55
+   },
+   {
+    "year": 2006,
+    "deals": 62,
+    "usd_bn": 0.803,
+    "disclosed": 56,
+    "median_usd_m": 8.1
+   },
+   {
+    "year": 2007,
+    "deals": 130,
+    "usd_bn": 2.868,
+    "disclosed": 116,
+    "median_usd_m": 11.27
+   },
+   {
+    "year": 2008,
+    "deals": 386,
+    "usd_bn": 8.202,
+    "disclosed": 350,
+    "median_usd_m": 8.24
+   },
+   {
+    "year": 2009,
+    "deals": 272,
+    "usd_bn": 5.609,
+    "disclosed": 253,
+    "median_usd_m": 8.46
+   },
+   {
+    "year": 2010,
+    "deals": 358,
+    "usd_bn": 8.52,
+    "disclosed": 332,
+    "median_usd_m": 5.97
+   },
+   {
+    "year": 2011,
+    "deals": 480,
+    "usd_bn": 7.702,
+    "disclosed": 440,
+    "median_usd_m": 5.32
+   },
+   {
+    "year": 2012,
+    "deals": 437,
+    "usd_bn": 6.436,
+    "disclosed": 404,
+    "median_usd_m": 3.18
+   }
+  ],
+  "views": [
+   {
+    "id": "deals",
+    "label": "Deal count",
+    "field": "deals",
+    "unit": "deals",
+    "colour_role": "green"
+   },
+   {
+    "id": "dollars",
+    "label": "Disclosed funding",
+    "field": "usd_bn",
+    "unit": "bn (constant 2015 USD)",
+    "colour_role": "green"
+   }
+  ],
+  "annotations": [
+   {
+    "id": "peak_deals",
+    "year": 2011,
+    "text": "Deal count peaks at 480"
+   },
+   {
+    "id": "peak_usd",
+    "year": 2010,
+    "text": "Dollars peak a year before deals do"
+   },
+   {
+    "id": "cheque",
+    "text_key": "cheque.difference_pp",
+    "prefix": "Within named stages, green cheque sizes fall ",
+    "suffix": "pp further than non-green"
+   }
+  ],
+  "axis": {
+   "x": {
+    "domain": [
+     2000,
+     2012
+    ]
+   }
+  }
+ },
+ "fig08_crisis": {
+  "series": [
+   {
+    "id": "AE-green",
+    "label": "Advanced economies, green",
+    "colour_role": "green",
+    "dash": null,
+    "points": [
+     {
+      "year": 2001,
+      "indexed": 0.8,
+      "deals": 1
+     },
+     {
+      "year": 2002,
+      "indexed": 3.2,
+      "deals": 4
+     },
+     {
+      "year": 2003,
+      "indexed": 3.2,
+      "deals": 4
+     },
+     {
+      "year": 2004,
+      "indexed": 8.7,
+      "deals": 11
+     },
+     {
+      "year": 2005,
+      "indexed": 21.4,
+      "deals": 27
+     },
+     {
+      "year": 2006,
+      "indexed": 46.0,
+      "deals": 58
+     },
+     {
+      "year": 2007,
+      "indexed": 100.0,
+      "deals": 126
+     },
+     {
+      "year": 2008,
+      "indexed": 275.4,
+      "deals": 347
+     },
+     {
+      "year": 2009,
+      "indexed": 202.4,
+      "deals": 255
+     },
+     {
+      "year": 2010,
+      "indexed": 269.8,
+      "deals": 340
+     },
+     {
+      "year": 2011,
+      "indexed": 368.3,
+      "deals": 464
+     },
+     {
+      "year": 2012,
+      "indexed": 332.5,
+      "deals": 419
+     }
+    ]
+   },
+   {
+    "id": "AE-non-green",
+    "label": "Advanced economies, non-green",
+    "colour_role": "nongreen",
+    "dash": "4 3",
+    "points": [
+     {
+      "year": 2000,
+      "indexed": 3.7,
+      "deals": 106
+     },
+     {
+      "year": 2001,
+      "indexed": 2.8,
+      "deals": 82
+     },
+     {
+      "year": 2002,
+      "indexed": 3.5,
+      "deals": 100
+     },
+     {
+      "year": 2003,
+      "indexed": 4.7,
+      "deals": 135
+     },
+     {
+      "year": 2004,
+      "indexed": 8.7,
+      "deals": 252
+     },
+     {
+      "year": 2005,
+      "indexed": 52.0,
+      "deals": 1504
+     },
+     {
+      "year": 2006,
+      "indexed": 75.4,
+      "deals": 2182
+     },
+     {
+      "year": 2007,
+      "indexed": 100.0,
+      "deals": 2894
+     },
+     {
+      "year": 2008,
+      "indexed": 104.9,
+      "deals": 3036
+     },
+     {
+      "year": 2009,
+      "indexed": 119.1,
+      "deals": 3447
+     },
+     {
+      "year": 2010,
+      "indexed": 183.6,
+      "deals": 5314
+     },
+     {
+      "year": 2011,
+      "indexed": 276.4,
+      "deals": 7998
+     },
+     {
+      "year": 2012,
+      "indexed": 303.7,
+      "deals": 8790
+     }
+    ]
+   }
+  ],
+  "base_year": 2007,
+  "crisis_window": [
+   2008,
+   2009
+  ],
+  "drawdown": {
+   "AE-green": -26.5,
+   "AE-non-green": 13.5,
+   "EM-green": -66.7,
+   "EM-non-green": 3.7
+  },
+  "omitted_series": {
+   "id": "EM-green",
+   "reason_key": "h2.em_base_deals",
+   "reason": "not drawn: its base year holds a single deal, so the index leaves the canvas"
+  },
+  "annotations": [
+   {
+    "id": "pretrend",
+    "text_key": "h2.pretrend_coef",
+    "prefix": "Parallel trends fail: green was already growing ",
+    "suffix": " log-points per year faster before the window"
+   }
+  ],
+  "axis": {
+   "x": {
+    "domain": [
+     2000,
+     2012
+    ]
+   },
+   "y": {
+    "label": "Deal volume, indexed to 2007 = 100",
+    "reference": 100
+   }
+  }
+ },
+ "fig09_instruments": {
+  "marks": [
+   {
+    "bloc": "AE",
+    "green": true,
+    "label": "Advanced economies, green",
+    "pct": 10.41,
+    "n": 2056,
+    "non_dilutive": 214,
+    "grant": 53,
+    "debt": 161,
+    "colour_role": "green",
+    "below_min_cell": false
+   },
+   {
+    "bloc": "AE",
+    "green": false,
+    "label": "Advanced economies, non-green",
+    "pct": 7.26,
+    "n": 35840,
+    "non_dilutive": 2603,
+    "grant": 424,
+    "debt": 2176,
+    "colour_role": "nongreen",
+    "below_min_cell": false
+   },
+   {
+    "bloc": "EM",
+    "green": true,
+    "label": "Emerging markets, green",
+    "pct": 8.82,
+    "n": 34,
+    "non_dilutive": 3,
+    "grant": 1,
+    "debt": 2,
+    "colour_role": "green",
+    "below_min_cell": true
+   },
+   {
+    "bloc": "EM",
+    "green": false,
+    "label": "Emerging markets, non-green",
+    "pct": 2.67,
+    "n": 1275,
+    "non_dilutive": 34,
+    "grant": 23,
+    "debt": 11,
+    "colour_role": "nongreen",
+    "below_min_cell": false
+   }
+  ],
+  "min_cell": 30,
+  "annotations": [
+   {
+    "id": "ae_test",
+    "text_key": "h3.rr",
+    "prefix": "Within advanced economies, green is ",
+    "suffix": " times more likely"
+   },
+   {
+    "id": "em_arm",
+    "text_key": "h3.em_nondilutive_n",
+    "prefix": "The emerging-market arm rests on ",
+    "suffix": " non-dilutive deals"
+   }
+  ],
+  "axis": {
+   "x": {
+    "domain": [
+     0,
+     15
+    ],
+    "unit": "%",
+    "label": "Share of the group's deals using non-dilutive instruments"
+   }
+  }
+ },
+ "fig10_depth_need": {
+  "marks": [
+   {
+    "country": "AUS",
+    "gdp_per_capita": 68301.0,
+    "green_usd_per_capita": 6.5286,
+    "green_deals": 8,
+    "all_deals": 228,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "BEL",
+    "gdp_per_capita": 44874.0,
+    "green_usd_per_capita": 2.5155,
+    "green_deals": 4,
+    "all_deals": 158,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "CAN",
+    "gdp_per_capita": 52670.0,
+    "green_usd_per_capita": 36.4889,
+    "green_deals": 62,
+    "all_deals": 1162,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "CHE",
+    "gdp_per_capita": 87270.0,
+    "green_usd_per_capita": 37.321,
+    "green_deals": 7,
+    "all_deals": 201,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "CHN",
+    "gdp_per_capita": 6405.0,
+    "green_usd_per_capita": 0.4048,
+    "green_deals": 20,
+    "all_deals": 361,
+    "electricity_deficit_pct": 0.1,
+    "colour_role": "em"
+   },
+   {
+    "country": "DEU",
+    "gdp_per_capita": 44718.0,
+    "green_usd_per_capita": 5.2508,
+    "green_deals": 30,
+    "all_deals": 836,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "DNK",
+    "gdp_per_capita": 58444.0,
+    "green_usd_per_capita": 12.1446,
+    "green_deals": 5,
+    "all_deals": 141,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "ESP",
+    "gdp_per_capita": 28456.0,
+    "green_usd_per_capita": 0.3287,
+    "green_deals": 8,
+    "all_deals": 422,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "FIN",
+    "gdp_per_capita": 47552.0,
+    "green_usd_per_capita": 2.9318,
+    "green_deals": 7,
+    "all_deals": 134,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "FRA",
+    "gdp_per_capita": 40864.0,
+    "green_usd_per_capita": 2.3313,
+    "green_deals": 26,
+    "all_deals": 834,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "GBR",
+    "gdp_per_capita": 42688.0,
+    "green_usd_per_capita": 22.4303,
+    "green_deals": 127,
+    "all_deals": 2356,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "IND",
+    "gdp_per_capita": 1429.0,
+    "green_usd_per_capita": 0.4427,
+    "green_deals": 20,
+    "all_deals": 433,
+    "electricity_deficit_pct": 20.1,
+    "colour_role": "em"
+   },
+   {
+    "country": "IRL",
+    "gdp_per_capita": 49336.0,
+    "green_usd_per_capita": 19.7204,
+    "green_deals": 14,
+    "all_deals": 254,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "ISR",
+    "gdp_per_capita": 33269.0,
+    "green_usd_per_capita": 21.4799,
+    "green_deals": 30,
+    "all_deals": 637,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "ITA",
+    "gdp_per_capita": 34854.0,
+    "green_usd_per_capita": 0.3199,
+    "green_deals": 13,
+    "all_deals": 206,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "JPN",
+    "gdp_per_capita": 49627.0,
+    "green_usd_per_capita": 2.3117,
+    "green_deals": 8,
+    "all_deals": 167,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "NLD",
+    "gdp_per_capita": 50474.0,
+    "green_usd_per_capita": 14.6627,
+    "green_deals": 20,
+    "all_deals": 233,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "NOR",
+    "gdp_per_capita": 104628.0,
+    "green_usd_per_capita": 96.9849,
+    "green_deals": 16,
+    "all_deals": 96,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "PRT",
+    "gdp_per_capita": 20593.0,
+    "green_usd_per_capita": 0.9613,
+    "green_deals": 3,
+    "all_deals": 34,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "SGP",
+    "gdp_per_capita": 55548.0,
+    "green_usd_per_capita": 16.3822,
+    "green_deals": 8,
+    "all_deals": 177,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "SWE",
+    "gdp_per_capita": 57750.0,
+    "green_usd_per_capita": 6.8316,
+    "green_deals": 20,
+    "all_deals": 317,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   },
+   {
+    "country": "USA",
+    "gdp_per_capita": 51708.0,
+    "green_usd_per_capita": 101.9869,
+    "green_deals": 1626,
+    "all_deals": 28657,
+    "electricity_deficit_pct": 0.0,
+    "colour_role": "em"
+   }
+  ],
+  "depth": {
+   "rho": 0.674,
+   "ci": [
+    0.298,
+    0.866
+   ],
+   "n": 22
+  },
+  "need": {
+   "variable": "electricity_deficit_pct",
+   "non_trivial_values": 2,
+   "variance_carriers": [
+    "CHN",
+    "IND"
+   ],
+   "degenerate": true,
+   "note": "Panel (b) is deliberately static: there is nothing to explore."
+  },
+  "concentration": {
+   "gini": 0.917,
+   "top5_pct": 89.9
+  },
+  "axis": {
+   "x": {
+    "log": true,
+    "unit": "USD",
+    "label": "GDP per capita, current USD"
+   },
+   "y": {
+    "log": true,
+    "label": "Green funding per capita, constant 2015 USD"
+   }
+  }
+ },
+ "fig11_power_wall": {
+  "marks": [
+   {
+    "hypothesis": "H2",
+    "label": "Largest EM green year-cell",
+    "value": 12,
+    "blocks": "difference-in-differences",
+    "colour_role": "muted",
+    "clears_threshold": false
+   },
+   {
+    "hypothesis": "H3",
+    "label": "EM green non-dilutive deals",
+    "value": 3,
+    "blocks": "instrument-mix test",
+    "colour_role": "muted",
+    "clears_threshold": false
+   },
+   {
+    "hypothesis": "H4",
+    "label": "EM green seed entrants",
+    "value": 0,
+    "blocks": "graduation model",
+    "colour_role": "muted",
+    "clears_threshold": false
+   },
+   {
+    "hypothesis": "H4",
+    "label": "AE green Series A to B pool",
+    "value": 13,
+    "blocks": "missing-middle transition",
+    "colour_role": "muted",
+    "clears_threshold": false
+   },
+   {
+    "hypothesis": "H5",
+    "label": "Countries with any energy deficit",
+    "value": 2,
+    "blocks": "need-indicator regression",
+    "colour_role": "muted",
+    "clears_threshold": false
+   }
+  ],
+  "threshold": {
+   "value": 30,
+   "label": "minimum cell size, n = 30",
+   "colour_role": "alert"
+  },
+  "axis": {
+   "x": {
+    "domain": [
+     0,
+     40
+    ],
+    "label": "Observations available in the cell the test depends on"
+   }
+  }
+ },
+ "fig12_continuity": {
+  "panels": [
+   {
+    "id": "crunchbase",
+    "label": "Crunchbase 2013 Snapshot",
+    "sublabel": "Emerging markets excluding China and LDCs, 2000\u20132012",
+    "colour_role": "em",
+    "marks": [
+     {
+      "year": 2000,
+      "green": 0,
+      "deals": 8
+     },
+     {
+      "year": 2001,
+      "green": 0,
+      "deals": 3
+     },
+     {
+      "year": 2002,
+      "green": 0,
+      "deals": 2
+     },
+     {
+      "year": 2003,
+      "green": 0,
+      "deals": 3
+     },
+     {
+      "year": 2004,
+      "green": 0,
+      "deals": 7
+     },
+     {
+      "year": 2005,
+      "green": 0,
+      "deals": 33
+     },
+     {
+      "year": 2006,
+      "green": 0,
+      "deals": 57
+     },
+     {
+      "year": 2007,
+      "green": 1,
+      "deals": 78
+     },
+     {
+      "year": 2008,
+      "green": 12,
+      "deals": 119
+     },
+     {
+      "year": 2009,
+      "green": 4,
+      "deals": 115
+     },
+     {
+      "year": 2010,
+      "green": 4,
+      "deals": 200
+     },
+     {
+      "year": 2011,
+      "green": 7,
+      "deals": 335
+     },
+     {
+      "year": 2012,
+      "green": 6,
+      "deals": 349
+     }
+    ]
+   },
+   {
+    "id": "india",
+    "label": "Indian startup funding scrape",
+    "sublabel": "2015\u20132019",
+    "colour_role": "ldc",
+    "marks": [
+     {
+      "year": 2015,
+      "green": 17,
+      "deals": 929
+     },
+     {
+      "year": 2016,
+      "green": 15,
+      "deals": 993
+     },
+     {
+      "year": 2017,
+      "green": 9,
+      "deals": 687
+     },
+     {
+      "year": 2018,
+      "green": 3,
+      "deals": 309
+     },
+     {
+      "year": 2019,
+      "green": 10,
+      "deals": 111
+     }
+    ]
+   }
+  ],
+  "never_pooled": "The panels share no axis. The taxonomies and amount conventions are not compatible, and the Indian data has no category_code so Tier A cannot fire.",
+  "annotations": [
+   {
+    "id": "india_rate",
+    "text_key": "india.rate_pct",
+    "prefix": "Green rate in the later window: ",
+    "suffix": "%"
+   }
+  ]
+ },
+ "figM1_censoring": {
+  "series": [
+   {
+    "id": "2011",
+    "label": "2011",
+    "colour_role": "muted",
+    "dash": "4 3",
+    "points": [
+     {
+      "month": 1,
+      "share": 11.02,
+      "deals": 1014
+     },
+     {
+      "month": 2,
+      "share": 7.23,
+      "deals": 665
+     },
+     {
+      "month": 3,
+      "share": 8.02,
+      "deals": 738
+     },
+     {
+      "month": 4,
+      "share": 7.59,
+      "deals": 699
+     },
+     {
+      "month": 5,
+      "share": 7.93,
+      "deals": 730
+     },
+     {
+      "month": 6,
+      "share": 8.75,
+      "deals": 805
+     },
+     {
+      "month": 7,
+      "share": 7.93,
+      "deals": 730
+     },
+     {
+      "month": 8,
+      "share": 8.99,
+      "deals": 827
+     },
+     {
+      "month": 9,
+      "share": 8.72,
+      "deals": 803
+     },
+     {
+      "month": 10,
+      "share": 7.87,
+      "deals": 724
+     },
+     {
+      "month": 11,
+      "share": 7.92,
+      "deals": 729
+     },
+     {
+      "month": 12,
+      "share": 8.04,
+      "deals": 740
+     }
+    ]
+   },
+   {
+    "id": "2012",
+    "label": "2012",
+    "colour_role": "muted",
+    "dash": "4 3",
+    "points": [
+     {
+      "month": 1,
+      "share": 12.21,
+      "deals": 1217
+     },
+     {
+      "month": 2,
+      "share": 6.36,
+      "deals": 634
+     },
+     {
+      "month": 3,
+      "share": 8.15,
+      "deals": 813
+     },
+     {
+      "month": 4,
+      "share": 8.45,
+      "deals": 842
+     },
+     {
+      "month": 5,
+      "share": 8.32,
+      "deals": 830
+     },
+     {
+      "month": 6,
+      "share": 8.57,
+      "deals": 854
+     },
+     {
+      "month": 7,
+      "share": 9.06,
+      "deals": 903
+     },
+     {
+      "month": 8,
+      "share": 8.24,
+      "deals": 822
+     },
+     {
+      "month": 9,
+      "share": 7.56,
+      "deals": 754
+     },
+     {
+      "month": 10,
+      "share": 8.95,
+      "deals": 892
+     },
+     {
+      "month": 11,
+      "share": 7.14,
+      "deals": 712
+     },
+     {
+      "month": 12,
+      "share": 6.99,
+      "deals": 697
+     }
+    ]
+   },
+   {
+    "id": "2013",
+    "label": "2013",
+    "colour_role": "alert",
+    "dash": null,
+    "points": [
+     {
+      "month": 1,
+      "share": 9.25,
+      "deals": 1024
+     },
+     {
+      "month": 2,
+      "share": 6.68,
+      "deals": 740
+     },
+     {
+      "month": 3,
+      "share": 7.81,
+      "deals": 865
+     },
+     {
+      "month": 4,
+      "share": 8.37,
+      "deals": 927
+     },
+     {
+      "month": 5,
+      "share": 8.59,
+      "deals": 951
+     },
+     {
+      "month": 6,
+      "share": 9.38,
+      "deals": 1039
+     },
+     {
+      "month": 7,
+      "share": 9.19,
+      "deals": 1017
+     },
+     {
+      "month": 8,
+      "share": 8.82,
+      "deals": 977
+     },
+     {
+      "month": 9,
+      "share": 9.61,
+      "deals": 1064
+     },
+     {
+      "month": 10,
+      "share": 9.93,
+      "deals": 1100
+     },
+     {
+      "month": 11,
+      "share": 8.53,
+      "deals": 944
+     },
+     {
+      "month": 12,
+      "share": 3.83,
+      "deals": 424
+     }
+    ]
+   }
+  ],
+  "annotations": [
+   {
+    "id": "december",
+    "text_key": "censor.dec_2013_pct",
+    "prefix": "December 2013 holds ",
+    "suffix": "% of its year"
+   },
+   {
+    "id": "baseline",
+    "text_key": "censor.dec_baseline_pct",
+    "prefix": "against a baseline of ",
+    "suffix": "%"
+   }
+  ],
+  "axis": {
+   "x": {
+    "domain": [
+     1,
+     12
+    ],
+    "label": "Month"
+   },
+   "y": {
+    "unit": "%",
+    "label": "Share of the year's deals"
+   }
+  }
+ }
+}

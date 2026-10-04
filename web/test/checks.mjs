@@ -22,9 +22,13 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { scrollThrough, serve, VIEWPORTS } from "./capture.mjs";
+import { baseURL, scrollThrough, serve, VIEWPORTS } from "./capture.mjs";
 
-const ROOT = fileURLToPath(new URL("..", import.meta.url));
+// The tree whose files back the page under test: web/ normally, docs/ when the
+// deploy harness points the suite at the built output. The data-integrity and
+// stylesheet checks read from disk, so they must read the same tree the browser
+// is being served.
+const ROOT = process.env.GCG_ROOT ?? fileURLToPath(new URL("..", import.meta.url));
 // Resolved rather than path-joined: node_modules sits beside this directory in
 // a checkout and above it in CI, and a hard-coded path works in one of them.
 const AXE_PATH = createRequire(import.meta.url).resolve("axe-core/axe.min.js");
@@ -1320,9 +1324,12 @@ async function main() {
     await readFile(join(ROOT, "data", "series.json"), "utf8"),
   );
 
-  const { server, port } = await serve();
+  // Against an already-served tree when one is given, so the deploy runs the
+  // same suite as the local build rather than a reduced version of it.
+  const external = baseURL();
+  const { server, port } = external ? { server: null, port: 0 } : await serve();
   const browser = await chromium.launch();
-  const base = `http://127.0.0.1:${port}/index.html`;
+  const base = external ? `${external}index.html` : `http://127.0.0.1:${port}/index.html`;
 
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
@@ -1444,7 +1451,7 @@ async function main() {
   await nojs.close();
 
   await browser.close();
-  server.close();
+  server?.close();
 
   console.log(`\n${passes.length} check(s) passed`);
   if (failures.length) {

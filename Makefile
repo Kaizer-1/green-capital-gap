@@ -109,16 +109,57 @@ $(STAMPS)/figures: $(FINDINGS) $(SRC_VIZ) $(CONFIGS)
 WEB_DATA := web/data/series.json
 SRC_WEB  := $(wildcard src/gcg/web/*.py)
 
-.PHONY: web web-data web-test
+.PHONY: web web-data web-test web-deploy web-deploy-check
+
+# The PDF is served from the page's own directory rather than linked as
+# ../report/report.pdf. That path works from a local server rooted at web/ and
+# breaks on Pages, where the site is rooted at /<repo>/ and ../ escapes it.
+# Copying it keeps one relative link that is correct in both places.
+web/report.pdf: $(REPORT_PDF)
+	cp $< $@
+
 web-data: $(WEB_DATA)
 $(WEB_DATA): $(FINDINGS) $(DEALS) $(SRC_WEB) $(CONFIGS) web/index.html
 	$(PY) -m gcg.web.export_series
 	$(PY) -m gcg.web.inject
 
-web-test: $(WEB_DATA)
+web-test: $(WEB_DATA) web/report.pdf
 	cd web && node test/checks.mjs && node test/capture.mjs
 
 web: web-data web-test
+
+# ---------------------------------------------------------------------------
+# deploy — GitHub Pages, served from docs/ on main.
+#
+# docs/ rather than a gh-pages branch: Pages serves it with no branch to keep in
+# step, the deployed files are reviewable in the same history as the code that
+# produced them, and an examiner opening the repo can see exactly what is
+# published. The cost is build output in main, which for a deliverable is a
+# feature.
+#
+# Nothing here is copied by hand. A deploy step outside the Makefile drifts from
+# the build, and this one is reproduced by `make web-deploy` from a clean tree.
+DOCS := docs
+
+web-deploy: web
+	rm -rf $(DOCS)
+	mkdir -p $(DOCS)
+	# Everything the page needs, and nothing it does not: no test harness, no
+	# node_modules, no screenshots.
+	cd web && tar cf - index.html report.pdf css js data | (cd ../$(DOCS) && tar xf -)
+	# Jekyll silently drops any path beginning with an underscore. The page has
+	# none today; .nojekyll means it never has to.
+	touch $(DOCS)/.nojekyll
+	$(PY) -m gcg.web.deploy_check $(DOCS)
+	@echo "docs/ built — commit it and set Pages to 'main /docs'"
+
+# Serves docs/ under a sub-path, the way Pages serves /<repo>/, and runs the
+# full check suite against it. This is the test that catches the two things
+# that break on Pages and never locally: a path that resolves at the server
+# root but not under a prefix, and a filename whose case differs from what is
+# on disk (Pages is case-sensitive, macOS is not).
+web-deploy-check: web-deploy
+	cd web && node test/deployed.mjs ../$(DOCS)
 
 # ---------------------------------------------------------------------------
 # report — fails loudly on any unresolved {{placeholder}} (CLAUDE.md §2.2).

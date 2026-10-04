@@ -49,6 +49,10 @@ class TypographyError(RuntimeError):
     """The page carries punctuation the report would have rejected."""
 
 
+class MetadataError(RuntimeError):
+    """report/metadata.yaml is missing something the page needs."""
+
+
 class SlotOverreachError(RuntimeError):
     """A data-key slot matched past its own closing tag."""
 
@@ -200,6 +204,28 @@ def inject_meta(html: str, meta: dict) -> str:
             count=1,
             flags=re.S,
         )
+
+    # The repository link. It was a literal https://github.com/ in the markup,
+    # which resolves to GitHub's home page: a dead link that looks like a live
+    # one. It comes from metadata.yaml now, and an unset value stops the build
+    # rather than deploying a page that links nowhere.
+    repo = str(meta.get("repo", "UNSET")).strip()
+    if repo in ("", "UNSET"):
+        raise MetadataError(
+            "report/metadata.yaml has no `repo` URL. The page links to it from the "
+            "masthead, so deploying without one ships a dead link."
+        )
+    # Every one of them, not the first. The masthead and the colophon both link
+    # to the repository, and replacing one left the other pointing at GitHub's
+    # home page — a dead link that looks live, which is the failure this guard
+    # exists to prevent.
+    html, filled = re.subn(
+        r'(<a href=")[^"]*(" data-meta="repo")',
+        lambda m: f"{m.group(1)}{escape(repo, quote=True)}{m.group(2)}",
+        html,
+    )
+    if not filled:
+        raise MetadataError('no <a data-meta="repo"> slot in the page to link the source')
     return html
 
 
